@@ -1,0 +1,52 @@
+{
+  "identity": {
+    "adapter_id": "offline-fixture-v1",
+    "adapter_version": "1.0.0",
+    "runtime": "local_fixture",
+    "runtime_plan": "offline",
+    "configuration_version": "portable-local-fixture@1.0.0",
+    "agent_release_id": "af-ka-01@3.9.0",
+    "corpus_version": "af-demo-services-he@1.0.0",
+    "question_set_version": "ka-prototype-he-v1"
+  },
+  "data_scope": "synthetic_only",
+  "tool_policy": "deny_all",
+  "capabilities": {
+    "knowledge_retrieval": {"supported": true, "evidence": "synthetic fixture contract", "limitations": ["no runtime retrieval"], "verified_at": "2026-08-21"},
+    "source_provenance": {"supported": true, "evidence": "fixture source_id and section_id", "limitations": [], "verified_at": "2026-08-21"},
+    "hebrew_io": {"supported": true, "evidence": "Hebrew fixture validation", "limitations": ["no model quality claim"], "verified_at": "2026-08-21"},
+    "deterministic_fallback": {"supported": true, "evidence": "canonical fallback equality check", "limitations": [], "verified_at": "2026-08-21"},
+    "external_actions_disabled": {"supported": true, "evidence": "deny_all policy and empty tool_calls", "limitations": [], "verified_at": "2026-08-21"},
+    "run_logs_usage": {"supported": true, "evidence": "synthetic usage fixture", "limitations": ["no provider logs"], "verified_at": "2026-08-21"},
+    "provider_native_limit": {"supported": true, "evidence": "offline synthetic ceiling", "limitations": ["must be remapped for a provider"], "verified_at": "2026-08-21"},
+    "export_reconstruction": {"supported": true, "evidence": "local JSON fixtures", "limitations": ["provider export not assessed"], "verified_at": "2026-08-21"},
+    "deletion_retention": {"supported": true, "evidence": "temporary test data only", "limitations": ["provider policy not assessed"], "verified_at": "2026-08-21"},
+    "tenant_runtime_isolation": {"supported": true, "evidence": "dedicated synthetic boundary declarations", "limitations": ["local fixture only"], "verified_at": "2026-08-21"}
+  },
+  "isolation": {
+    "credentials": {"dedicated": true, "shared_with_other_clients": false, "boundary_id": "offline:no-credentials"},
+    "configuration": {"dedicated": true, "shared_with_other_clients": false, "boundary_id": "af-demo-services:local-config"},
+    "storage": {"dedicated": true, "shared_with_other_clients": false, "boundary_id": "af-demo-services:local-temp"},
+    "knowledge": {"dedicated": true, "shared_with_other_clients": false, "boundary_id": "af-demo-services-he@1.0.0"},
+    "indexes": {"dedicated": true, "shared_with_other_clients": false, "boundary_id": "offline:no-index"},
+    "logs": {"dedicated": true, "shared_with_other_clients": false, "boundary_id": "offline:stdout-only"},
+    "evidence": {"dedicated": true, "shared_with_other_clients": false, "boundary_id": "af-demo-services:synthetic-fixtures"}
+  },
+  "cost_controls": {
+    "usage_observable": true,
+    "native_unit": "synthetic_check",
+    "native_currency": "ILS",
+    "native_limit": 30,
+    "native_stop_threshold": 25,
+    "normalized_limit_ils": 10,
+    "normalized_stop_threshold_ils": 8,
+    "conversion_source": "synthetic-test-rate",
+    "conversion_timestamp": "2026-08-21",
+    "conversion_confidence": "estimated"
+  },
+  "lifecycle": {
+    "export_evidence": "local JSON declaration; no secrets",
+    "retention_policy": "temporary test process only; no generated report is persisted",
+    "deletion_classes": ["documents", "chunks", "vectors", "conversations", "logs", "runs", "backups"]
+  }
+}

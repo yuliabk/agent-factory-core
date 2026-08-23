@@ -1,0 +1,65 @@
+name: travel-poc-synthetic-n8n
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n@sha256:f410270e715c795b4935eb16f94c099f7aee8da81c340c9842e76f0d5e716ff3
+    container_name: travel-poc-synthetic-n8n
+    restart: "no"
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      N8N_HOST: localhost
+      N8N_PORT: "5678"
+      N8N_LISTEN_ADDRESS: 0.0.0.0
+      N8N_PROTOCOL: https
+      N8N_SSL_KEY: /run/secrets/n8n_tls_key
+      N8N_SSL_CERT: /run/secrets/n8n_tls_cert
+      N8N_ENCRYPTION_KEY_FILE: /run/secrets/n8n_encryption_key
+      N8N_PUBLIC_API_DISABLED: "true"
+      N8N_PUBLIC_API_SWAGGERUI_DISABLED: "true"
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+      N8N_TEMPLATES_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_COMMUNITY_PACKAGES_ENABLED: "false"
+      N8N_COMMUNITY_PACKAGES_PREVENT_LOADING: "true"
+      N8N_UNVERIFIED_PACKAGES_ENABLED: "false"
+      N8N_VERIFIED_PACKAGES_ENABLED: "false"
+      N8N_MFA_ENABLED: "true"
+      N8N_SSRF_PROTECTION_ENABLED: "true"
+      N8N_SSRF_BLOCKED_IP_RANGES: default
+      EXECUTIONS_DATA_SAVE_ON_ERROR: none
+      EXECUTIONS_DATA_SAVE_ON_SUCCESS: none
+      EXECUTIONS_DATA_SAVE_ON_PROGRESS: "false"
+      EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS: "false"
+      EXECUTIONS_DATA_PRUNE: "true"
+      NODES_EXCLUDE: '["n8n-nodes-base.executeCommand","n8n-nodes-base.localFileTrigger","n8n-nodes-base.readWriteFile","n8n-nodes-base.httpRequest"]'
+    volumes:
+      - n8n_data:/home/node/.n8n
+    secrets:
+      - n8n_encryption_key
+      - n8n_tls_key
+      - n8n_tls_cert
+    networks:
+      - isolated
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  n8n_data:
+    name: travel_poc_synthetic_n8n_data
+
+networks:
+  isolated:
+    name: travel_poc_synthetic_n8n_isolated
+    internal: true
+
+secrets:
+  n8n_encryption_key:
+    file: ${N8N_ENCRYPTION_KEY_FILE_PATH:?Owner-managed encryption-key file path is required}
+  n8n_tls_key:
+    file: ${N8N_TLS_KEY_FILE_PATH:?Owner-managed TLS-key file path is required}
+  n8n_tls_cert:
+    file: ${N8N_TLS_CERT_FILE_PATH:?Owner-managed TLS-certificate file path is required}

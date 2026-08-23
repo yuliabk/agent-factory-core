@@ -38,8 +38,18 @@ Building each client agent from a blank project repeats discovery, architecture,
 - The action agent cannot execute a protected action without authorization.
 - No data, credentials, retrieval index, or audit record is shared between clients.
 - Monthly pilot spend can be capped within 200-500 ₪.
+- Every deployed client version can be traced to an approved OpenSpec change, evaluation evidence, and rollback target without storing secrets in Git.
+- Client onboarding and decommissioning can be completed from a checklist with evidence that access, data, indexes, credentials, and audit boundaries are isolated.
+- Authorization and approval decisions are made by policy controls outside the language model and are covered by negative acceptance tests.
 
 ## Approval
 
-Approval of this proposal authorizes detailed prototype planning. It does not authorize Production deployment or use of sensitive client data.
+- **Gate:** G0
+- **Status:** Approved
+- **Approved by:** Owner (Yulush)
+- **Approval date:** 2026-08-20
+
+This approval accepts the Architecture Baseline and authorizes detailed prototype planning. It does not authorize implementation, service configuration, credential connection, Production deployment, or use of confidential, personal, medical, financial, or other sensitive data.
+
+ADR-001, ADR-002, and ADR-003 were accepted before Gate G0 approval. Every later implementation task group still requires explicit Owner authorization under the repository workflow.
 

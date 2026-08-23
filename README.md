@@ -32,13 +32,16 @@ templates/                        טפסים לשכפול סוכן עבור לק
 .agents/skills/                   Skills מקומיים של המאגר
 ```
 
+החלטות ארכיטקטורה מוצעות מתועדות ב-`docs/adr-*.md`. מסמך ADR במצב `Proposed` אינו אישור למימוש; הוא נכנס לתוקף רק לאחר החלטת Owner ושינוי הסטטוס ל-`Accepted`.
+
 ## מצב נוכחי
 
-- שלב: Architecture and specification
+- שלב: Architecture Baseline approved at Gate G0; detailed Prototype planning is next
 - Change פעיל: `openspec/changes/agent-factory-v1/`
 - קצב עבודה מתוכנן: 6-10 שעות בשבוע
 - תקציב ניסוי: 200-500 ₪ בחודש
-- החלטת מימוש: ממתינה לאישור Owner לאחר סקירת הארכיטקטורה
+- החלטת מימוש: לא ניתנה; כל קבוצת משימות דורשת אישור Owner מפורש
+- ADRs מאושרים: ADR-001, ADR-002, ADR-003, ADR-004
 
 ## התחלה עם Codex
 

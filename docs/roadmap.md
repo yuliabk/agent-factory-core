@@ -9,9 +9,12 @@
 - לאשר Scope, גבולות וסוגי סוכנים.
 - לאשר ארכיטקטורת Control Plane ו-Client Data Plane.
 - לאשר מודל אבטחה ומגבלות MVP.
+- לאשר זהות, הרשאות, בידוד לקוחות ומחזור חיי מופע.
+- לאשר Release manifest, טיפול ב-Drift וגבולות Rollback.
+- להחליט ב-ADR-001, ADR-002 ו-ADR-003.
 - לבחור החלטות פתוחות הנדרשות ל-Prototype.
 
-תוצר: Architecture Baseline מאושר, ללא קוד.
+תוצר: Architecture Baseline ו-ADRs מאושרים ב-Gate G0, ללא קוד או חיבורי Runtime.
 
 ## Phase 1 - Knowledge Agent Prototype
 
@@ -58,11 +61,11 @@
 
 ## שערי החלטה
 
-| Gate | החלטה | מאשר |
-|---|---|---|
-| G0 | אישור ארכיטקטורה | Owner |
-| G1 | אישור Prototype | Owner |
-| G2 | אישור פעולה אוטומטית | Owner + Process Owner |
-| G3 | אישור מידע אישי או חסוי | Security/Privacy Owner |
-| G4 | אישור Production | Owner + Client |
+| Gate | החלטה | מאשר | סטטוס |
+|---|---|---|---|
+| G0 | אישור ארכיטקטורה | Owner | Approved — 2026-08-20 |
+| G1 | אישור Prototype | Owner | Pending |
+| G2 | אישור פעולה אוטומטית | Owner + Process Owner | Pending |
+| G3 | אישור מידע אישי או חסוי | Security/Privacy Owner | Pending |
+| G4 | אישור Production | Owner + Client | Pending |
 

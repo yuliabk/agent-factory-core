@@ -18,6 +18,8 @@
 - WhatsApp:
 - Internal systems:
 - Supported languages:
+- Identity provider or login method:
+- Required user roles:
 
 ## 3. סוג הסוכן
 
@@ -50,6 +52,8 @@
 - Deletion requirement:
 - Audit requirement:
 - Human approval rules:
+- Required isolation tier:
+- Security/Privacy approver:
 
 ## 7. איכות ומסירה
 
@@ -61,4 +65,8 @@
 - Support window:
 - Budget ceiling:
 - Target date:
+- Incident owner:
+- Required RPO:
+- Required RTO:
+- Exit, export, and deletion expectations:
 

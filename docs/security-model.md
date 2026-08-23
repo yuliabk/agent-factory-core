@@ -71,3 +71,46 @@
 - Backup ו-Restore נבדקו.
 - הלקוח אישר את ה-Scope ואת מגבלות הסוכן.
 
+## 6. זהות והרשאות
+
+- הרשאות נגזרות מ-Role ומ-Policy מאושרים; Prompt או תשובת מודל אינם מעניקים הרשאה.
+- משתמש אנושי ו-Service Account מזוהים בנפרד ונרשמים ב-Audit.
+- כל Credential מוגבל ללקוח, Environment ופעולות נדרשות בלבד.
+- גישת Admin ניתנת לזמן מוגבל ככל האפשר ונבדקת תקופתית.
+- Approval לפעולה מוגנת כולל מאשר, פעולה, יעד, `request_id`, זמן ותפוגה.
+
+## 7. Threat Model מינימלי
+
+לפני Pilot בודקים לפחות:
+
+- Prompt injection ממסמך, אתר, הודעה או Tool output.
+- Cross-tenant retrieval, logs, cache, export ו-Credentials.
+- Broken authorization ו-Approval replay.
+- Data exfiltration דרך תשובה, Tool, URL או Log.
+- Secret exposure ב-Prompt, Export, Screenshot או Error message.
+- Duplicate או forged action request.
+- ספק חיצוני לא זמין או מחזיר תוכן זדוני.
+- שינוי Runtime ידני שאינו תואם Release מאושר.
+
+## 8. Audit, Retention ומחיקה
+
+Audit event ממוזער כולל: `tenant_id`, `request_id`, `actor_id` או pseudonymous reference, `agent_release_id`, `action`, `policy_decision`, `approval_reference`, `tool`, `result`, `timestamp` ו-`environment`.
+
+- אין לשמור Prompt מלא, מסמך מלא או Secret כברירת מחדל.
+- לכל Data type מוגדרים Purpose, Owner, Retention, Access ו-Deletion method.
+- מחיקה כוללת Primary storage, indexes, caches, exports ו-backups לפי חלון מתועד.
+- Decommissioning מסתיים רק לאחר ביטול גישה וראיית מחיקה או החזרה ללקוח.
+
+## 9. Secrets ושרשרת אספקה
+
+- Secrets נשמרים ב-Credential store של הסביבה ולא ב-Git, OpenSpec, Prompt או Release manifest.
+- Integrations ו-Skills חיצוניים נשארים חסומים עד Pinning, License review, Scan ו-Owner approval.
+- שינוי Provider, Model major version או Tool schema מחייב Regression evaluation.
+
+## 10. גיבוי, שחזור ותגובה לאירוע
+
+- לפני Production מוגדרים RPO, RTO, Backup owner ו-Restore test לפי לקוח.
+- באירוע חשוד עוצרים פעולות חיצוניות, משמרים Audit ממוזער, מסובבים Credentials לפי צורך ומפעילים Runbook.
+- Rollback מחזיר ל-`agent_release_id` ידוע; הוא אינו משחזר אוטומטית פעולה עסקית שכבר בוצעה.
+- Owner, Client Process Owner ו-Security/Privacy Owner מקבלים תחומי אחריות והסלמה מתועדים.
+

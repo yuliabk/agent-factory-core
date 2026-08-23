@@ -5,6 +5,9 @@
 - Test ID:
 - Requirement ID:
 - Agent version:
+- Agent release ID:
+- Tenant ID:
+- Actor role:
 - Environment:
 - Data classification:
 - Tester:
@@ -25,6 +28,7 @@ Use synthetic or explicitly approved test data only.
 - Expected answer or action:
 - Expected citation:
 - Expected authorization result:
+- Expected policy or approval result:
 - Expected audit event:
 - Expected fallback or escalation:
 
