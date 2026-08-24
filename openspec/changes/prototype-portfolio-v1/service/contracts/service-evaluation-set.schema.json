@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-factory:pf-s:service-evaluation-set:1.0.0",
+  "title": "PF-S Frozen Synthetic Evaluation Set",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evaluation_set_version", "prototype_id", "tenant_id", "classification", "locale", "provider_request_ceiling", "authorized_cost_ils", "scenarios"],
+  "properties": {
+    "evaluation_set_version": {"const": "pf-s-service-he@1.0.0"},
+    "prototype_id": {"const": "pf-s-af-demo-retail"},
+    "tenant_id": {"const": "af-demo-retail"},
+    "classification": {"const": "synthetic"},
+    "locale": {"const": "he-IL"},
+    "provider_request_ceiling": {"const": 0},
+    "authorized_cost_ils": {"const": 0},
+    "scenarios": {
+      "type": "array",
+      "minItems": 10,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["scenario_id", "case_id", "category", "test_tags", "request", "expected"],
+        "properties": {
+          "scenario_id": {"type": "string", "pattern": "^CS-E[0-9]{2}$"},
+          "case_id": {"type": ["string", "null"], "pattern": "^CS-C[0-9]{2}$"},
+          "category": {"type": "string", "enum": ["product_policy", "delivery_policy", "warranty_policy", "unsupported", "protected_action"]},
+          "test_tags": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+          "request": {"$ref": "urn:agent-factory:pf-s:service-request:1.0.0"},
+          "expected": {"$ref": "urn:agent-factory:pf-s:service-response:1.0.0"}
+        }
+      }
+    }
+  }
+}

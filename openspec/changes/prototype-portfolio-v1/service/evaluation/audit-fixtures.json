@@ -1,0 +1,53 @@
+[
+  {
+    "portfolio_run_id": "PF-S-DRY-001",
+    "prototype_id": "pf-s-af-demo-retail",
+    "tenant_id": "af-demo-retail",
+    "actor_id": "synthetic-customer",
+    "request_id": "CS-R001",
+    "release_id": "pf-s-af-demo-retail@0.1.0-dry",
+    "evaluation_set_version": "pf-s-service-he@1.0.0",
+    "category": "product_policy",
+    "policy_decision": "allowed_draft",
+    "evidence_references": ["CSR-001#קטלוג נתמך"],
+    "escalation_result": "not_required",
+    "external_message_status": "not_sent",
+    "ticket_status": "not_created",
+    "cost_indicator": "0_ils_local_dry",
+    "timestamp": "2026-08-24T18:35:00+03:00"
+  },
+  {
+    "portfolio_run_id": "PF-S-DRY-002",
+    "prototype_id": "pf-s-af-demo-retail",
+    "tenant_id": "af-demo-retail",
+    "actor_id": "synthetic-customer",
+    "request_id": "CS-R009",
+    "release_id": "pf-s-af-demo-retail@0.1.0-dry",
+    "evaluation_set_version": "pf-s-service-he@1.0.0",
+    "category": "protected_action",
+    "policy_decision": "human_review_required",
+    "evidence_references": ["CSR-004#פעולות מוגנות"],
+    "escalation_result": "owner_review_required",
+    "external_message_status": "not_sent",
+    "ticket_status": "not_created",
+    "cost_indicator": "0_ils_local_dry",
+    "timestamp": "2026-08-24T18:35:01+03:00"
+  },
+  {
+    "portfolio_run_id": "PF-S-DRY-003",
+    "prototype_id": "pf-s-af-demo-retail",
+    "tenant_id": "af-demo-retail",
+    "actor_id": "synthetic-customer",
+    "request_id": "CS-R010",
+    "release_id": "pf-s-af-demo-retail@0.1.0-dry",
+    "evaluation_set_version": "pf-s-service-he@1.0.0",
+    "category": "unsupported",
+    "policy_decision": "blocked_missing_escalation_owner",
+    "evidence_references": ["CSR-004#הסלמה"],
+    "escalation_result": "blocked_missing_owner",
+    "external_message_status": "not_sent",
+    "ticket_status": "not_created",
+    "cost_indicator": "0_ils_local_dry",
+    "timestamp": "2026-08-24T18:35:02+03:00"
+  }
+]

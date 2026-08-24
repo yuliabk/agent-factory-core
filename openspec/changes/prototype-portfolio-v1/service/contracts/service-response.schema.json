@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-factory:pf-s:service-response:1.0.0",
+  "title": "PF-S Synthetic Service Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request_id", "prototype_id", "tenant_id", "category", "response_type", "draft_he", "evidence_refs", "policy_decision", "clarification_fields", "escalation_status", "external_message_status", "ticket_status", "external_actions"],
+  "properties": {
+    "request_id": {"type": "string", "pattern": "^CS-R[0-9]{3}$"},
+    "prototype_id": {"const": "pf-s-af-demo-retail"},
+    "tenant_id": {"const": "af-demo-retail"},
+    "category": {"type": "string", "enum": ["product_policy", "delivery_policy", "warranty_policy", "unsupported", "protected_action"]},
+    "response_type": {"type": "string", "enum": ["draft_answer", "clarification", "insufficient_evidence", "refusal", "escalation", "blocked"]},
+    "draft_he": {"type": "string", "maxLength": 1000},
+    "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^CSR-00[1-4]#.+$"}},
+    "policy_decision": {"type": "string", "enum": ["allowed_draft", "clarification_required", "insufficient_evidence", "human_review_required", "blocked_policy", "blocked_missing_escalation_owner", "blocked_dependency_unavailable", "blocked_cost_ceiling"]},
+    "clarification_fields": {"type": "array", "uniqueItems": true, "items": {"type": "string", "enum": ["item_id", "demo_zone", "submitted_time"]}},
+    "escalation_status": {"type": "string", "enum": ["not_required", "owner_review_required", "blocked_missing_owner"]},
+    "external_message_status": {"const": "not_sent"},
+    "ticket_status": {"const": "not_created"},
+    "external_actions": {"type": "array", "maxItems": 0}
+  }
+}

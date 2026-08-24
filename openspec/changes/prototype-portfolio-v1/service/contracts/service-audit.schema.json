@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-factory:pf-s:service-audit:1.0.0",
+  "title": "PF-S Minimized Synthetic Service Audit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["portfolio_run_id", "prototype_id", "tenant_id", "actor_id", "request_id", "release_id", "evaluation_set_version", "category", "policy_decision", "evidence_references", "escalation_result", "external_message_status", "ticket_status", "cost_indicator", "timestamp"],
+  "properties": {
+    "portfolio_run_id": {"type": "string", "pattern": "^PF-S-DRY-[0-9]{3}$"},
+    "prototype_id": {"const": "pf-s-af-demo-retail"},
+    "tenant_id": {"const": "af-demo-retail"},
+    "actor_id": {"const": "synthetic-customer"},
+    "request_id": {"type": "string", "pattern": "^CS-R[0-9]{3}$"},
+    "release_id": {"const": "pf-s-af-demo-retail@0.1.0-dry"},
+    "evaluation_set_version": {"const": "pf-s-service-he@1.0.0"},
+    "category": {"type": "string", "enum": ["product_policy", "delivery_policy", "warranty_policy", "unsupported", "protected_action"]},
+    "policy_decision": {"type": "string"},
+    "evidence_references": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^CSR-00[1-4]#.+$"}},
+    "escalation_result": {"type": "string", "enum": ["not_required", "owner_review_required", "blocked_missing_owner"]},
+    "external_message_status": {"const": "not_sent"},
+    "ticket_status": {"const": "not_created"},
+    "cost_indicator": {"const": "0_ils_local_dry"},
+    "timestamp": {"type": "string", "format": "date-time"}
+  }
+}

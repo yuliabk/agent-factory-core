@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:agent-factory:pf-s:service-request:1.0.0",
+  "title": "PF-S Synthetic Service Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request_id", "tenant_id", "actor_id", "locale", "data_classification", "query_he", "fields"],
+  "properties": {
+    "request_id": {"type": "string", "pattern": "^CS-R[0-9]{3}$"},
+    "tenant_id": {"const": "af-demo-retail"},
+    "actor_id": {"const": "synthetic-customer"},
+    "locale": {"const": "he-IL"},
+    "data_classification": {"const": "synthetic"},
+    "query_he": {"type": "string", "minLength": 1, "maxLength": 500},
+    "fields": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {"type": "string", "enum": ["NOTE-A5", "PEN-BLUE", "STAND-01", "UNKNOWN"]},
+        "demo_zone": {"type": "string", "enum": ["Demo Zone A", "Demo Zone B", "UNKNOWN"]},
+        "submitted_time": {"type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"}
+      }
+    }
+  }
+}
