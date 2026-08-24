@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenSpec Agent Builder"
+  short_description: "Build agent specifications with OpenSpec"
+  default_prompt: "Use $build-openspec-agent to turn this agent request into an approval-ready OpenSpec change."
