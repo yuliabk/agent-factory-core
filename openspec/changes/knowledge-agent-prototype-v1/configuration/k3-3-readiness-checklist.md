@@ -3,16 +3,16 @@
 ## Status
 
 - `checklist_id`: `af-ka-01-k3-3-readiness`
-- `version`: `3.6.0`
-- `previous_version`: `3.5.0`
-- `date`: `2026-08-20`
+- `version`: `3.7.0`
+- `previous_version`: `3.6.0`
+- `date`: `2026-08-24`
 - `intended_runtime`: `Dify Cloud Sandbox`
-- `overall_status`: `k4_0_capacity_plan_complete_k4_1c_not_granted`
-- `provider_action_status`: `d3w_persisted_d3t_smoke_pass`
+- `overall_status`: `phase_1_synthetic_smoke_closed_gate_g1_open`
+- `provider_action_status`: `d3t2_smoke_pass_stopped_after_one_request`
 - `current_authorized_stage`: `none`
 - `account_status`: `existing_owner_account_authenticated_by_owner`
 - `indexing_status`: `all_six_documents_indexed_available`
-- `runtime_status`: `one_request_citation_pass_36_remaining_full_evaluation_blocked_unpublished`
+- `runtime_status`: `latest_one_request_citation_pass_post_run_credits_unverified_full_evaluation_blocked_unpublished`
 - `credentials_status`: `not_connected`
 - `paid_execution_status`: `not_authorized`
 
@@ -28,6 +28,8 @@ D3S נעצרה בבטחה. עורך הקוד לא קיבל את התבנית ה�
 
 לפני D3SR ה-Owner אישרה שגם הפעילה Preview לאחר ההדבקה; הוא החזיר את תגובת חוסר-המידע הקנונית והוריד את היתרה מ-48 ל-42. לא בוצעה חזרה. D3SR עצמה אימתה את התבנית לקריאה בלבד. D3W חיברה את `Citation Context` בין Retrieval ל-LLM, שמרה את Retrieval Context לייחוס Dify והוסיפה `Citation Context / output` ל-System prompt. D3T הריצה את KA-E01 פעם אחת: העובדות, העברית ושני הציטוטים עברו; נצרכו 6 Credits ונשארו 36. האפליקציה נשארה Unpublished.
 
+ב-2026-08-24 ה-Owner אישרה KA-E01 נוספת פעם אחת בלבד, בתקרת 6 Credits וללא retry, Indexing או Publish. Dify דיווח `Workflow Process succeeded`; העובדות, העברית ושני הציטוטים עברו וההרצה נעצרה מיד לאחר התשובה. מסך התוצאה לא הציג יתרת Credits לאחר ההרצה, ולכן היתרה וה-delta מסומנים `unverified`. ה-Owner סגרה לאחר מכן את Phase 1 כ-`Synthetic Smoke Prototype` בלבד; Gate G1 והערכת 25 השאלות נשארו פתוחים.
+
 ## Readiness Summary
 
 | Gate | Current status | Decision |
@@ -39,9 +41,9 @@ D3S נעצרה בבטחה. עורך הקוד לא קיבל את התבנית ה�
 | Export and restore | `pass_manual_reconstruction_planned` | DSL, Git corpus ו-Runbook שחזור מלאים מקומית; Restore בפועל נשאר פעולה מאושרת עתידית |
 | Deletion and retention | `residual_risk_accepted_synthetic_only` | מחיקה ו-30 ימי Logs מתועדים; Backup/cache retention אינו ידוע ומתקבל רק לנתונים סינתטיים |
 | Isolation and access | `partial_pass_owner_only_current_state` | Member יחיד; App ו-Knowledge ייעודיים לסינתטי; האפליקציה Unpublished וללא Tool או integration |
-| Cost controls | `k4_0_planned_waiting_for_renewal` | 164/200 Credits בשימוש ו-36 זמינים; נדרשים 180 Credits עבור 25 שאלות ועד 5 retries. נבחרה המתנה לחידוש Sandbox ושער K4.1C לקריאה בלבד, שטרם אושר |
+| Cost controls | `post_d3t2_balance_unverified_full_run_blocked` | היתרה האחרונה שתועדה לפני D3T2 הייתה 36 Credits; היתרה לאחר ההרצה אינה מוצגת ולכן אין להסיק ערך. נדרשים 180 Credits מאומתים לפני מעטפת 25 שאלות ועד 5 retries |
 | Hebrew quality | `ka_e01_factual_and_citation_pass` | KA-E01 עברה עובדתית ובעברית עם שני ציטוטי `[SOURCE_ID § Section]` נכונים |
-| K3.3 Owner approval | `d3c_consumed_no_current_stage` | D3SR, D3W, D3T ו-D3C הושלמו; כל Runtime נוסף ו-K4 דורשים Stage נפרד |
+| K3.3 Owner approval | `d3t2_and_phase_1_closure_consumed_no_current_stage` | D3T2 והסגירה המקומית הושלמו; כל Runtime נוסף, K4 ו-Gate G1 דורשים אישור נפרד |
 
 כל Gate המסומן `blocked_*`, `pending_*`, `not_tested` או `not_granted` מונע מעבר אוטומטי ל-K4.
 
@@ -185,7 +187,7 @@ The future deletion sequence SHALL cover, in order:
 - [x] Propose smaller request-scoped authorizations in `k3-3-staged-authorization.md`; each requires explicit Owner approval.
 - [x] The current account has no visible paid quota, BYOK or enabled Billing management; the permitted committed spend is therefore 0 ₪ and any Drift from this state blocks execution before a request.
 
-Authenticated UI evidence initially confirmed 0/200 Credits used. The current post-D3T state is 164/200 used and 36 available, with no visible BYOK or paid quota, disabled Billing management and a separate manual Upgrade action. All four observed generation responses consumed six Credits: D, D2, the Owner-invoked pre-D3SR Preview, and D3T. The citation contract now passes for KA-E01, but the full 25-question evaluation is blocked because its measured pre-retry forecast is approximately 150 Credits.
+Authenticated UI evidence initially confirmed 0/200 Credits used. The last verified balance before D3T2 was 36 available, with no visible BYOK or paid quota, disabled Billing management and a separate manual Upgrade action. The four earlier observed generation responses each consumed six Credits: D, D2, the Owner-invoked pre-D3SR Preview, and D3T. D3T2 produced one successful response, but its post-run Credit balance was not visible and remains unverified. The citation contract passes for KA-E01, while the full 25-question evaluation remains blocked because its measured pre-retry forecast is approximately 150 Credits and its safe envelope requires 180 verified Credits.
 
 ## H. Security, Logging and Failure Gate
 
@@ -198,14 +200,14 @@ Authenticated UI evidence initially confirmed 0/200 Credits used. The current po
 
 ## I. K3.3 Owner Decision Record
 
-Each additional K3.3 Stage can be proposed only when the preceding Stage evidence is complete and the overall status names that next decision. Approval must name exactly one Stage and state its actions, Credit/request ceiling, permitted data, forbidden actions and expiry. The current status is `stage_d3c_local_closure_complete_full_evaluation_blocked`.
+Each additional K3.3 Stage can be proposed only when the preceding Stage evidence is complete and the overall status names that next decision. Approval must name exactly one Stage and state its actions, Credit/request ceiling, permitted data, forbidden actions and expiry. The current status is `phase_1_synthetic_smoke_closed_full_evaluation_blocked`.
 
 An eventual approval SHALL NOT be interpreted as authorization for Production, real data, external users, n8n, Tools, public channels or Gate G1.
 
 ### Current decision
 
-- `decision`: `k4_0_capacity_plan_complete_k4_1c_not_granted`
-- `reason`: deterministic citation enrichment passed KA-E01, but only 36 Credits remain; the scored set requires 150 Credits and the safe envelope with five technical retries requires 180.
+- `decision`: `phase_1_synthetic_smoke_closed_gate_g1_open`
+- `reason`: deterministic citation enrichment passed KA-E01 again, but post-run Credits are unverified and the scored set still requires 150 Credits plus a safe 180-Credit envelope with five technical retries.
 - `selected_capacity_strategy`: wait for the monthly Sandbox allowance, then verify at least 180 Credits and frozen configuration under a separately approved read-only K4.1C gate.
 - `next_safe_step`: no provider action. The Owner may later approve K4.1C only; a passing check still does not authorize the separately gated K4.3E scored run.
 
@@ -225,4 +227,5 @@ An eventual approval SHALL NOT be interpreted as authorization for Production, r
 - Staged authorization: `configuration/k3-3-staged-authorization.md`
 - D3W evidence: `configuration/k3-3-d3w-execution-evidence.md`
 - D3T evidence: `configuration/k3-3-d3t-execution-evidence.md`
+- Phase 1 smoke closure evidence: `configuration/phase-1-synthetic-smoke-closure-evidence.md`
 - K4.0 capacity plan: `configuration/k4-0-capacity-evaluation-plan.md`

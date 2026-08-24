@@ -3,9 +3,9 @@
 ## Status
 
 - `record_id`: `af-ka-01-k3-3-staged`
-- `version`: `3.5.0`
-- `previous_version`: `3.4.0`
-- `status`: `k4_0_capacity_plan_complete_k4_1c_not_granted`
+- `version`: `3.6.0`
+- `previous_version`: `3.5.0`
+- `status`: `phase_1_synthetic_smoke_closed_gate_g1_open`
 - `current_authorized_stage`: `none`
 - `monthly_committed_spend`: `0 ILS`
 - `data_scope`: `af-demo-services-he@1.0.0` synthetic only
@@ -315,6 +315,32 @@ May record D3W and D3T evidence and update Tasks, Design, Staged Authorization, 
 - `forbidden_actions`: `Dify change, Runtime, Indexing, Publish, Commit and Push`
 - `execution_result`: `D3W and D3T evidence recorded; local status package aligned; no provider action`
 
+## Stage D3T2 — One Additional KA-E01 Preview
+
+May execute only `KA-E01` once in Studio Preview under a six-Credit ceiling and stop immediately after the response.
+
+- `authorization`: `consumed_complete`
+- `approved_by`: `Owner (Yulush)`
+- `approved_on`: `2026-08-24`
+- `approval_context`: `exact bounded approval for one KA-E01 Preview request, no retry, Indexing or Publish`
+- `question_id`: `KA-E01`
+- `question`: `באילו ימים ושעות הארגון פעיל?`
+- `model_request_ceiling`: `1`
+- `technical_retries`: `0`
+- `credit_ceiling`: `6`
+- `execution_result`: `Workflow succeeded; factual, Hebrew and both citation checks passed; post-run Credit balance not visible and remains unverified`
+- `evidence`: `phase-1-synthetic-smoke-closure-evidence.md`
+
+## Phase 1 Closure — Synthetic Smoke Prototype Only
+
+- `authorization`: `consumed_complete`
+- `approved_by`: `Owner (Yulush)`
+- `approved_on`: `2026-08-24`
+- `approved_scope`: `local documentation and closure of Phase 1 as a Synthetic Smoke Prototype only`
+- `forbidden_actions`: `Dify change, additional Runtime, Indexing, Publish, Commit and Push`
+- `execution_result`: `Phase 1 smoke scope closed locally; Gate G1 and the frozen 25-question evaluation remain open`
+- `evidence`: `phase-1-synthetic-smoke-closure-evidence.md`
+
 ## Stage E — Scored Evaluation
 
 Covered by K4, not by K3.3-A through K3.3-D.
@@ -325,8 +351,8 @@ Covered by K4, not by K3.3-A through K3.3-D.
 - `measured_generation_credits_per_response`: `6`
 - `estimated_generation_credits_before_retries`: `150`
 - `safe_capacity_target_with_retries`: `180`
-- `credits_available`: `36`
-- `safe_capacity_deficit`: `144`
+- `credits_available`: `unverified after D3T2; last recorded value was 36 before the additional request`
+- `safe_capacity_deficit`: `unverified; at least 144 against the last recorded pre-D3T2 value`
 - `capacity_plan`: `k4-0-capacity-evaluation-plan.md`
 - `prerequisite`: K4.1C read-only capacity/Drift gate and a later separate K4.3E Runtime approval
 

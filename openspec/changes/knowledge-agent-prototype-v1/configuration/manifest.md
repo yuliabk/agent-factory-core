@@ -3,22 +3,22 @@
 ## Status
 
 - `configuration_set_id`: `af-ka-01-planning`
-- `configuration_version`: `3.9.0`
-- `previous_configuration_version`: `3.8.0`
+- `configuration_version`: `3.10.0`
+- `previous_configuration_version`: `3.9.0`
 - `change_id`: `knowledge-agent-prototype-v1`
 - `corpus`: `af-demo-services-he@1.0.0`
 - `evaluation_set`: `ka-prototype-he-v1`
-- `status`: `partially_materialized_synthetic_prototype`
+- `status`: `phase_1_synthetic_smoke_prototype_closed`
 - `approved_by`: `Owner (Yulush)`
-- `approval_date`: `2026-08-20`
+- `approval_date`: `2026-08-24`
 - `indexing_status`: `all_six_documents_indexed_available`
-- `runtime_status`: `d3t_smoke_pass_36_remaining_full_evaluation_blocked_unpublished`
+- `runtime_status`: `d3t2_smoke_pass_post_run_credits_unverified_full_evaluation_blocked_unpublished`
 - `credentials_status`: `not_connected`
 - `paid_execution_status`: `not_authorized`
 - `intended_runtime`: `Dify Cloud Sandbox`
 - `runtime_decision_status`: `selected_partially_materialized`
 - `runtime_decision_reference`: `docs/adr-004-dify-cloud-sandbox-runtime.md`
-- `k3_3_readiness_status`: `k4_0_capacity_plan_complete_k4_1c_not_granted`
+- `k3_3_readiness_status`: `phase_1_smoke_closed_k4_and_gate_g1_open`
 - `k3_3_readiness_reference`: `configuration/k3-3-readiness-checklist.md`
 - `dify_evidence_status`: `official_partial_ui_complete_residual_bounded`
 - `dify_evidence_reference`: `configuration/dify-official-evidence.md`
@@ -47,13 +47,15 @@
 - `k3_3_stage_d3w_status`: `complete_five_node_graph_prompt_variable_zero_credit_42_remaining`
 - `k3_3_stage_d3t_status`: `complete_one_request_citation_pass_6_credit_delta_36_remaining`
 - `k3_3_stage_d3c_status`: `complete_local_evidence_closure_no_provider_action`
+- `k3_3_stage_d3t2_status`: `complete_one_request_citation_pass_post_run_credits_unverified`
+- `phase_1_closure_status`: `synthetic_smoke_prototype_closed_gate_g1_open`
 - `k4_0_status`: `complete_local_capacity_plan_owner_gate_required`
 - `k4_0_reference`: `configuration/k4-0-capacity-evaluation-plan.md`
 - `provider_resource_status`: `one_unpublished_five_node_chatflow_and_one_knowledge_base_with_all_six_documents_indexed`
 
 ## Authorized Planning Scope
 
-The provider-neutral artifacts cover K2.1-K2.5. ADR-004 selected Dify Cloud Sandbox for K3.2. Version `3.9.0` adds the local K4.0 capacity decision to the completed D3SR, D3W and D3T record. The persisted flow is `User Input → Knowledge Retrieval → Citation Context → LLM 2 → Answer 2`; KA-E01 passed factual, Hebrew and citation checks. The app remains Unpublished with 36 Credits. K4.0 selects waiting for a fresh monthly Sandbox allowance, followed by a separately approved read-only K4.1C gate. Further Runtime and the 25-question evaluation remain unauthorized.
+The provider-neutral artifacts cover K2.1-K2.5. ADR-004 selected Dify Cloud Sandbox for K3.2. Version `3.10.0` records one additional authorized KA-E01 Preview and closes Phase 1 as a `Synthetic Smoke Prototype` only. The persisted flow is `User Input → Knowledge Retrieval → Citation Context → LLM 2 → Answer 2`; KA-E01 again passed factual, Hebrew and citation checks and the app remains Unpublished. The post-run Credit balance was not visible and is explicitly unverified. Gate G1, K4, further Runtime and the frozen 25-question evaluation remain open or unauthorized.
 
 ## Artifact Set
 
@@ -89,6 +91,7 @@ The provider-neutral artifacts cover K2.1-K2.5. ADR-004 selected Dify Cloud Sand
 | `k3-3-d3s-execution-evidence.md` | `1.0.0` | Template editor failure, neutral recovery, Reload and zero-Credit evidence |
 | `k3-3-d3w-execution-evidence.md` | `1.0.0` | Persisted five-node graph, structured prompt variable and zero-Credit verification |
 | `k3-3-d3t-execution-evidence.md` | `1.0.0` | One-question factual and citation pass, six-Credit delta and safe stop |
+| `phase-1-synthetic-smoke-closure-evidence.md` | `1.0.0` | Latest one-request KA-E01 evidence and bounded Phase 1 smoke closure |
 
 ## Invariants
 

@@ -182,6 +182,12 @@ The prototype SHALL be evaluated against a versioned 25-question set frozen befo
 - WHEN promotion is considered
 - THEN the prototype SHALL remain unapproved for release
 
+#### Scenario: Synthetic smoke phase closure
+
+- GIVEN one bounded supported question passes factual, Hebrew and citation checks in the unpublished synthetic prototype
+- WHEN the Owner closes Phase 1 as a Synthetic Smoke Prototype
+- THEN the closure SHALL record only bounded smoke evidence and SHALL NOT be interpreted as Gate G1 approval, completion of the frozen 25-question evaluation, Production readiness, or authorization for additional Runtime
+
 ### Requirement: KA-110 - Minimized evaluation records
 
 The prototype SHALL record only the metadata and synthetic content needed to reproduce and assess an evaluation and SHALL exclude secrets and personal data.
