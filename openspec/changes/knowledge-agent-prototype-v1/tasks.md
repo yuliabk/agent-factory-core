@@ -56,7 +56,8 @@
 ## 4. Authorized Prototype and Evaluation
 
 - [x] K4.0 Prepare the local capacity and 25-question evaluation plan, including measured capacity, alternatives, costs, risks, stop controls and a separate approval gate. No Dify action, Runtime, Payment, Credential, Commit or Push was authorized or performed. Evidence: `configuration/k4-0-capacity-evaluation-plan.md`. Requirements: KA-109, KA-110, KA-111.
-- [ ] K4.1 Provision only the approved non-production synthetic tenant and disable external tools and actions. Requirements: KA-107, KA-108.
+- [ ] K4.1C Obtain explicit Owner approval and complete a read-only Dify reload/inspection only to verify a renewed Credit balance of at least 180 and zero configuration Drift before any provisioning action. No Runtime, Preview, Indexing, Payment, Upgrade, Subscription, Credentials, graph/Prompt change, Publish or external Tool is included. Evidence: `configuration/k4-1c-capacity-verification-request.md`. Requirements: KA-107, KA-108, KA-109, KA-110, KA-111.
+- [ ] K4.1 Provision only the approved non-production synthetic tenant and disable external tools and actions. Blocked until K4.1C passes and a separate Owner approval names this exact Stage. Requirements: KA-107, KA-108.
 - [ ] K4.2 Index only the approved corpus version and verify that superseded, withdrawn, conflict-fixture, and foreign-tenant sources are excluded by default. Requirements: KA-101, KA-105, KA-108.
 - [ ] K4.3 Run the frozen 25-question set and preserve per-question evidence. Requirements: KA-102, KA-103, KA-104, KA-105, KA-106, KA-107, KA-108, KA-109, KA-110, KA-111.
 - [ ] K4.4 Record failures without deleting them; version any configuration change and rerun the complete relevant set. Requirements: KA-109.

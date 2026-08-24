@@ -3,9 +3,9 @@
 ## Status
 
 - `record_id`: `af-ka-01-k3-3-staged`
-- `version`: `3.5.0`
-- `previous_version`: `3.4.0`
-- `status`: `k4_0_capacity_plan_complete_k4_1c_not_granted`
+- `version`: `3.6.0`
+- `previous_version`: `3.5.0`
+- `status`: `k4_1c_gate_request_drafted_not_granted`
 - `current_authorized_stage`: `none`
 - `monthly_committed_spend`: `0 ILS`
 - `data_scope`: `af-demo-services-he@1.0.0` synthetic only
@@ -314,6 +314,18 @@ May record D3W and D3T evidence and update Tasks, Design, Staged Authorization, 
 - `credit_ceiling`: `0`
 - `forbidden_actions`: `Dify change, Runtime, Indexing, Publish, Commit and Push`
 - `execution_result`: `D3W and D3T evidence recorded; local status package aligned; no provider action`
+
+## Stage K4.1C — Capacity and Configuration-Drift Read-only Verification
+
+May, only after the Owner approves the exact bounded wording in `configuration/k4-1c-capacity-verification-request.md`, perform a read-only Dify Reload of the existing Workspace, App and Knowledge Base to verify the renewed Credit balance and zero configuration Drift. Codex/Claude may not perform this Stage without that Owner Login and approval; the account access itself remains manual and Owner-only, consistent with every prior authenticated UI checkpoint since K3.2c.
+
+- `authorization`: `not_granted`
+- `approval_context`: `pending; requires the exact bounded K4.1C wording from configuration/k4-1c-capacity-verification-request.md`
+- `credit_ceiling`: `0 expected`; any decrease stops
+- `required_pass_conditions`: `Credits available >= 180; five-node graph, model, Knowledge Base, six documents, source_id metadata, Prompt and corpus hashes match Stage D3T/manifest.md exactly; Workspace remains Sandbox with 1/1 Owner-only Membership and no visible Billing/BYOK/Payment/Tool/Trigger/Publish`
+- `forbidden_actions`: `Runtime request, Preview, Test Run, Indexing, Upload, Payment, Upgrade, Subscription, Credential connection, Graph change, Prompt change, Publish, external Tool/Trigger`
+- `prerequisite`: `K4.0 capacity plan complete (configuration/k4-0-capacity-evaluation-plan.md)`
+- `evidence`: `configuration/k4-1c-capacity-verification-request.md`
 
 ## Stage E — Scored Evaluation
 

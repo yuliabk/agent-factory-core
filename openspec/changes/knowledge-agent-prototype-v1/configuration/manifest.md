@@ -3,8 +3,8 @@
 ## Status
 
 - `configuration_set_id`: `af-ka-01-planning`
-- `configuration_version`: `3.9.0`
-- `previous_configuration_version`: `3.8.0`
+- `configuration_version`: `4.0.0`
+- `previous_configuration_version`: `3.9.0`
 - `change_id`: `knowledge-agent-prototype-v1`
 - `corpus`: `af-demo-services-he@1.0.0`
 - `evaluation_set`: `ka-prototype-he-v1`
@@ -20,6 +20,8 @@
 - `runtime_decision_reference`: `docs/adr-004-dify-cloud-sandbox-runtime.md`
 - `k3_3_readiness_status`: `k4_0_capacity_plan_complete_k4_1c_not_granted`
 - `k3_3_readiness_reference`: `configuration/k3-3-readiness-checklist.md`
+- `k4_1c_status`: `gate_request_drafted_pending_owner_approval`
+- `k4_1c_reference`: `configuration/k4-1c-capacity-verification-request.md`
 - `dify_evidence_status`: `official_partial_ui_complete_residual_bounded`
 - `dify_evidence_reference`: `configuration/dify-official-evidence.md`
 - `residual_region_retention_risk`: `accepted_synthetic_only`
@@ -53,7 +55,7 @@
 
 ## Authorized Planning Scope
 
-The provider-neutral artifacts cover K2.1-K2.5. ADR-004 selected Dify Cloud Sandbox for K3.2. Version `3.9.0` adds the local K4.0 capacity decision to the completed D3SR, D3W and D3T record. The persisted flow is `User Input → Knowledge Retrieval → Citation Context → LLM 2 → Answer 2`; KA-E01 passed factual, Hebrew and citation checks. The app remains Unpublished with 36 Credits. K4.0 selects waiting for a fresh monthly Sandbox allowance, followed by a separately approved read-only K4.1C gate. Further Runtime and the 25-question evaluation remain unauthorized.
+The provider-neutral artifacts cover K2.1-K2.5. ADR-004 selected Dify Cloud Sandbox for K3.2. Version `3.9.0` added the local K4.0 capacity decision to the completed D3SR, D3W and D3T record. Version `4.0.0` drafts the bounded `K4.1C` gate-approval request text so the Owner can grant a read-only Credit-balance/Drift verification before any K4.1 provisioning; the gate itself remains `not_granted` and no provider action was performed to produce it. The persisted flow is `User Input → Knowledge Retrieval → Citation Context → LLM 2 → Answer 2`; KA-E01 passed factual, Hebrew and citation checks. The app remains Unpublished with 36 Credits. K4.0 selects waiting for a fresh monthly Sandbox allowance, followed by a separately approved read-only K4.1C gate. Further Runtime and the 25-question evaluation remain unauthorized.
 
 ## Artifact Set
 
@@ -65,6 +67,7 @@ The provider-neutral artifacts cover K2.1-K2.5. ADR-004 selected Dify Cloud Sand
 | `evaluation-record-contract.md` | `1.0.0` | Minimized evidence schema and retention rules |
 | `cost-control-plan.md` | `1.7.0` | 180-Credit safe capacity target and renewal strategy |
 | `k4-0-capacity-evaluation-plan.md` | `1.0.0` | 25-question capacity, alternatives, costs, risks and future gates |
+| `k4-1c-capacity-verification-request.md` | `1.0.0` | Bounded K4.1C gate-approval text, forbidden actions and evidence fields; not yet granted |
 | `citation-remediation-plan.md` | `1.0.0` | Candidate comparison, selected M-TEMPLATE design and fail-closed contract |
 | `citation-metadata-path-plan.md` | `1.0.0` | Source-backed doc_metadata path, reviewed Template candidate and D3S gate |
 | `k3-3-readiness-checklist.md` | `3.6.0` | K4.0 capacity strategy and ungranted K4.1C gate |
@@ -72,7 +75,7 @@ The provider-neutral artifacts cover K2.1-K2.5. ADR-004 selected Dify Cloud Sand
 | `dify-ui-inspection-evidence.md` | `1.0.0` | Minimized authenticated UI evidence without account data or screenshots |
 | `k3-2d-closure-package.md` | `2.3.0` | D3S editor safe stop and manual recovery boundary |
 | `dify-reconstruction-runbook.md` | `1.1.0` | Manual reconstruction, measured R3 settings, rollback and deletion sequence |
-| `k3-3-staged-authorization.md` | `3.5.0` | D3 closure plus K4.0 capacity prerequisite; no current stage |
+| `k3-3-staged-authorization.md` | `3.6.0` | D3 closure, K4.0 capacity prerequisite and drafted K4.1C gate; no current stage |
 | `k3-3-a-execution-evidence.md` | `1.0.0` | Minimized empty-resource evidence and model Drift stop |
 | `k3-3-a1-execution-evidence.md` | `1.0.0` | Dated-model, empty Retrieval node and platform-constraint evidence |
 | `k3-3-b-execution-evidence.md` | `1.0.0` | One-document staging and minimum-overlap Drift evidence |
