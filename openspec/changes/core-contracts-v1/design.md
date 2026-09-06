@@ -2,65 +2,136 @@
 
 ## Architecture direction
 
-`Agent Factory Core` becomes the control plane for shared contracts and platform controls. Business agents remain separate repositories.
+`Agent Factory Core` is a platform Core with two logical planes: Build / Control Plane and Runtime Governance Plane. Business Agents remain independently versioned repositories.
+
+The versioned specification is the primary artifact.
 
 ```text
-Client Intent
+Business Intent
  -> Spec Compiler
- -> Template Engine
- -> Agent Manifest
- -> Orchestrator + ExecutionContext
+ -> Template + modular composition
+ -> AgentManifest
+ + ClientInstanceConfig
+ + PlatformPolicy / ExceptionPolicy
+ -> EffectiveReleaseConfig
+ -> Runtime Governance Plane
+    -> bounded Agent planning
     -> Model Router
     -> Capability Registry
     -> Tool Gateway
-    -> Memory Broker
- -> Evals / Evidence / Approval
+    -> Memory Gateway
+ -> Evals / Evidence / Release Decision
  -> Versioned Release
 ```
 
 ## Boundary decisions
 
-### Core owns
+### Build / Control Plane owns
 
-- contracts, policies and validation;
-- capability resolution and orchestration;
-- model/provider routing policy;
-- tool/memory access controls;
-- budget/runtime limits;
-- eval/release/audit contracts;
-- template registry/selection contracts.
+- intent/spec compilation;
+- template/module selection;
+- AgentManifest and ClientInstanceConfig validation;
+- PlatformPolicy/ExceptionPolicy compilation;
+- EffectiveReleaseConfig generation;
+- evaluation/release planning and evidence;
+- registry/contract metadata.
+
+### Runtime Governance Plane owns
+
+- trusted ExecutionContext;
+- policy/risk/trust enforcement;
+- hybrid orchestration boundaries;
+- capability/model/tool/memory routing;
+- budget/runtime/hop/safety limits;
+- approvals/escalations when effective policy requires them;
+- runtime audit/traces/drift detection.
 
 ### Agent repository owns
 
-- domain/business behavior;
-- domain prompts and workflow logic;
-- capabilities provided/required;
-- agent-specific evaluation dataset;
-- domain-specific adapters not reusable platform-wide.
+- reusable domain/business behavior;
+- domain prompts/workflows;
+- provided/required capabilities;
+- Agent-specific eval data;
+- reusable AgentManifest requirements;
+- domain-specific non-Core assets.
 
-## Provider migration
+Agent repositories do not store client secrets, raw PII or client business state.
 
-Earlier Dify, n8n and OpenAI prototype artifacts remain historical/experimental evidence. They can continue as implementations where useful, but current Core contracts MUST NOT require them unless a bounded agent requirement explicitly does so.
+## Manifest / client / effective release model
 
-## Security model
+```text
+AgentManifest (reusable requirements)
+ + ClientInstanceConfig (tenant grants/config)
+ + PlatformPolicy / ExceptionPolicy
+ = EffectiveReleaseConfig (immutable runtime authority)
+```
 
-Authority lives outside the model. Untrusted content cannot grant permissions. Tools, capabilities, memory and network access are default-deny. Every invocation receives trusted execution context and bounded cost/runtime controls.
+Agents request authority; they do not grant it to themselves.
 
-## Budget model
+## Security and governance model
 
-Business budget and emergency safety cap are distinct:
+- default deny + least privilege + policy-before-execution;
+- approvals are risk-based rather than mandatory for every low-risk action;
+- trust profiles begin with `sandbox`, `internal`, `business`, `privileged`;
+- Factory proposes trust; PlatformPolicy defines the ceiling; client can configure within it;
+- rules are either non-overridable invariants or overridable through a scoped, expiring, audited ExceptionPolicy;
+- untrusted content cannot grant permissions;
+- persistent memory, tools, providers and Agent delegation remain governed outside model output.
 
-- business limit can be increased only by the authorized approver after warning;
-- emergency cap stops loops/anomalies regardless of business approval.
+## Release strategy
+
+Release behavior is versioned and policy-bounded:
+
+- `human-required`;
+- `policy-auto`;
+- `policy` (derive from risk/trust/environment/change class).
+
+Automatic release still requires all blocking gates to pass and produces the same release evidence/decision record.
+
+## Evaluation model
+
+Functional/business, security/policy, cost/runtime and contract/portability evals are first-class. PlatformPolicy determines whether a result is blocking, warning or advisory.
+
+Non-overridable security failures always block. A universal business-quality score is intentionally rejected.
+
+## Provider model
+
+Routing is provider-neutral and policy-driven. The system can optimize for economy, balance, quality, latency or privacy according to task/client constraints. Provider fallback must remain inside data/privacy/eval policy.
 
 ## Agent-to-Agent model
 
-Consumers request versioned capabilities. Core resolves an implementation and delegates only the minimum context/permissions/budget slice. Direct peer URLs are not the default architecture.
+Consumers request versioned capabilities. Core resolves implementation and delegates minimum context/permissions/budget.
+
+Registry enforcement is soft-strict:
+
+- sandbox/dev may warn or use explicit mocks for optional/non-critical dependencies;
+- production requires critical/consequential capabilities to resolve to registered, compatible and policy-approved implementations.
+
+## Orchestration model
+
+Core defines authority and limits. Business Agents autonomously decide how to plan/decompose and which approved capability to request inside those boundaries.
+
+## Memory model
+
+Memory classes are logically separated. Agents may identify useful information and request/write memory autonomously if effective policy permits. Policy decides class, purpose, retention, minimization/consent and tenant boundary.
+
+## Template model
+
+Templates are versioned starting points plus modular capability composition, not rigid complete architectures. Factory prefers the simplest composition that satisfies the approved outcome.
 
 ## Client intake
 
-The client gives a plain-language goal. The platform asks only critical missing questions, including budget and consequential-action boundaries. It infers non-critical technical choices and presents assumptions/options for confirmation.
+Client gives a plain-language business goal. The platform asks only critical missing questions, offers understandable budget options and uses `infer -> show assumptions -> confirm/correct` for non-critical ambiguity. Under-10-minute/5-6-question behavior is a UX target, not a hard contract limit.
 
-## Implementation strategy after approval
+## Implementation strategy
 
-Start with a small deterministic skeleton: manifest schema/validator, execution context, permission/budget checks, minimal audit schema and adapter interfaces. Do not build a distributed platform before those contracts prove useful.
+Move fast through a thin vertical slice instead of fully building each subsystem in isolation:
+
+1. schemas/compiler -> EffectiveReleaseConfig;
+2. trusted ExecutionContext + policy/budget kernel;
+3. minimal provider/capability/tool/memory interfaces;
+4. eval/release decision kernel;
+5. one synthetic end-to-end reference Agent;
+6. Research/Brain Agent as first real external Agent.
+
+Do not wait for long-term database/service-mesh/registry choices before proving the contracts.
