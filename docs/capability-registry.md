@@ -1,14 +1,14 @@
 # Capability Registry and Agent-to-Agent Routing
 
-**Status:** Proposed
+**Status:** Accepted direction after Owner Review
 
-## 1. מטרה
+## 1. Purpose
 
-לאפשר ל-Agent להשתמש ב-Agent אחר בלי להכיר את שמו, ה-URL שלו, ה-Provider שלו או פרטי המימוש שלו.
+Allow an Agent to use another Agent or implementation without knowing its repository, URL, provider or internal runtime.
 
-## 2. עיקרון
+## 2. Capability-first contract
 
-Agent מבקש Capability, לדוגמה:
+Agents request capabilities such as:
 
 ```text
 research.lookup
@@ -17,24 +17,32 @@ message.draft
 travel.inventory.search
 ```
 
-ה-Core פותר את הבקשה ל-Implementation מתאים בזמן Runtime.
+The Runtime Governance Plane resolves a compatible implementation.
 
-## 3. למה לא direct calls
+Direct peer coupling is not the default architecture.
 
-Direct Agent-to-Agent calls יוצרים:
+## 3. Registry enforcement modes
 
-- Coupling בין repositories.
-- קושי להחליף Agent.
-- קושי לאכוף Permissions.
-- קושי לחשב Cost.
-- קושי לבצע Audit.
-- שרשראות Agents לא נשלטות.
+The Registry is intentionally **soft-strict** so development stays flexible while production stays reproducible.
 
-לכן כל call בין Agents עובר דרך Orchestrator + Capability Registry.
+### Development / sandbox
+
+- Missing non-critical registrations MAY produce warnings instead of blocking the entire Agent.
+- Local/mock implementations may be used when explicitly marked as development-only.
+- Unknown optional capability can degrade gracefully.
+- Security invariants, tenant isolation and prohibited side effects remain blocking even in development.
+
+### Production / elevated environments
+
+- Critical capabilities MUST resolve to a registered, version-compatible and policy-approved implementation.
+- Consequential capabilities MUST have risk classification, schemas, effective permission and audit configuration.
+- A required capability without valid resolution blocks the affected execution/release according to policy.
+
+This prevents the Registry from becoming a development bottleneck without allowing production dependencies to become invisible.
 
 ## 4. Registry record
 
-כל Capability registration כולל לפחות:
+A production-capable registration contains at least:
 
 ```yaml
 name: research.lookup
@@ -43,6 +51,9 @@ providerAgent: research-agent
 release: research-agent@1.3.2
 risk: read-only
 costClass: variable
+environments:
+  - sandbox
+  - production
 supports:
   - public-web
   - client-knowledge
@@ -50,56 +61,63 @@ supports:
 
 ## 5. Resolution policy
 
-ה-Core בוחר Implementation לפי:
+The Core selects an implementation according to:
 
-1. Contract compatibility.
-2. Tenant permissions.
-3. Data classification.
-4. Client/provider restrictions.
-5. Cost profile.
-6. Quality profile.
-7. Availability/health.
-8. Latency target.
+1. contract compatibility;
+2. environment and enforcement mode;
+3. tenant permission and trust level;
+4. data classification/privacy restrictions;
+5. ClientInstanceConfig restrictions;
+6. cost profile;
+7. quality/eval profile;
+8. provider health/availability;
+9. latency target.
 
-## 6. Agent hops
+## 6. Hybrid orchestration
 
-כל Agent hop:
+The Core Orchestrator owns boundaries, permissions, limits, routing and policy enforcement. A business Agent may autonomously decide which approved capability to request and how to decompose its task inside those boundaries.
 
-- יורש `request_id` ו-`trace_id`.
-- מקבל Context מצומצם לצורך המשימה בלבד.
-- אינו מקבל אוטומטית את כל Permissions של ה-Caller.
-- נרשם כ-child span ב-Audit/Trace.
-- נכלל בתקציב של הבקשה.
+Thus autonomy lives **inside** policy rather than being hard-coded either entirely in the central orchestrator or entirely in each Agent.
 
-ה-Core אוכף `maxAgentHopsPerRequest` כדי למנוע loops ו-cost explosion.
+## 7. Agent hops and delegation
 
-## 7. Delegation
+Every Agent hop:
 
-Caller אינו יכול להעניק Permission שאין לו. Capability provider מקבל רק את intersection של:
+- inherits `request_id` and `trace_id`;
+- receives only task-required context;
+- does not inherit all caller permissions automatically;
+- is recorded as a child span;
+- consumes request budget/deadline;
+- increments hop count.
 
-`Caller scope ∩ Provider allowed scope ∩ Tenant policy ∩ Request purpose`
+Effective delegated authority is bounded by:
 
-## 8. Failure
+`Caller authority ∩ Provider allowed scope ∩ Client policy ∩ PlatformPolicy ∩ Request purpose`
 
-אם Capability unavailable:
+`maxAgentHopsPerRequest` and cycle detection prevent recursion/cost explosion.
 
-- ה-Core יכול לבחור Implementation חלופי אם contract תואם.
-- אם אין fallback מאושר, מחזירים degraded result או escalation.
-- אסור ל-Agent לעקוף Registry ולקרוא ל-implementation ישירות.
+## 8. Failure and fallback
 
-## 9. גרסאות
+If a capability is unavailable:
 
-- Minor contract change יכול להיות backward compatible.
-- Major version דורש explicit compatibility.
-- Consumer Agent מצהיר איזו contract version הוא דורש.
+- use a contract-compatible approved fallback when policy allows;
+- otherwise return a typed degraded/partial result or escalate;
+- never bypass the Registry by directly calling an unapproved peer implementation in production.
 
-## 10. Research/Brain Agent
+## 9. Contract versions
 
-ה-Research Agent המתוכנן יהיה ה-use case הראשון של Registry:
+- backward-compatible changes may remain in the same major contract version;
+- breaking changes require major version and compatibility/migration handling;
+- consumers declare supported version/range;
+- provider replacement should not require consumer business-code changes when the capability contract remains compatible.
+
+## 10. First reference capability
+
+The planned Research/Brain Agent will provide:
 
 ```text
 Capability: research.lookup
 Consumers: Travel Agent, Sales Agent, future agents
 ```
 
-כך הוא הופך ליכולת משותפת בלי להיכנס לתוך ה-Core עצמו.
+It is the first portability test for reusable Agent-to-Agent capabilities.
