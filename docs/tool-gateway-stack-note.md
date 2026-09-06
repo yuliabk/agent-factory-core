@@ -1,0 +1,1 @@
+Tool Gateway work is intentionally developed as a stacked change after the Runtime Governance kernel. This note is temporary implementation trace and should be removed before final merge if the stacked PR is flattened.
