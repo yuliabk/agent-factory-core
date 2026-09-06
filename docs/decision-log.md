@@ -18,6 +18,8 @@
 | `spec` הראשון כולל רק `template`, `capabilities`, `tools`, `permissions`, `memoryProfile`, `budgetProfile`, `evalProfile` | Accepted | agent-manifest.md / templates/agent-manifest.yaml |
 | Manifest profile/permission fields הם requirements/references ולא concrete client grants | Accepted | agent-manifest.md |
 | שדות חדשים יתווספו ל-AgentManifest רק כאשר use case אמיתי מוכיח צורך | Accepted | agent-manifest.md |
+| JSON Schema הוא ה-contract החיצוני הקנוני; Pydantic הוא ה-runtime/internal model ב-Python | Accepted | ADR-012 |
+| Pydantic אינו contract עצמאי; הוא חייב להישאר semantically aligned ל-JSON Schema | Accepted | ADR-012 |
 | Release strategy מוגדרת בספציפיקציה/קונפיגורציה ומוגבלת ע"י Policy | Accepted | ADR-010 / agent-lifecycle.md |
 | Release modes: `human-required`, `policy-auto`, `policy` | Accepted | ADR-010 |
 | לא נדרש Human approval לכל שינוי/פעולה; approvals הם risk-based | Accepted | security-model.md / governance.md |
@@ -51,16 +53,15 @@
 
 These do not block starting the thin Core Skeleton:
 
-1. Final schema implementation technology: JSON Schema, Pydantic or combined.
-2. Physical Capability Registry backend after the initial in-process implementation.
-3. First two real provider adapters for portability validation.
-4. Pricing source and currency normalization.
-5. Concrete default emergency safety-cap values by workload.
-6. Final production list of non-overridable invariants.
-7. Persistent-memory backend and whether/when it becomes a separate service.
-8. Exact client approval identity representation for each channel.
-9. Factory client-facing UI repository/deployment location.
-10. Long-term template package registry/storage beyond base templates.
+1. Physical Capability Registry backend after the initial in-process implementation.
+2. First two real provider adapters for portability validation.
+3. Pricing source and currency normalization.
+4. Concrete default emergency safety-cap values by workload.
+5. Final production list of non-overridable invariants.
+6. Persistent-memory backend and whether/when it becomes a separate service.
+7. Exact client approval identity representation for each channel.
+8. Factory client-facing UI repository/deployment location.
+9. Long-term template package registry/storage beyond base templates.
 
 ## Working rule
 
