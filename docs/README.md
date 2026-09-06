@@ -18,8 +18,9 @@ This folder is the architectural entry point for `Agent Factory Core`.
 12. [`template-engine.md`](template-engine.md) - hybrid template + modular composition.
 13. [`client-experience.md`](client-experience.md) - non-technical, assumption-aware client intake.
 14. [`evidence-and-evals.md`](evidence-and-evals.md) - policy-driven eval/release decisions, evidence and audit.
-15. [`roadmap.md`](roadmap.md) - optimized implementation sequence and current next step.
-16. [`decision-log.md`](decision-log.md) - concise accepted/open decision index.
+15. [`architecture-review-2026-09-06.md`](architecture-review-2026-09-06.md) - completed synchronization review, resolved inconsistencies and readiness assessment.
+16. [`roadmap.md`](roadmap.md) - optimized implementation sequence and current next step.
+17. [`decision-log.md`](decision-log.md) - concise accepted/open decision index.
 
 ## ADRs
 
