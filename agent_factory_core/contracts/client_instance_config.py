@@ -4,6 +4,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .release_strategy import RequestedReleaseStrategy
 from .trust import TrustProfile
 
 
@@ -35,6 +36,7 @@ class ClientInstanceSpec(StrictModel):
     tenant: TenantRef
     variables: dict[str, Any] = Field(default_factory=dict)
     trust_profile: TrustProfile = Field(alias="trustProfile")
+    release_strategy: RequestedReleaseStrategy = Field(alias="releaseStrategy")
     provider_profile: str = Field(alias="providerProfile", min_length=1)
     secrets_ref: dict[str, str] = Field(alias="secretsRef", default_factory=dict)
     memory_config: dict[str, Any] = Field(alias="memoryConfig", default_factory=dict)
