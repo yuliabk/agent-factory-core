@@ -4,6 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .release_strategy import EffectiveReleaseStrategy
 from .trust import TrustProfile
 
 
@@ -39,6 +40,7 @@ class PlatformPolicySpec(StrictModel):
     allowed_budget_override_keys: list[str] = Field(alias="allowedBudgetOverrideKeys", default_factory=list)
     allowed_memory_config_keys: list[str] = Field(alias="allowedMemoryConfigKeys", default_factory=list)
     max_trust_profile: TrustProfile = Field(alias="maxTrustProfile")
+    minimum_release_strategy: EffectiveReleaseStrategy = Field(alias="minimumReleaseStrategy")
     registry_mode: Literal["soft", "strict"] = Field(alias="registryMode")
     default_data_classification: str = Field(alias="defaultDataClassification", min_length=1)
     eval_rules: list[EvalRule] = Field(alias="evalRules")
