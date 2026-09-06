@@ -66,7 +66,7 @@ class ToolExecutionResult:
 
 
 class ToolGateway:
-    """Governed in-process Tool Gateway for the first read-only vertical slice."""
+    """Governed zero-cost, read-only Tool Gateway for the first vertical slice."""
 
     def __init__(self, registrations: tuple[ToolRegistration, ...] = ()) -> None:
         self._by_binding = {registration.spec.binding_id: registration for registration in registrations}
