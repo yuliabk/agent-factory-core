@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1A contract implementation is starting.
+**Current mode:** Phase 1A contract implementation is active.
 
 ## North Star
 
@@ -22,6 +22,7 @@ Principles:
 - thin interfaces before sophisticated infrastructure;
 - do not add schema fields before a real use case needs them;
 - external contracts stay implementation-neutral even when the first Core runtime is Python;
+- Capability Registry owns capability contracts/metadata; manifests carry lightweight refs;
 - Research/Brain Agent becomes the first real reference consumer as soon as the Core slice is usable.
 
 ## Phase 0A - Historical baseline
@@ -63,16 +64,21 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 - [x] Agree minimal `AgentManifest` contract shape: `apiVersion`, `kind`, `metadata(name/version/description)`, `spec`.
 - [x] Agree first `spec` keys: `template`, `capabilities`, `tools`, `permissions`, `memoryProfile`, `budgetProfile`, `evalProfile`.
 - [x] Choose schema implementation boundary: **JSON Schema is the canonical external contract; Pydantic is the internal Python runtime/validation model**.
-- [ ] Implement canonical JSON Schema for the minimal `AgentManifest`.
-- [ ] Implement matching Pydantic models and validator.
-- [ ] Add schema/Pydantic alignment tests to prevent semantic drift.
+- [x] Agree capability reference model: Registry is source of truth; Manifest uses `ref/version`, optional `optional` on requirements, and bounded `overrides`.
+- [x] Add canonical minimal AgentManifest JSON Schema.
+- [x] Add matching Pydantic AgentManifest models.
+- [x] Add schema/Pydantic alignment tests.
+- [ ] Execute contract tests in the implementation environment/CI and resolve any drift.
 - [ ] Implement `ClientInstanceConfig` JSON Schema + Pydantic model.
 - [ ] Implement minimal `PlatformPolicy` JSON Schema + Pydantic model.
 - [ ] Implement minimal `ExceptionPolicy` JSON Schema + Pydantic model.
 - [ ] compiler -> immutable `EffectiveReleaseConfig`.
+- [ ] compiler validates capability refs and Registry-declared override keys.
 - [ ] validation errors that clearly state exact path/rule/remediation.
 
 **Contract rule:** JSON Schema is externally authoritative and usable by non-Python consumers. Pydantic is an internal implementation convenience and must not become a second independent contract.
+
+**Capability rule:** Registry owns capability contracts/metadata. AgentManifest contains lightweight references and cannot grant itself authority or duplicate protected registry metadata.
 
 **Manifest rule:** fields in AgentManifest are reusable requirements/profile references. Concrete client grants/amounts/bindings remain in ClientInstanceConfig; actual runtime authority exists only in EffectiveReleaseConfig.
 
@@ -87,7 +93,7 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 ### 1C. Adapter contracts
 
 - [ ] provider-neutral model interface with one working adapter and one stub/second adapter for portability.
-- [ ] Capability Registry in-process implementation with soft-strict mode.
+- [ ] Capability Registry in-process implementation with soft-strict mode and authoritative capability metadata.
 - [ ] Tool Gateway interface and one read-only example capability.
 - [ ] Memory Gateway interface with session/task memory first.
 
@@ -166,8 +172,8 @@ Deepen only proven needs:
 
 ## Current stop point
 
-**Phase 1A is active.** The minimal AgentManifest shape and the hybrid schema boundary are accepted and synchronized.
+**Phase 1A is active.** The minimal AgentManifest contract, JSON Schema/Pydantic boundary and Registry-backed capability reference shape are synchronized.
 
-**Next executable step:** implement the minimal AgentManifest JSON Schema and matching Pydantic model/validator, then add alignment tests before expanding the contract.
+**Next executable step:** run the new contract tests, then define the minimal `ClientInstanceConfig` external schema + Pydantic model before implementing the compiler.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
