@@ -14,6 +14,7 @@ from .contracts.effective_release_config import (
 )
 from .contracts.exception_policy import ExceptionPolicy
 from .contracts.platform_policy import PlatformPolicy
+from .contracts.release_strategy import resolve_release_strategy
 from .contracts.trust import trust_profile_rank
 from .registry import CapabilityRegistry, CapabilityResolutionError
 
@@ -235,6 +236,10 @@ def compile_effective_release(
         capability_bindings[resolved.ref] = resolved.implementation_id
 
     effective_permissions = tuple(sorted(requested))
+    effective_release_strategy = resolve_release_strategy(
+        client.spec.release_strategy,
+        platform_policy.spec.minimum_release_strategy,
+    )
 
     return EffectiveReleaseConfig(
         apiVersion="agentfactory.io/v1alpha1",
@@ -255,6 +260,7 @@ def compile_effective_release(
             capabilities=manifest.spec.capabilities,
             capabilityBindings=capability_bindings,
             trustProfile=client.spec.trust_profile,
+            releaseStrategy=effective_release_strategy,
             providerProfile=client.spec.provider_profile,
             secretsRef=dict(client.spec.secrets_ref),
             memoryConfig=dict(client.spec.memory_config),
