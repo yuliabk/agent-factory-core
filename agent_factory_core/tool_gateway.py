@@ -125,6 +125,18 @@ class ToolGateway:
                 now=now,
             )
 
+        if spec.estimated_cost > 0:
+            return self._deny(
+                context,
+                tool_ref=binding_id,
+                platform_policy_ref=platform_policy_ref,
+                exception_policy_refs=exception_policy_refs,
+                approval_ref=approval_ref,
+                rule="budget_preflight",
+                reason="costed tools remain blocked until runtime budget accounting state is attached",
+                now=now,
+            )
+
         authority = evaluate_request_authority(
             context,
             tenant_id=tenant_id,
