@@ -17,7 +17,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C1.11 Accept minimal first AgentManifest shape: `apiVersion`, `kind`, `metadata(name/version/description)`, and `spec(template/capabilities/tools/permissions/memoryProfile/budgetProfile/evalProfile)`. Maps: CORE-202.
 - [x] C1.12 Accept hybrid schema boundary: JSON Schema canonical externally; Pydantic internal for Python runtime/validation. Maps: CORE-202, CORE-203. ADR-012.
 - [x] C1.13 Accept Registry-backed capability references and bounded overrides. Maps: CORE-202, CORE-205, CORE-206. ADR-013.
-- [x] C1.14 Accept minimal `ClientInstanceConfig`: metadata(name/environment) + spec(agentRef/tenant/variables/trustProfile/providerProfile/secretsRef/memoryConfig/budgetOverrides/permissionOverrides/toolBindings). Maps: CORE-202, CORE-203, CORE-210.
+- [x] C1.14 Accept minimal `ClientInstanceConfig`: metadata(name/environment) + spec(agentRef/tenant/variables/trustProfile/releaseStrategy/providerProfile/secretsRef/memoryConfig/budgetOverrides/permissionOverrides/toolBindings). Maps: CORE-202, CORE-203, CORE-210, CORE-213.
 - [x] C1.15 Confirm `EffectiveReleaseConfig` is the only runtime-executable configuration artifact. Maps: CORE-203, CORE-218.
 - [x] C1.16 Accept trust placement/enforcement: ClientInstanceConfig requests one of `sandbox/internal/business/privileged`; PlatformPolicy sets `maxTrustProfile`; compiler rejects requests above the ceiling; EffectiveReleaseConfig and ExecutionContext carry the compiled trust profile; trust does not grant permissions. Maps: CORE-204, CORE-208, CORE-210.
 
@@ -55,7 +55,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 
 - [x] C5.1 Canonical decision-neutral EvalResult JSON Schema + frozen Pydantic model for functional/business, security/policy, cost/runtime and contract/portability families. Raw statuses are `PASS`, `PASS_WITH_WARNINGS`, `FAIL`; blocking/warning/advisory and release decisions are intentionally excluded from the result contract. Maps: CORE-212.
 - [x] C5.2 PlatformPolicy evalRules map every release-gated check explicitly to `blocking`, `warning` or `advisory`; unmapped/duplicate rules, mixed releases and malformed security-invariant policy fail closed; securityInvariantChecks cannot be downgraded from blocking. Maps: CORE-212.
-- [ ] C5.3 Implement release strategies `human-required`, `policy-auto`, `policy`. Maps: CORE-213.
+- [x] C5.3 ClientInstanceConfig requests `human-required`, `policy-auto` or `policy`; PlatformPolicy defines a concrete minimum strategy; compiler writes only concrete `human-required`/`policy-auto` to EffectiveReleaseConfig. Eval gate failures block every strategy; eligible policy-auto can auto-release and eligible human-required requires human approval. Maps: CORE-213.
 - [ ] C5.4 Build minimal Evidence Pack and release decision record. Maps: CORE-217.
 - [ ] C5.5 Drift check: runtime release maps to approved Spec + EffectiveReleaseConfig. Maps: CORE-218.
 
