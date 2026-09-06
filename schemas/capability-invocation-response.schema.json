@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.io/schemas/capability-invocation-response/v1alpha1.json",
+  "title": "CapabilityInvocationResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "kind",
+    "invocationId",
+    "requestId",
+    "traceId",
+    "capabilityRef",
+    "implementationId",
+    "status",
+    "limitations"
+  ],
+  "properties": {
+    "apiVersion": {"const": "agentfactory.io/v1alpha1"},
+    "kind": {"const": "CapabilityInvocationResponse"},
+    "invocationId": {"type": "string", "minLength": 1},
+    "requestId": {"type": "string", "minLength": 1},
+    "traceId": {"type": "string", "minLength": 1},
+    "capabilityRef": {"type": "string", "minLength": 1},
+    "implementationId": {"type": "string", "minLength": 1},
+    "status": {"enum": ["success", "error"]},
+    "output": {"type": ["object", "null"]},
+    "errorCode": {"type": ["string", "null"], "minLength": 1},
+    "limitations": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}
