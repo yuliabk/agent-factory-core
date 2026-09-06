@@ -6,6 +6,11 @@ from agent_factory_core.eval_policy import EvalPolicyError, map_eval_results
 
 
 def policy(*, rules=None, invariants=None) -> PlatformPolicy:
+    default_rules = [
+        {"checkId": "security.cross-tenant", "classification": "blocking"},
+        {"checkId": "business.quality", "classification": "warning"},
+        {"checkId": "contract.portability", "classification": "advisory"},
+    ]
     return PlatformPolicy.model_validate(
         {
             "apiVersion": "agentfactory.io/v1alpha1",
@@ -20,12 +25,7 @@ def policy(*, rules=None, invariants=None) -> PlatformPolicy:
                 "maxTrustProfile": "business",
                 "registryMode": "strict",
                 "defaultDataClassification": "internal",
-                "evalRules": rules
-                or [
-                    {"checkId": "security.cross-tenant", "classification": "blocking"},
-                    {"checkId": "business.quality", "classification": "warning"},
-                    {"checkId": "contract.portability", "classification": "advisory"},
-                ],
+                "evalRules": rules if rules is not None else default_rules,
                 "securityInvariantChecks": invariants
                 if invariants is not None
                 else ["security.cross-tenant"],
