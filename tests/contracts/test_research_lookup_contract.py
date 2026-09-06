@@ -14,7 +14,7 @@ RECORD_PATH = ROOT / "registry" / "capabilities" / "research.lookup.v1.json"
 REGISTRY_SCHEMA_PATH = ROOT / "schemas" / "capability-registry-record.schema.json"
 INPUT_SCHEMA_PATH = ROOT / "schemas" / "capabilities" / "research.lookup.input.v1.json"
 OUTPUT_SCHEMA_PATH = ROOT / "schemas" / "capabilities" / "research.lookup.output.v1.json"
-RESEARCH_RELEASE_ID = "github:yuliabk/agent-factory-research-agent@4a8b308aeaf22228c6a03d438509b0717e6daf8b"
+RESEARCH_RELEASE_ID = "github:yuliabk/agent-factory-research-agent@024367572ca001dec385ca0f781495b5fa91d181"
 
 
 class ResearchLookupContractTests(unittest.TestCase):
@@ -37,8 +37,16 @@ class ResearchLookupContractTests(unittest.TestCase):
         self.assertEqual(record.required_permissions, ["research.lookup"])
         self.assertNotIn("web.search", record.required_permissions)
         self.assertEqual(len(record.implementations), 1)
-        self.assertEqual(record.implementations[0].id, RESEARCH_RELEASE_ID)
-        self.assertEqual(record.implementations[0].environments, ["sandbox"])
+        implementation = record.implementations[0]
+        self.assertEqual(implementation.id, RESEARCH_RELEASE_ID)
+        self.assertEqual(implementation.environments, ["sandbox"])
+        self.assertIsNotNone(implementation.transport)
+        assert implementation.transport is not None
+        self.assertEqual(implementation.transport.type, "http-json")
+        self.assertEqual(implementation.transport.endpoint_ref, "research-agent-sandbox")
+        self.assertEqual(implementation.transport.path, "/capabilities/research.lookup")
+        self.assertEqual(implementation.transport.auth, "bearer")
+        self.assertEqual(implementation.transport.timeout_seconds, 8)
 
         generated = CapabilityRecord.model_json_schema(by_alias=True)
         self.assertEqual(set(self.registry_schema["required"]), set(generated["required"]))
@@ -73,6 +81,9 @@ class ResearchLookupContractTests(unittest.TestCase):
         self.assertEqual(resolved.cost_class, "variable")
         self.assertEqual(resolved.allowed_data_classifications, ("public", "internal"))
         self.assertEqual(resolved.overrides, {"qualityProfile": "balanced"})
+        self.assertIsNotNone(resolved.transport)
+        assert resolved.transport is not None
+        self.assertEqual(resolved.transport.endpoint_ref, "research-agent-sandbox")
 
     def test_real_source_provider_remains_sandbox_only(self) -> None:
         registry = CapabilityRegistry([CapabilityRecord.model_validate(self.record_data)])
