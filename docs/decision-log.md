@@ -27,6 +27,11 @@
 | ClientInstanceConfig אינו מכיל Agent business logic; overrides נשארים bounded by PlatformPolicy/ExceptionPolicy | Accepted | client-instance-config.md |
 | EffectiveReleaseConfig הוא ה-runtime-executable configuration artifact היחיד; runtime לא מריץ raw Manifest/ClientInstanceConfig | Accepted | effective-release-config.md |
 | שינוי material ב-runtime config יוצר release חדש במקום hand-edit ל-EffectiveReleaseConfig קיים | Accepted | effective-release-config.md |
+| PlatformPolicy ו-ExceptionPolicy מקבלים canonical JSON Schema + Pydantic runtime models; compiler לא משתמש יותר ב-dict policy ad-hoc | Accepted implementation | platform-policy-contract.md |
+| ExceptionPolicy חייב להיות scoped, expiring, auditable ולהוסיף רק values שה-PlatformPolicy סימן overrideable | Accepted | platform-policy-contract.md / ADR-009 |
+| `deniedPermissions` ב-PlatformPolicy הם non-overridable ב-Core Skeleton הראשון | Accepted implementation | platform-policy-contract.md |
+| Required capability refs נפתרים בזמן compilation דרך in-process Capability Registry; EffectiveReleaseConfig שומר `capabilityBindings` | Accepted implementation | capability-registry.md / effective-release-config.md |
+| ExecutionContext נגזר רק מ-EffectiveReleaseConfig + request identity/trace/deadline; Prompt או Agent output אינם מקור authority | Accepted implementation | execution-context.md / architecture.md |
 | Release strategy מוגדרת בספציפיקציה/קונפיגורציה ומוגבלת ע"י Policy | Accepted | ADR-010 / agent-lifecycle.md |
 | Release modes: `human-required`, `policy-auto`, `policy` | Accepted | ADR-010 |
 | לא נדרש Human approval לכל שינוי/פעולה; approvals הם risk-based | Accepted | security-model.md / governance.md |
@@ -58,9 +63,9 @@
 
 ## Open implementation decisions - resolve just-in-time
 
-These do not block starting the thin Core Skeleton:
+These do not block the thin Core Skeleton:
 
-1. Physical Capability Registry backend after the initial in-process implementation.
+1. Physical Capability Registry backend after the in-process implementation.
 2. First two real provider adapters for portability validation.
 3. Pricing source and currency normalization.
 4. Concrete default emergency safety-cap values by workload.
