@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1 Core Skeleton thin vertical slice is complete end-to-end through the C6 synthetic gate; the next executable step is C7 / Research-Brain Agent as the first real external reference consumer.
+**Current mode:** Phase 1 Core Skeleton is complete end-to-end and C7.1 `research.lookup@1` is now the first authoritative external capability contract; the next executable step is C7.2, creating the Research/Brain Agent in a separate repository and registering its first compatible implementation.
 
 ## North Star
 
@@ -27,7 +27,8 @@ Principles:
 - Runtime executes only compiled EffectiveReleaseConfig;
 - ExecutionContext is derived from EffectiveReleaseConfig rather than prompts or drafts;
 - release evidence is bound to the exact EffectiveReleaseConfig fingerprint and approved specification;
-- Research/Brain Agent becomes the first real reference consumer as soon as the Core slice is usable.
+- external capability consumers receive only their consumer authority, not provider-internal tool/provider permissions;
+- Research/Brain Agent is the first real external reference provider/consumer boundary test.
 
 ## Phase 0A - Historical baseline
 
@@ -107,11 +108,12 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 
 Separate repository exposing `research.lookup`.
 
-- [ ] define and approve the authoritative `research.lookup` Capability Registry contract;
-- [ ] create the Research/Brain Agent in a separate repository with a lightweight capability reference rather than Core business logic;
+- [x] authoritative `research.lookup@1` Capability Registry contract is defined in Core with canonical Registry/Input/Output schemas, explicit read-only risk/cost/data scope and bounded override surface;
+- [ ] create the Research/Brain Agent in a separate repository and register its first compatible implementation/release;
+- [ ] start with the smallest useful source set: internal/model knowledge plus one governed external retrieval path, then expand only after contract validation;
 - [ ] inspect request/context and decide whether available/internal knowledge is sufficient;
 - [ ] choose internal knowledge, Web search, API, MCP, model knowledge or approved capability according to policy;
-- [ ] return structured evidence/provenance;
+- [ ] return `research.lookup@1` structured answer/findings/evidence/limitations output;
 - [ ] route model usage through Core policy rather than provider hard-code;
 - [ ] respect data, trust, budget and tool permissions;
 - [ ] degrade gracefully if optional sources are unavailable;
@@ -120,6 +122,7 @@ Separate repository exposing `research.lookup`.
 ## Phase 3 - Travel Agent as first external consumer
 
 - [ ] consume `research.lookup` through Capability Registry;
+- [ ] grant Travel Agent only `research.lookup`, not Research-provider internal web/API/model permissions;
 - [ ] remove avoidable direct search/provider dependency;
 - [ ] run end-to-end quality/security/cost eval;
 - [ ] test provider/capability fallback;
@@ -158,8 +161,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Phase 1 Core Skeleton is complete end-to-end.** A checked-in synthetic Agent definition validates against canonical contracts, compiles to immutable EffectiveReleaseConfig, derives trusted ExecutionContext, executes capability/model/tool/memory through bounded governance, emits minimized audit evidence, passes all four eval families, creates release/evidence artifacts and verifies exact provenance/drift. A blocking security invariant also fails closed under policy-auto.
+**Phase 1 Core Skeleton is complete and C7.1 is complete.** `research.lookup@1` is now the first real authoritative external capability contract. The Registry owns its input/output schemas, risk/cost/data scope and consumer permission; the public payload cannot select provider/model/tool/credentials, and consumer authority remains isolated from provider-internal search/API/model permissions.
 
-**Next executable step:** C7 / Phase 2 - define the authoritative `research.lookup` Registry contract and create the Research/Brain Agent in a separate repository as the first real external consumer of Core. Do not deepen production providers, persistent memory or domain-specific Core logic before this reference integration proves which depth is actually needed.
+**Next executable step:** C7.2 / Phase 2 - create the Research/Brain Agent in a separate repository, implement the smallest contract-compatible source path, and register that release as the first `research.lookup@1` implementation. Do not add Travel-specific logic to Core and do not expand the Research source set before the first contract/eval/release path is green.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.

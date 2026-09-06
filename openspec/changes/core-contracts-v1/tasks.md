@@ -67,11 +67,11 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C6.4 The same end-to-end path emits functional/business, security/policy, cost/runtime and contract/portability EvalResults, maps them through PlatformPolicy and produces a policy-auto ReleaseDecisionRecord.
 - [x] C6.5 Per-step audit evidence, EvidencePack reconstruction, canonical release fingerprint and C5.5 drift verification are proven on the same release/context/spec chain.
 
-**Exit gate: PASSED.** One complete thin Core path works end-to-end without provider or business-domain lock-in; PR #27 Core Contract Tests run #87 passed the synthetic gate.
+**Exit gate: PASSED.** One complete thin Core path works end-to-end without provider or business-domain lock-in; PR #27 final C6 code run #89 passed 93 contract tests and the merged `main` push run #91 passed.
 
 ## C7 - Research/Brain Agent gate
 
-- [ ] C7.1 Define/approve authoritative `research.lookup` Registry contract.
-- [ ] C7.2 Create Research/Brain Agent in a separate repository using a lightweight `research.lookup` capability ref.
+- [x] C7.1 Authoritative `research.lookup@1` Registry contract is defined with canonical Registry/Input/Output JSON Schemas, `read_only` risk, `variable` cost, `public/internal` data scope, consumer permission `research.lookup`, bounded `qualityProfile` override, provider-neutral payload and structured evidence/provenance output. Provider-internal `web.search`/API/model/tool permissions do not leak into consumer authority. No implementation is registered until C7.2.
+- [ ] C7.2 Create Research/Brain Agent in a separate repository using a lightweight `research.lookup` capability ref and register its first compatible implementation/release.
 - [ ] C7.3 Start with the smallest useful source set and expand only after contract validation.
 - [ ] C7.4 Use Travel Agent as the first external consumer after Research v1 is stable.
