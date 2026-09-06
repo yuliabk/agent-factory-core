@@ -6,6 +6,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from .effective_release_config import EffectiveReleaseConfig
+from .trust import TrustProfile
 
 
 class FrozenModel(BaseModel):
@@ -23,6 +24,7 @@ class ExecutionContext(FrozenModel):
     environment: str = Field(min_length=1)
     agent_id: str = Field(alias="agentId", min_length=1)
     agent_release_id: str = Field(alias="agentReleaseId", min_length=1)
+    trust_profile: TrustProfile = Field(alias="trustProfile")
     permissions: tuple[str, ...]
     data_classification: str = Field(alias="dataClassification", min_length=1)
     capability_bindings: dict[str, str] = Field(alias="capabilityBindings")
@@ -53,6 +55,7 @@ def build_execution_context(
         environment=release.metadata.environment,
         agentId=release.spec.agent_ref.name,
         agentReleaseId=release.metadata.release_id,
+        trustProfile=release.spec.trust_profile,
         permissions=release.spec.permissions,
         dataClassification=release.spec.data_classification,
         capabilityBindings=dict(release.spec.capability_bindings),
