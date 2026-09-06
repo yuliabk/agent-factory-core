@@ -1,184 +1,198 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1 Core Skeleton and C7.1-C7.4 are complete for the sandbox vertical slice. Travel now invokes the external Research Agent through a Core-owned governed HTTP JSON capability transport and receives real Wikipedia-backed background evidence. Production remains disabled. The next executable step is the real consumer eval/release/evidence gate plus provider-side outbound-network governance before any production registration.
+**Current mode:** The Core Skeleton and the real Research path are complete in sandbox. `travel.flight.search@1` now has a canonical provider-neutral contract, a separate sandbox provider, Core Registry binding, a Travel consumer, deployed-runtime bridge logic, manual webform/shared-agent wiring, and proposal rendering for observed flight evidence. The remaining blocker is deployment activation: the latest Travel release has not yet been proven on the production alias `api.yb-designs.com`. Hotels are still legacy-SerpAPI dependent and therefore non-functional while that quota/path is exhausted.
 
 ## North Star
 
-Build a platform where a non-technical client describes a business need in minutes and receives a governed Agent, while Core handles Spec, Templates, Security, Providers, Tools, Memory, Budget, Evals, Release and Audit behind the scenes.
+Build a platform where a non-technical client describes a business need and receives a governed Agent, while Core owns Spec, Templates, Security, Providers, Tools, Memory, Budget, Evals, Release and Audit.
 
-The specification and its history remain the primary artifact. Deployments are reproducible outputs.
+The specification and release evidence are primary artifacts. Deployments are reproducible outputs.
 
-## Delivery strategy - move fast without building a fragile monolith
+## Architecture rules that remain fixed
 
-We build a thin vertical slice that proves the critical contracts end-to-end, then deepen only the modules proven necessary.
-
-Principles:
-
-- one architectural decision -> synchronize all affected docs/specs immediately;
-- Owner spends time on material decisions, not repetitive editing;
-- defaults/profiles reduce manual approvals/configuration;
-- progressive complexity;
-- thin interfaces before sophisticated infrastructure;
-- do not add schema fields before a real use case needs them;
-- external contracts stay implementation-neutral even when the first Core runtime is Python;
-- Capability Registry owns capability contracts/metadata; manifests carry lightweight refs;
-- ClientInstanceConfig contains client/environment deployment values only, never reusable business logic;
-- Runtime executes only compiled EffectiveReleaseConfig;
-- ExecutionContext is derived from EffectiveReleaseConfig rather than prompts or drafts;
-- release evidence is bound to the exact EffectiveReleaseConfig fingerprint and approved specification;
-- external capability consumers receive only their consumer authority, not provider-internal tool/provider permissions;
-- remote Agent-to-Agent invocation preserves Core authority/trace/budget/deadline/audit boundaries; endpoint URLs and credentials are runtime configuration rather than consumer business logic;
-- Research/Brain Agent is the first real external reference provider/consumer boundary test.
-
-## Phase 0A - Historical baseline
-
-Existing assets include OpenSpec workflow, client isolation concepts, release manifests, security/prototype work and earlier Dify/n8n/runtime exploration.
-
-**Status:** Historical baseline preserved; newer accepted contracts take precedence.
-
-## Phase 0B - Core architecture/contracts synchronization
-
-**Status:** Complete after Owner review and repository-wide architecture synchronization on 2026-09-06.
+- JSON Schema is the canonical external contract; Pydantic is an internal projection.
+- Capability Registry owns capability contracts and implementation resolution.
+- AgentManifest carries lightweight capability refs, never provider internals.
+- ClientInstanceConfig contains client/environment values, never reusable business logic.
+- Runtime executes only compiled EffectiveReleaseConfig and trusted ExecutionContext.
+- Consumers receive consumer authority only; provider-internal permissions do not leak.
+- Remote calls preserve tenant, request/trace, deadline, hop budget, classification, budget and audit boundaries.
+- Endpoint URLs and credentials are runtime configuration, not business-Agent input.
+- Research evidence and commercial live evidence remain separate.
+- Scraper-derived commercial results are `observed`, never booking-ready or provider-verified.
+- Green CI is not equivalent to a working customer deployment; deployment activation must be proven explicitly.
+- Production registration remains blocked until provider outbound network/egress is governed.
 
 ## Phase 1 - Core Skeleton Vertical Slice
 
-**Goal:** get a small working Core as quickly as possible without pretending the entire platform exists.
+**Status: COMPLETE.**
 
-### 1A. Contract schemas and compiler
+- [x] AgentManifest / ClientInstanceConfig / PlatformPolicy / ExceptionPolicy / EffectiveReleaseConfig.
+- [x] Registry resolution and bounded overrides.
+- [x] trusted ExecutionContext.
+- [x] runtime permission, tenant, trust, classification, deadline, hop/cycle and budget checks.
+- [x] minimized audit/trace events.
+- [x] provider-neutral Model Router, Capability Gateway, Tool Gateway, Memory Gateway and bounded Orchestrator.
+- [x] four EvalResult families.
+- [x] ReleaseDecisionRecord, HumanApprovalRecord and EvidencePack.
+- [x] canonical EffectiveReleaseConfig fingerprint + drift verification.
+- [x] synthetic end-to-end compile -> execute -> eval -> release -> reconstruct gate.
 
-- [x] Minimal `AgentManifest` contract shape accepted.
-- [x] JSON Schema is canonical externally; Pydantic is internal Python validation/runtime representation.
-- [x] Registry-backed capability reference model accepted and implemented.
-- [x] Canonical AgentManifest JSON Schema + matching Pydantic models + alignment tests.
-- [x] Minimal `ClientInstanceConfig` JSON Schema + Pydantic model + tests.
-- [x] Immutable `EffectiveReleaseConfig` JSON Schema + frozen Pydantic model.
-- [x] Minimal typed `PlatformPolicy` JSON Schema + Pydantic model.
-- [x] Minimal scoped/expiring `ExceptionPolicy` JSON Schema + Pydantic model.
-- [x] Compiler consumes typed PlatformPolicy/ExceptionPolicy.
-- [x] Compiler validates scoped exceptions against explicit PlatformPolicy exception allowances.
-- [x] In-process Capability Registry resolves required capability refs and rejects protected/invalid overrides.
-- [x] EffectiveReleaseConfig records resolved capability bindings and applied policy/exception versions.
-- [x] Trusted `ExecutionContext` JSON Schema + Pydantic builder from EffectiveReleaseConfig.
-- [x] Compiler errors expose path/rule/remediation for enforced rules.
+## Phase 2 - Research/Brain Agent v1
 
-**Contract rule:** JSON Schema is externally authoritative. Pydantic is an internal implementation projection and must remain aligned.
+Repository: `yuliabk/agent-factory-research-agent`.
 
-**Runtime rule:** `AgentManifest + ClientInstanceConfig + PlatformPolicy/valid ExceptionPolicy + Registry resolution -> EffectiveReleaseConfig -> ExecutionContext`.
+- [x] canonical `research.lookup@1` contract.
+- [x] separate Research Agent repository and CI.
+- [x] real Wikipedia background source with bounded results, timeout, normalization and freshness honesty.
+- [x] sandbox HTTP capability endpoint with bearer auth and scope/classification/deadline/hop/release validation.
+- [x] exact Research release: `024367572ca001dec385ca0f781495b5fa91d181`.
+- [x] Core Registry resolves via `endpointRef=research-agent-sandbox`.
+- [x] one real Travel -> Core -> Research -> Wikipedia cross-repository invocation.
+- [ ] move Research outbound Wikipedia/network access behind Core-governed egress before production.
+- [ ] add broader recent/current sources only after evaluation proves need.
 
-### 1B. Runtime Governance kernel
+**Research status:** end-to-end sandbox path proven.
 
-- [x] trusted `ExecutionContext` contract and builder.
-- [x] trust/risk + request-time permission evaluation, including compile-time trust ceiling and request-time minimum trust enforcement.
-- [x] runtime limits/hop/cycle enforcement.
-- [x] business-budget precheck + emergency safety-cap interface.
-- [x] minimized audit/trace event with canonical JSON Schema + aligned Pydantic model.
+## Phase 3 - Travel Agent external consumer
 
-### 1C. Adapter contracts
+Repository: `yuliabk/travel-agent-bot`.
 
-- [x] provider-neutral Model Router with deterministic primary + compatible stub adapter, Core-owned profile routing, bounded fallback and Runtime Governance checks.
-- [x] in-process Capability Registry resolver with authoritative records, bounded overrides and soft/strict behavior.
-- [x] Tool Gateway with trusted binding resolution, Runtime Governance checks, schema validation, audit and deterministic read-only synthetic tool.
-- [x] Memory Gateway with ephemeral `session` and `task_working` memory, trusted scope isolation and governed reads/writes.
-- [x] Hybrid Orchestrator executes one Agent-prepared bounded capability/model/tool/memory plan, preserves per-step gateway checks, enforces max-step/repeat/deadline boundaries and fails closed on denial.
+### 3A. Research consumer
 
-### 1D. Eval/release kernel
+- [x] provider-neutral `research.lookup@1` consumer.
+- [x] PII-minimized research requests.
+- [x] non-commercial PLACE/TRANSPORT evidence separation.
+- [x] no `web.search` authority leakage.
+- [x] real remote Research path proven in CI.
 
-- [x] canonical decision-neutral EvalResult for functional/business, security/policy, cost/runtime and contract/portability families.
-- [x] typed PlatformPolicy eval mapping to blocking/warning/advisory with fail-closed handling and non-downgradeable security invariants.
-- [x] requested `human-required` / `policy-auto` / `policy` strategy compiled to a concrete effective strategy.
-- [x] HumanApprovalRecord, ReleaseDecisionRecord and EvidencePack contracts with exact release/policy/exception binding.
-- [x] canonical SHA-256 EffectiveReleaseConfig fingerprint and drift verification against approved spec/evidence and runtime ExecutionContext authority.
+### 3B. Governed flight evidence
 
-**Phase 1D status:** complete for the thin skeleton.
+Canonical capability: `travel.flight.search@1`.
 
-## Phase 1E - Synthetic end-to-end gate
+#### Contract and provider
 
-- [x] checked-in tiny synthetic reference Agent Definition uses only the accepted minimal AgentManifest fields;
-- [x] compiler path supports AgentManifest + ClientInstanceConfig + typed Policy/Exception + Registry resolution -> EffectiveReleaseConfig;
-- [x] synthetic Agent executes through trusted ExecutionContext + Runtime Governance + bounded Hybrid Orchestrator;
-- [x] capability, provider-neutral model, read-only tool and task-memory steps execute in one governed flow;
-- [x] all four EvalResult families are generated and mapped through PlatformPolicy;
-- [x] policy-auto ReleaseDecisionRecord and EvidencePack are created from the same exact release;
-- [x] C5.5 drift verification reconstructs a managed release and minimized audit/evidence chain;
-- [x] blocking security invariant failure is proven fail-closed even under `policy-auto`.
+- [x] Core contract merged at `8abfbaeb724cda38bc26d647b320cc93863a750c`.
+- [x] public request is provider-neutral: route, dates, passengers, cabin, currency and bounded controls only.
+- [x] output distinguishes `observed` from `provider-verified`; observed results require `bookingReady=false`.
+- [x] separate provider repository: `yuliabk/agent-factory-flight-provider`.
+- [x] initial `fast-flights==3.1.0` rejected after live parser failure.
+- [x] accepted sandbox source uses `faster-flights==3.8.0`, upstream release commit `10b99740b15bd6e0d77b0ae6cd26f2e1f2cc2c84`.
+- [x] Flight Provider exact release: `d2f4e18d5e8f5911a4365a48da80617b4304e77a`.
+- [x] provider deterministic/security tests + live TLV->ATH source gate passed.
+- [x] Core Registry binds the exact provider release in sandbox via `endpointRef=flight-provider-sandbox`.
+- [x] Core registration commit: `1aff3bf5e3300202dd46aa24e878d52fbdaba2b7`.
+- [x] production resolution remains fail-closed.
 
-**Exit gate: PASSED.** One complete thin path can be compiled, executed, evaluated, released and reconstructed without provider or business-domain lock-in. C6 is the executable proof that the first Core Skeleton works as a system rather than only as isolated contracts.
+#### Travel consumer and runtime wiring
 
-## Phase 2 - Research/Brain Agent v1 - first real reference Agent
+- [x] PR #19: `FlightSearchConsumerV1` added; request is PII-minimized and provider-neutral.
+- [x] PR #20: `/v1/web/draft` and `/v1/evidence/search` wired to a sandbox flight runtime bridge so SerpAPI exhaustion no longer blocks flights on Contract v1 API paths.
+- [x] PR #21: the actual shared-agent/manual `/api/webform` path was fixed; its legacy `search_flights_google()` name now acts only as a compatibility shim over canonical `travel.flight.search@1`, not SerpAPI.
+- [x] all existing channels using the shared agent can therefore use the new flight source without changing their public channel contracts.
+- [x] PDF wording no longer presents observed fares as guaranteed booking offers.
+- [x] when hotel search is empty, output states that live hotel evidence is unavailable instead of fabricating hotel prices.
+- [x] PR #22: observed flight evidence is surfaced in `proposal.flight_options` without trust escalation.
+- [x] observed flight prices use observed fields/status and do not populate verified-price fields, booking-ready claims or aggregate verified totals.
+- [x] unverified hotel prices remain suppressed.
+- [x] current Travel `main`: `734d6ca442b2f16bb1f359795a197feb46105d04`.
+- [x] current Travel Contract v1 CI run `34049530023`: SUCCESS.
 
-Separate repository exposing `research.lookup`.
+#### Deployment state
 
-- [x] authoritative `research.lookup@1` Capability Registry contract is defined in Core with canonical Registry/Input/Output schemas, explicit read-only risk/cost/data scope and bounded override surface;
-- [x] Research/Brain Agent exists in `yuliabk/agent-factory-research-agent`, is contract-locked to Core and passes its own CI;
-- [x] smallest useful real source set is implemented: internal evidence plus English Wikipedia through the official MediaWiki REST API, without changing `research.lookup@1`;
-- [x] source path uses bounded result count, explicit User-Agent, timeout, deterministic normalization and graceful failure handling;
-- [x] live CI smoke test proves the Wikipedia path makes a real network call and returns contract-compatible evidence;
-- [x] freshness honesty is enforced: Wikipedia supports background (`any`) only and is not presented as `recent/current` evidence;
-- [x] Research release `024367572ca001dec385ca0f781495b5fa91d181` exposes the canonical sandbox HTTP capability endpoint and independently validates bearer auth, capability/scope/classification/deadline/hop/release boundaries;
-- [x] Core Registry binds `research.lookup@1` to the exact HTTP-capable Research release through `endpointRef=research-agent-sandbox` rather than a committed URL/credential;
-- [x] return `research.lookup@1` structured answer/findings/evidence/limitations output;
-- [x] degrade gracefully if the external source is unavailable;
-- [ ] pass provider-side outbound Wikipedia/network access through Core Runtime Governance / Tool Gateway before any production registration;
-- [ ] route model usage through Core policy if/when a real model adapter is added;
-- [ ] add broader recent/current sources only after the first consumer eval proves the need.
+- [x] Vercel project identified: `yb-travel-api` / `prj_mlijKLJl8W8a9n5l29NsgajSCILi`.
+- [x] production alias remains `api.yb-designs.com`.
+- [x] automatic GitHub deployment was not observed after the Travel merges; deployment activation must therefore be handled explicitly.
+- [x] Vercel preview deployment `dpl_BB4HB4ZGBpWS6NwexRNREepXrxvf` reached READY.
+- [ ] prove that the preview contains the current Travel release rather than merely a platform-side current-project snapshot.
+- [ ] deploy/promote current Travel release `734d6ca442b2f16bb1f359795a197feb46105d04` to the production `yb-travel-api` project.
+- [ ] verify `GET /v1/contract` on production reports governed flight search enabled.
+- [ ] perform a real manual `/api/webform` request and confirm at least one observed flight is visible in the returned customer output/PDF without SerpAPI.
+- [ ] inspect production logs for the same request and confirm no SerpAPI flight call is made.
 
-**Phase 2 sandbox status:** functional external capability provider and HTTP transport endpoint are proven. Production remains intentionally disabled.
+**Flight status:** code, contracts, provider, CI, manual-channel wiring and rendering are green. The only immediate blocker to the user's manual retest is production deployment/promotion and production-path verification.
 
-## Phase 3 - Travel Agent as first external consumer
+### 3C. Hotels
 
-- [x] Travel Agent external commit `9da84b635d1ea3b1d62f4b4e8652acd22e42ead6` contains a provider-neutral `research.lookup@1` consumer slice and green Contract v1 CI;
-- [x] locked Travel manifest resolves through Core Capability Registry in sandbox to the exact Research Agent HTTP release;
-- [x] Travel EffectiveReleaseConfig/ExecutionContext contain only `research.lookup`; provider-internal `web.search` and direct tool bindings do not leak;
-- [x] Travel maps research output into separate non-commercial background evidence and keeps commercial SerpAPI evidence distinct;
-- [x] Travel background-research requests are PII-minimized and do not contain caller-selected provider/model/tool IDs;
-- [x] consumer capability failure degrades safely without failing the draft workflow;
-- [x] governed HTTP JSON transport v1 carries trusted request/trace, caller release, tenant/environment, data classification, delegated permission, deadline, hop budget and budget context from Core to Research;
-- [x] one real Travel -> Core -> Research -> Wikipedia sandbox call is executed in cross-repository CI using exact locked commits and an ephemeral runtime bearer token;
-- [x] real Wikipedia-backed structured evidence reaches the Travel consumer and is mapped to non-commercial `PLACE` evidence;
-- [x] Core audit for the real invocation preserves Travel request/trace IDs and exact Research implementation target;
-- [x] no Travel-specific routing/business logic is required in Core transport; Travel sees only the generic capability invoker;
-- [ ] run consumer-side functional/security/cost/contract EvalResults and release/evidence reconstruction on the real remote path;
-- [ ] test remote provider/capability unavailable fallback as a cross-repository scenario while preserving trace/budget/deadline/audit evidence;
-- [ ] keep production disabled until Research provider-side outbound network/tool governance is routed through Core.
+Current deployed hotel path still relies on legacy SerpAPI.
 
-**C7.4 status:** complete for the real sandbox consumer/provider transport path. Integration run `34041728655` proves the real cross-repository call; Core contract run `34041728604` validates the same PR contracts.
+- [x] manual test confirmed no usable hotel results while SerpAPI quota/path is exhausted.
+- [ ] define provider-neutral `travel.hotel.search@1`.
+- [ ] define explicit hotel evidence semantics: per-night vs stay-total, taxes/fees, room occupancy, cancellation/refundability and booking-readiness.
+- [ ] choose a sandbox provider only after the contract is fixed.
+- [ ] create an independent provider implementation and live source gate.
+- [ ] register exact implementation release in Core.
+- [ ] consume through generic CapabilityInvoker / Travel adapter.
+- [ ] activate and manually prove deployed hotel results.
+- [ ] run the same Eval/Release/Evidence gate used for flights.
 
-## Phase 4 - Spec Compiler + Template Factory UX
+**Rule:** flight and hotel capabilities remain separate even if a future source can provide both.
 
-- [ ] `ClientIntent` schema.
+## Phase 4 - Real remote Eval / Release / Evidence
+
+After the customer-path flight deployment is proven:
+
+- [ ] functional/business EvalResult for real Research + Flight paths.
+- [ ] security/policy EvalResult for authority isolation and fail-closed remote failures.
+- [ ] cost/runtime EvalResult for network, deadlines, hop/budget behavior.
+- [ ] contract/portability EvalResult proving provider replacement does not require Travel business-code rewrite.
+- [ ] policy mapping -> ReleaseDecisionRecord.
+- [ ] EvidencePack with exact Core/Travel/provider release refs.
+- [ ] EffectiveReleaseConfig fingerprint + drift verification against the executed path.
+- [ ] negative gate proving a blocking security eval prevents policy-auto release.
+
+## Phase 5 - Replace temporary sandbox bridge with final remote deployment
+
+The in-Travel flight bridge is intentionally temporary for manual sandbox validation.
+
+- [ ] deploy Flight Provider as its own sandbox HTTP service.
+- [ ] configure Core runtime `flight-provider-sandbox` endpointRef to that service.
+- [ ] remove the in-process Travel source adapter once the remote provider is proven.
+- [ ] run exact-release `Travel -> Core -> Flight Provider -> source` three-repository CI.
+- [ ] prove correlated audit/trace across the remote hop.
+- [ ] test remote provider unavailable/parser-failure fallback.
+- [ ] move Flight Provider outbound network access behind Core-governed egress before production.
+
+## Phase 6 - Spec Compiler + Template Factory UX
+
+- [ ] ClientIntent schema.
 - [ ] conversational intake.
 - [ ] `infer -> assumptions -> confirm/correct` flow.
-- [ ] under-10-minute UX target, typically 5-6 critical questions.
-- [ ] modular template recommendation/composition.
-- [ ] economy/balanced/premium business options.
+- [ ] under-10-minute UX target.
+- [ ] modular template composition.
+- [ ] economy/balanced/premium options.
 - [ ] generated AgentManifest + ClientInstanceConfig.
 - [ ] plain-language scope/cost/data/approval summary.
 
-## Phase 5 - Tool, Memory and Runtime depth
+## Phase 7 - Runtime depth and multi-client hardening
 
-- [ ] persistent memory policies/backends;
-- [ ] production Tool Gateway adapters;
-- [ ] richer Capability Registry health/version resolution;
-- [ ] exception-management workflow;
-- [ ] policy/trust profile library;
-- [ ] improved observability and anomaly detection.
-
-## Phase 6 - Multi-client hardening
-
-- [ ] security attack corpus;
-- [ ] cross-tenant negative tests;
-- [ ] prompt-injection and exfiltration evals;
-- [ ] budget anomaly/loop tests;
-- [ ] provider outage/fallback tests;
-- [ ] backup/recovery/deletion evidence;
-- [ ] incident/runbook flows;
+- [ ] Core-governed outbound network/egress adapter.
+- [ ] persistent memory policies/backends.
+- [ ] production Tool Gateway adapters.
+- [ ] Registry health/version resolution.
+- [ ] exception-management workflow.
+- [ ] security attack corpus and prompt-injection/exfiltration evals.
+- [ ] cross-tenant negative tests.
+- [ ] provider outage/fallback and budget-loop tests.
+- [ ] backup/recovery/deletion and incident evidence.
 - [ ] finalize non-overridable production invariants.
 
 ## Current stop point
 
-**Phase 1 Core Skeleton and C7.1-C7.4 are complete for the sandbox vertical slice.** Travel business code invokes only `research.lookup`; Core resolves the exact Research release, builds the trusted delegated envelope, authenticates the HTTP hop from runtime endpoint configuration, validates the correlated response and audits the call; Research independently rejects invalid scope/deadline/hop/release requests and retrieves real Wikipedia evidence; Travel receives that evidence without gaining Research-internal permissions.
+**Research:** complete end-to-end in sandbox.
 
-**Next executable step:** run the existing Core Eval/Release/Evidence machinery against this real remote consumer path, including functional, security, cost/runtime and contract/portability results. In parallel, before any production registration, move the Research Agent's outbound Wikipedia/network access behind Core-governed tool/network policy rather than allowing the provider implementation to own unrestricted outbound HTTP.
+**Flights:** current code path is complete through the shared/manual webform logic and proposal rendering. Exact current refs:
 
-Keep contracts stable, implementations replaceable and decisions just-in-time.
+- Core: `1aff3bf5e3300202dd46aa24e878d52fbdaba2b7`
+- Travel Agent: `734d6ca442b2f16bb1f359795a197feb46105d04`
+- Flight Provider: `d2f4e18d5e8f5911a4365a48da80617b4304e77a`
+- Research Agent: `024367572ca001dec385ca0f781495b5fa91d181`
+
+**Immediate next executable step:** deploy/promote the current Travel release to `yb-travel-api` production, verify the production contract endpoint, then repeat the user's manual website test and confirm observed flight options appear without SerpAPI.
+
+**Hotels:** still blocked because they remain on exhausted legacy SerpAPI. After flight production-path proof, define `travel.hotel.search@1` and repeat the same provider-neutral pattern.
+
+**Production remains intentionally blocked for Agent Factory capability registration** until Research/Flight provider outbound network access is governed and real remote Eval/Release/Evidence gates pass.
+
+Keep contracts stable, implementations replaceable and deployment proof explicit.
