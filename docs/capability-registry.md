@@ -1,6 +1,6 @@
 # Capability Registry and Agent-to-Agent Routing
 
-**Status:** Accepted direction after Owner Review
+**Status:** Accepted direction after Owner Review; first external capability contract implemented
 
 ## 1. Purpose
 
@@ -27,8 +27,7 @@ Capability Registry owns capability contract metadata. Agent manifests reference
 
 Registry-owned information includes, as applicable:
 
-- canonical capability name;
-- contract/version compatibility;
+- canonical capability name and contract version;
 - input/output schema references;
 - provider implementation registrations;
 - risk/side-effect class;
@@ -37,6 +36,8 @@ Registry-owned information includes, as applicable:
 - supported environments/data classes;
 - overrideable keys and their constraints;
 - health/availability metadata used by resolution.
+
+The canonical external record shape is `schemas/capability-registry-record.schema.json`. The Python `CapabilityRecord` is the internal projection. Resolved capabilities retain the authoritative schema/risk/cost/data-class metadata rather than reducing resolution to an implementation ID alone.
 
 ### Manifest reference shape
 
@@ -51,7 +52,7 @@ overrides: {}
 A required capability may additionally be optional:
 
 ```yaml
-ref: web.search
+ref: research.lookup
 version: "1"
 optional: true
 overrides:
@@ -83,31 +84,82 @@ This prevents the Registry from becoming a development bottleneck without allowi
 
 ## 5. Registry record
 
-A production-capable registration contains enough authoritative metadata for validation and resolution, for example:
+The first real external contract is checked in as `registry/capabilities/research.lookup.v1.json`:
 
 ```yaml
-name: research.lookup
-contractVersion: "1"
+ref: research.lookup
+version: "1"
 inputSchemaRef: schemas/capabilities/research.lookup.input.v1.json
 outputSchemaRef: schemas/capabilities/research.lookup.output.v1.json
-risk: read-only
-requiredPermissions:
-  - web.search
+riskClass: read_only
 costClass: variable
+allowedDataClassifications:
+  - public
+  - internal
 environments:
   - sandbox
   - production
+requiredPermissions:
+  - research.lookup
 overrideable:
-  qualityProfile:
-    allowed: [economy, balanced, high]
-implementations:
-  - providerAgent: research-agent
-    release: research-agent@1.3.2
+  qualityProfile: [economy, balanced, high]
+implementations: []
 ```
 
-Implementation/health information can evolve without forcing every consumer manifest to change.
+`implementations` is intentionally empty at C7.1. C7.2 registers the first compatible Research/Brain Agent release without changing the consumer contract.
 
-## 6. Resolution policy
+### Permission boundary
+
+A consumer that requires `research.lookup` receives only the consumer authority `research.lookup`.
+
+Provider-internal authorities such as `web.search`, API access, model invocation, MCP access or internal-knowledge retrieval belong to the Research/Brain Agent's own compiled release. They MUST NOT be copied into Travel/Sales Agent manifests merely because the provider may use them internally.
+
+This isolates consumer authority from provider implementation details.
+
+## 6. `research.lookup` v1 public payload
+
+Input is intentionally small and provider-neutral:
+
+```json
+{
+  "query": "What changed in the rail schedule?",
+  "purpose": "travel planning",
+  "freshness": "current",
+  "maxEvidenceItems": 6
+}
+```
+
+`purpose` is semantic task intent only; it never grants runtime authority. The input schema rejects caller-selected provider, model, tool, web-search or credential fields.
+
+Output is structured around answer + evidence-linked findings:
+
+```json
+{
+  "status": "complete",
+  "answer": "A schedule change was published.",
+  "findings": [
+    {
+      "statement": "The published schedule changed.",
+      "evidenceIds": ["e1"]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e1",
+      "sourceType": "web",
+      "sourceRef": "https://example.test/schedule",
+      "title": "Schedule update",
+      "summary": "Official page reports the change.",
+      "retrievedAt": "2026-09-06T13:00:00Z"
+    }
+  ],
+  "limitations": []
+}
+```
+
+Evidence is minimized provenance. Raw prompts, credentials and provider payloads are not part of the capability contract.
+
+## 7. Resolution policy
 
 The Core selects an implementation according to:
 
@@ -122,13 +174,13 @@ The Core selects an implementation according to:
 9. provider health/availability;
 10. latency target.
 
-## 7. Hybrid orchestration
+## 8. Hybrid orchestration
 
 The Core Orchestrator owns boundaries, permissions, limits, routing and policy enforcement. A business Agent may autonomously decide which approved capability to request and how to decompose its task inside those boundaries.
 
 Thus autonomy lives **inside** policy rather than being hard-coded either entirely in the central orchestrator or entirely in each Agent.
 
-## 8. Agent hops and delegation
+## 9. Agent hops and delegation
 
 Every Agent hop:
 
@@ -145,7 +197,7 @@ Effective delegated authority is bounded by:
 
 `maxAgentHopsPerRequest` and cycle detection prevent recursion/cost explosion.
 
-## 9. Failure and fallback
+## 10. Failure and fallback
 
 If a capability is unavailable:
 
@@ -153,20 +205,15 @@ If a capability is unavailable:
 - otherwise return a typed degraded/partial result or escalate;
 - never bypass the Registry by directly calling an unapproved peer implementation in production.
 
-## 10. Contract versions
+## 11. Contract versions
 
 - backward-compatible changes may remain in the same major contract version;
 - breaking changes require major version and compatibility/migration handling;
 - consumers declare supported version/range through the manifest reference;
 - provider replacement should not require consumer business-code changes when the capability contract remains compatible.
 
-## 11. First reference capability
+## 12. First reference capability status
 
-The planned Research/Brain Agent will provide:
+`research.lookup@1` is now the first authoritative external capability contract.
 
-```text
-Capability: research.lookup
-Consumers: Travel Agent, Sales Agent, future agents
-```
-
-It is the first portability test for reusable Agent-to-Agent capabilities.
+Consumers are expected to include only a lightweight `research.lookup` reference and the corresponding consumer permission. The next implementation step is C7.2: create the Research/Brain Agent in a separate repository and register its first compatible implementation/release against this contract.
