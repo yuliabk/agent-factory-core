@@ -11,5 +11,11 @@
   "overrideable": {
     "qualityProfile": ["economy", "balanced", "high"]
   },
-  "implementations": []
+  "implementations": [
+    {
+      "id": "github:yuliabk/agent-factory-research-agent@dad37d9147ed4fcb97c0ba268402e93e78e76645",
+      "environments": ["sandbox"],
+      "enabled": true
+    }
+  ]
 }
