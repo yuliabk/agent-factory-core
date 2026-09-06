@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.io/schemas/capabilities/travel.flight.search.input.v1.json",
+  "title": "travel.flight.search v1 input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "originIata",
+    "destinationIata",
+    "departureDate",
+    "tripType",
+    "adults",
+    "children",
+    "cabin",
+    "currency",
+    "maxResults"
+  ],
+  "properties": {
+    "originIata": {"type": "string", "pattern": "^[A-Z]{3}$"},
+    "destinationIata": {"type": "string", "pattern": "^[A-Z]{3}$"},
+    "departureDate": {"type": "string", "format": "date"},
+    "returnDate": {"type": ["string", "null"], "format": "date", "default": null},
+    "tripType": {"enum": ["one-way", "round-trip"]},
+    "adults": {"type": "integer", "minimum": 1, "maximum": 9},
+    "children": {"type": "integer", "minimum": 0, "maximum": 8},
+    "cabin": {"enum": ["economy", "premium-economy", "business", "first"]},
+    "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+    "maxStops": {"type": ["integer", "null"], "minimum": 0, "maximum": 2, "default": null},
+    "maxResults": {"type": "integer", "minimum": 1, "maximum": 20}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"tripType": {"const": "round-trip"}}, "required": ["tripType"]},
+      "then": {"required": ["returnDate"], "properties": {"returnDate": {"type": "string", "format": "date"}}},
+      "else": {"properties": {"returnDate": {"const": null}}}
+    }
+  ]
+}
