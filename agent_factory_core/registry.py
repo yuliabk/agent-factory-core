@@ -6,6 +6,7 @@ from typing import Annotated, Any, Iterable
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .contracts.agent_manifest import RequiredCapabilityRef
+from .contracts.capability_transport import HttpJsonTransportDescriptor
 
 
 NonEmptyString = Annotated[str, Field(min_length=1)]
@@ -19,6 +20,7 @@ class CapabilityImplementation(StrictModel):
     id: str = Field(min_length=1)
     environments: list[NonEmptyString] = Field(default_factory=list)
     enabled: bool = True
+    transport: HttpJsonTransportDescriptor | None = None
 
     @model_validator(mode="after")
     def validate_environments(self) -> "CapabilityImplementation":
@@ -73,6 +75,7 @@ class ResolvedCapability:
     allowed_data_classifications: tuple[str, ...]
     required_permissions: tuple[str, ...]
     overrides: dict[str, Any]
+    transport: HttpJsonTransportDescriptor | None = None
 
 
 class CapabilityResolutionError(ValueError):
@@ -146,4 +149,5 @@ class CapabilityRegistry:
             allowed_data_classifications=tuple(record.allowed_data_classifications),
             required_permissions=tuple(record.required_permissions),
             overrides=dict(requirement.overrides),
+            transport=implementation.transport,
         )
