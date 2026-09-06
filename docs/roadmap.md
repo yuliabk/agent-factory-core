@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1B Runtime Governance, C4.3 Tool Gateway and C4.4 Memory Gateway are complete for the thin skeleton; C4.1 provider-neutral Model interface is next.
+**Current mode:** Phase 1B Runtime Governance and the first Tool, Memory and provider-neutral Model adapter slices are complete; C4.5 bounded Hybrid Orchestrator is next.
 
 ## North Star
 
@@ -73,7 +73,7 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 
 ### 1C. Adapter contracts
 
-- [ ] provider-neutral model interface with one working adapter and one stub/second adapter for portability.
+- [x] provider-neutral Model Router with deterministic primary + compatible stub adapter, Core-owned profile routing, bounded fallback and Runtime Governance checks. Costed adapters remain blocked until budget accounting is connected.
 - [x] first in-process Capability Registry resolver with authoritative records, bounded overrides and soft/strict behavior.
 - [x] Tool Gateway interface with trusted binding resolution, Runtime Governance checks, schema validation, audit and one deterministic read-only synthetic tool. Costed/write-capable tools remain blocked in this first slice.
 - [x] Memory Gateway interface with ephemeral `session` and `task_working` memory. Session scope is trusted request ID; task scope is trusted trace ID; tenant/release namespace isolation, permission/trust/classification/purpose/retention checks and minimized audit are enforced. Persistent memory remains later depth.
@@ -140,8 +140,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Phase 1B, C4.3 and C4.4 are complete for the thin skeleton.** Runtime authority now governs both read-only tools and ephemeral session/task memory. Memory is scoped by trusted context and cannot cross tenant/release/session/task boundaries; persistent memory classes remain explicitly outside the first implementation.
+**Runtime Governance and all three first adapter families are available for the thin skeleton.** Model, read-only Tool and ephemeral Memory requests are independently governed by trusted ExecutionContext and emit minimized audit evidence.
 
-**Next executable step:** Phase 1C C4.1 - add a provider-neutral Model interface with one deterministic working adapter and a second stub/test adapter to prove portability. After that, C4.5 can bind Model/Tool/Memory through one bounded orchestrator.
+**Next executable step:** Phase 1C C4.5 - build the minimal Hybrid Orchestrator that executes one pre-bounded plan across Model/Tool/Memory without moving business planning into Core. It must preserve per-step gateway checks, limits, deadline and fail-closed behavior. Then Phase 1D Eval/Release can start.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
