@@ -54,7 +54,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 ## C5 - Eval/release kernel
 
 - [x] C5.1 Canonical decision-neutral EvalResult JSON Schema + frozen Pydantic model for functional/business, security/policy, cost/runtime and contract/portability families. Raw statuses are `PASS`, `PASS_WITH_WARNINGS`, `FAIL`; blocking/warning/advisory and release decisions are intentionally excluded from the result contract. Maps: CORE-212.
-- [ ] C5.2 Policy mapping for blocking/warning/advisory. Maps: CORE-212.
+- [x] C5.2 PlatformPolicy evalRules map every release-gated check explicitly to `blocking`, `warning` or `advisory`; unmapped/duplicate rules, mixed releases and malformed security-invariant policy fail closed; securityInvariantChecks cannot be downgraded from blocking. Maps: CORE-212.
 - [ ] C5.3 Implement release strategies `human-required`, `policy-auto`, `policy`. Maps: CORE-213.
 - [ ] C5.4 Build minimal Evidence Pack and release decision record. Maps: CORE-217.
 - [ ] C5.5 Drift check: runtime release maps to approved Spec + EffectiveReleaseConfig. Maps: CORE-218.
