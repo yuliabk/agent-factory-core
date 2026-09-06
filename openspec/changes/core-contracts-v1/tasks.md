@@ -45,7 +45,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 
 ## C4 - Thin adapter vertical slice
 
-- [ ] C4.1 Provider-neutral model interface with one working adapter and one second test/stub adapter. Maps: CORE-207.
+- [x] C4.1 Provider-neutral Model Router with deterministic working adapter + compatible stub adapter. Routing is selected from trusted `ExecutionContext.providerProfile`; Agent requests do not carry provider/adapter IDs; permission/trust/classification/deadline checks and fallback are enforced; costed adapters remain blocked until runtime budget accounting is attached. Maps: CORE-207.
 - [x] C4.2 Add first in-process Capability Registry resolver with authoritative records, override validation and soft/strict resolution behavior. Richer health/version routing remains later depth. Maps: CORE-205, CORE-206.
 - [x] C4.3 Tool Gateway interface + deterministic read-only synthetic tool. Trusted ExecutionContext binding, tenant/permission/trust/classification checks, JSON Schema input/output validation and audit are enforced; costed or write-capable tools remain blocked in this first slice. Maps: CORE-208.
 - [x] C4.4 Memory Gateway interface + ephemeral `session` / `task_working` implementation. Session scope uses trusted request ID; task scope uses trusted trace ID; namespace includes tenant/release/class/scope/key; memory read/write permissions, trust, classification, purpose, retention and enable flags are enforced; malformed config is default-deny; persistent/client-knowledge classes remain blocked. Maps: CORE-209.
