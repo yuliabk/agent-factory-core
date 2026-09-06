@@ -13,6 +13,7 @@ from agent_factory_core.contracts import (
     ReleaseDecisionRecord,
 )
 from agent_factory_core.eval_policy import EvalGateSummary, MappedEvalResult
+from agent_factory_core.provenance import effective_release_fingerprint
 from agent_factory_core.release_evidence import (
     ReleaseEvidenceError,
     build_evidence_pack,
@@ -231,7 +232,6 @@ class ReleaseEvidenceTests(unittest.TestCase):
             spec_ref="spec://core-contracts/synthetic-agent@1",
             agent_manifest_ref="artifact://agent-manifest/synthetic-agent@0.1.0",
             client_instance_config_ref="artifact://client/tenant-a/synthetic-agent",
-            effective_release_config_ref="artifact://release/release-1",
             template_module_refs=("template://general-agent@1",),
             config_diff_ref="artifact://diff/release-1",
             capability_tool_contract_refs=("contract://tool/synthetic.lookup@1",),
@@ -242,6 +242,7 @@ class ReleaseEvidenceTests(unittest.TestCase):
         self.assertEqual(pack.eval_result_refs, ("eval-security-1",))
         self.assertEqual(pack.release_decision_ref, "decision-auto-1")
         self.assertEqual(pack.provider_profile, "balanced")
+        self.assertEqual(pack.effective_release_config_ref, effective_release_fingerprint(rel))
         Draft202012Validator(self.evidence_schema).validate(
             pack.model_dump(by_alias=True, mode="json")
         )
@@ -260,7 +261,6 @@ class ReleaseEvidenceTests(unittest.TestCase):
                 spec_ref="spec://one",
                 agent_manifest_ref="artifact://manifest",
                 client_instance_config_ref="artifact://client",
-                effective_release_config_ref="artifact://release",
                 template_module_refs=("template://one",),
                 config_diff_ref="artifact://diff",
             )
@@ -283,6 +283,22 @@ class ReleaseEvidenceTests(unittest.TestCase):
             Draft202012Validator(self.decision_schema).validate(decision)
         with self.assertRaises(PydanticValidationError):
             ReleaseDecisionRecord.model_validate(decision)
+
+        bad_pack = build_evidence_pack(
+            release(),
+            build_release_decision_record(release(), gate(), release_decision_id="decision-fp"),
+            evidence_pack_id="evidence-fp",
+            spec_ref="spec://one",
+            agent_manifest_ref="artifact://manifest",
+            client_instance_config_ref="artifact://client",
+            template_module_refs=("template://one",),
+            config_diff_ref="artifact://diff",
+        ).model_dump(by_alias=True, mode="json")
+        bad_pack["effectiveReleaseConfigRef"] = "artifact://not-a-fingerprint"
+        with self.assertRaises(ValidationError):
+            Draft202012Validator(self.evidence_schema).validate(bad_pack)
+        with self.assertRaises(PydanticValidationError):
+            EvidencePack.model_validate(bad_pack)
 
 
 if __name__ == "__main__":
