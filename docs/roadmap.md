@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1B Runtime Governance kernel is complete for the thin skeleton; Phase 1C adapter contracts are next, starting with the read-only Tool Gateway vertical slice.
+**Current mode:** Phase 1B Runtime Governance is complete and Phase 1C C4.3 Tool Gateway read-only slice is complete; C4.4 Memory Gateway is next.
 
 ## North Star
 
@@ -75,7 +75,7 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 
 - [ ] provider-neutral model interface with one working adapter and one stub/second adapter for portability.
 - [x] first in-process Capability Registry resolver with authoritative records, bounded overrides and soft/strict behavior.
-- [ ] Tool Gateway interface and one read-only example capability.
+- [x] Tool Gateway interface with trusted binding resolution, Runtime Governance checks, schema validation, audit and one deterministic read-only synthetic tool. Costed/write-capable tools remain blocked in this first slice.
 - [ ] Memory Gateway interface with session/task memory first.
 - [ ] Hybrid Orchestrator can execute one bounded capability/model/tool/memory plan.
 
@@ -140,8 +140,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Phase 1B is complete for the thin skeleton.** The trusted runtime path now enforces tenant, permission, data classification, deadline, compiled trust profile, hop/cycle limits, business budget vs independent safety cap and minimized audit evidence.
+**Phase 1B is complete and C4.3 is complete for the thin skeleton.** Tool execution now has a governed read-only vertical slice on top of trusted Runtime Governance, including trusted binding resolution, tenant/permission/trust/classification/deadline checks, JSON Schema validation and minimized audit evidence.
 
-**Next executable step:** Phase 1C C4.3 - add the minimal Tool Gateway interface plus one synthetic read-only tool, with all execution mediated by trusted ExecutionContext and the Runtime Governance evaluator. Then add Memory/Model interfaces and the bounded orchestrator.
+**Next executable step:** Phase 1C C4.4 - add a storage-neutral Memory Gateway interface with session/task memory first, enforcing tenant, memory class, purpose, classification and compiled runtime authority. Then add the provider-neutral Model interface and bounded orchestrator.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
