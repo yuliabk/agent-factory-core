@@ -16,18 +16,21 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C1.10 Synchronize roadmap and decision log.
 - [x] C1.11 Accept minimal first AgentManifest shape: `apiVersion`, `kind`, `metadata(name/version/description)`, and `spec(template/capabilities/tools/permissions/memoryProfile/budgetProfile/evalProfile)`. Maps: CORE-202.
 - [x] C1.12 Accept hybrid schema boundary: JSON Schema canonical externally; Pydantic internal for Python runtime/validation. Maps: CORE-202, CORE-203. ADR-012.
+- [x] C1.13 Accept Registry-backed capability references and bounded overrides. Maps: CORE-202, CORE-205, CORE-206. ADR-013.
 
 ## C2 - Core Skeleton schemas/compiler
 
 - [x] C2.1 Choose executable schema approach: JSON Schema external contract + Pydantic internal models/validation. Maps: CORE-202, CORE-203.
-- [ ] C2.2 Implement canonical JSON Schema for `AgentManifest` exactly from the accepted minimal shape before adding optional fields. Maps: CORE-202.
-- [ ] C2.3 Implement matching Pydantic AgentManifest models/validator. Maps: CORE-202.
-- [ ] C2.4 Add schema/Pydantic semantic-alignment tests. Maps: CORE-202, CORE-203.
-- [ ] C2.5 Implement `ClientInstanceConfig` JSON Schema + Pydantic model/validator. Maps: CORE-202.
-- [ ] C2.6 Implement minimal `PlatformPolicy` + `ExceptionPolicy` JSON Schemas + Pydantic models. Maps: CORE-210.
-- [ ] C2.7 Compile inputs into immutable `EffectiveReleaseConfig`. Maps: CORE-203.
-- [ ] C2.8 Define trusted `ExecutionContext` schema. Maps: CORE-204.
-- [ ] C2.9 Define clear validation errors with path/rule/remediation hint.
+- [x] C2.2 Add canonical JSON Schema for `AgentManifest` from the accepted minimal shape. Maps: CORE-202.
+- [x] C2.3 Add matching Pydantic AgentManifest models. Maps: CORE-202.
+- [x] C2.4 Add schema/Pydantic semantic-alignment tests. Maps: CORE-202, CORE-203.
+- [ ] C2.5 Execute the new AgentManifest contract tests in the implementation environment/CI and resolve any drift.
+- [ ] C2.6 Implement `ClientInstanceConfig` JSON Schema + Pydantic model/validator. Maps: CORE-202.
+- [ ] C2.7 Implement minimal `PlatformPolicy` + `ExceptionPolicy` JSON Schemas + Pydantic models. Maps: CORE-210.
+- [ ] C2.8 Compile inputs into immutable `EffectiveReleaseConfig`. Maps: CORE-203.
+- [ ] C2.9 Resolve capability refs against Registry and reject non-overrideable override keys. Maps: CORE-202, CORE-205, CORE-206.
+- [ ] C2.10 Define trusted `ExecutionContext` schema. Maps: CORE-204.
+- [ ] C2.11 Define clear validation errors with path/rule/remediation hint.
 
 ## C3 - Runtime Governance kernel
 
@@ -40,7 +43,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 ## C4 - Thin adapter vertical slice
 
 - [ ] C4.1 Provider-neutral model interface with one working adapter and one second test/stub adapter. Maps: CORE-207.
-- [ ] C4.2 In-process Capability Registry with dev/production enforcement modes. Maps: CORE-205, CORE-206.
+- [ ] C4.2 In-process Capability Registry with authoritative capability metadata, override declarations and dev/production enforcement modes. Maps: CORE-205, CORE-206.
 - [ ] C4.3 Tool Gateway interface + one read-only test tool. Maps: CORE-208.
 - [ ] C4.4 Memory Gateway interface + session/task memory implementation. Maps: CORE-209.
 - [ ] C4.5 Hybrid Orchestrator can execute one bounded capability/model/tool/memory plan. Maps: CORE-214.
@@ -56,7 +59,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 ## C6 - Synthetic end-to-end gate
 
 - [ ] C6.1 Create a tiny synthetic reference Agent Definition using only the minimal AgentManifest fields.
-- [ ] C6.2 Compile AgentManifest + ClientInstanceConfig + Policy to EffectiveReleaseConfig.
+- [ ] C6.2 Compile AgentManifest + ClientInstanceConfig + Policy + Registry resolution to EffectiveReleaseConfig.
 - [ ] C6.3 Execute through Runtime Governance kernel.
 - [ ] C6.4 Run required evals and release decision.
 - [ ] C6.5 Verify audit/evidence reconstruction.
@@ -65,7 +68,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 
 ## C7 - Research/Brain Agent gate
 
-- [ ] C7.1 Define/approve `research.lookup` capability contract.
-- [ ] C7.2 Create Research/Brain Agent in a separate repository.
+- [ ] C7.1 Define/approve authoritative `research.lookup` Registry contract.
+- [ ] C7.2 Create Research/Brain Agent in a separate repository using a lightweight `research.lookup` capability ref.
 - [ ] C7.3 Start with the smallest useful source set and expand only after contract validation.
 - [ ] C7.4 Use Travel Agent as the first external consumer after Research v1 is stable.
