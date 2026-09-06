@@ -14,7 +14,7 @@ RECORD_PATH = ROOT / "registry" / "capabilities" / "research.lookup.v1.json"
 REGISTRY_SCHEMA_PATH = ROOT / "schemas" / "capability-registry-record.schema.json"
 INPUT_SCHEMA_PATH = ROOT / "schemas" / "capabilities" / "research.lookup.input.v1.json"
 OUTPUT_SCHEMA_PATH = ROOT / "schemas" / "capabilities" / "research.lookup.output.v1.json"
-RESEARCH_RELEASE_ID = "github:yuliabk/agent-factory-research-agent@dad37d9147ed4fcb97c0ba268402e93e78e76645"
+RESEARCH_RELEASE_ID = "github:yuliabk/agent-factory-research-agent@4a8b308aeaf22228c6a03d438509b0717e6daf8b"
 
 
 class ResearchLookupContractTests(unittest.TestCase):
@@ -74,7 +74,7 @@ class ResearchLookupContractTests(unittest.TestCase):
         self.assertEqual(resolved.allowed_data_classifications, ("public", "internal"))
         self.assertEqual(resolved.overrides, {"qualityProfile": "balanced"})
 
-    def test_v01_provider_is_not_registered_for_production(self) -> None:
+    def test_real_source_provider_remains_sandbox_only(self) -> None:
         registry = CapabilityRegistry([CapabilityRecord.model_validate(self.record_data)])
         with self.assertRaises(ValueError):
             registry.resolve_required(
