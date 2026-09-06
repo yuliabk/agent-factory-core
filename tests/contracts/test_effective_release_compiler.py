@@ -49,6 +49,7 @@ CLIENT = ClientInstanceConfig.model_validate(
             "tenant": {"id": "tenant-acme"},
             "variables": {"locale": "en"},
             "trustProfile": "internal",
+            "releaseStrategy": "policy",
             "providerProfile": "balanced",
             "secretsRef": {"search": "secret://tenant-acme/search"},
             "memoryConfig": {"profile": "session-only"},
@@ -71,6 +72,7 @@ POLICY = PlatformPolicy.model_validate(
             "allowedBudgetOverrideKeys": ["monthlyUsd"],
             "allowedMemoryConfigKeys": ["profile"],
             "maxTrustProfile": "business",
+            "minimumReleaseStrategy": "policy-auto",
             "registryMode": "strict",
             "defaultDataClassification": "internal",
             "evalRules": [
@@ -109,14 +111,17 @@ class EffectiveReleaseCompilerTests(unittest.TestCase):
             (ROOT / "schemas/effective-release-config.schema.json").read_text(encoding="utf-8")
         )
 
-    def test_compiles_to_effective_release(self) -> None:
-        release = compile_effective_release(
+    def compile(self, client=CLIENT, policy=POLICY, release_id="release-001"):
+        return compile_effective_release(
             MANIFEST,
-            CLIENT,
-            POLICY,
+            client,
+            policy,
             REGISTRY,
-            release_id="release-001",
+            release_id=release_id,
         )
+
+    def test_compiles_to_effective_release(self) -> None:
+        release = self.compile()
         dumped = release.model_dump(by_alias=True, mode="json")
         Draft202012Validator(self.release_schema).validate(dumped)
 
@@ -125,37 +130,52 @@ class EffectiveReleaseCompilerTests(unittest.TestCase):
         self.assertEqual(release.spec.permissions, ("web.search",))
         self.assertEqual(release.spec.tenant.id, "tenant-acme")
         self.assertEqual(release.spec.trust_profile, "internal")
+        self.assertEqual(release.spec.release_strategy, "policy-auto")
         self.assertEqual(release.spec.capability_bindings["web.search"], "web-search:test")
 
         generated = EffectiveReleaseConfig.model_json_schema(by_alias=True)
         self.assertEqual(set(self.release_schema["required"]), set(generated["required"]))
         self.assertEqual(set(self.release_schema["properties"]), set(generated["properties"]))
 
+    def test_human_required_request_cannot_be_weakened(self) -> None:
+        client = CLIENT.model_copy(deep=True)
+        client.spec.release_strategy = "human-required"
+        release = self.compile(client=client, release_id="release-human")
+        self.assertEqual(release.spec.release_strategy, "human-required")
+
+    def test_policy_can_upgrade_policy_auto_request_to_human_required(self) -> None:
+        client = CLIENT.model_copy(deep=True)
+        client.spec.release_strategy = "policy-auto"
+        policy = POLICY.model_copy(deep=True)
+        policy.spec.minimum_release_strategy = "human-required"
+        release = self.compile(client=client, policy=policy, release_id="release-upgraded")
+        self.assertEqual(release.spec.release_strategy, "human-required")
+
+    def test_policy_request_resolves_to_policy_minimum(self) -> None:
+        policy = POLICY.model_copy(deep=True)
+        policy.spec.minimum_release_strategy = "human-required"
+        release = self.compile(policy=policy, release_id="release-policy-derived")
+        self.assertEqual(release.spec.release_strategy, "human-required")
+
     def test_rejects_trust_profile_above_platform_ceiling(self) -> None:
         client = CLIENT.model_copy(deep=True)
         client.spec.trust_profile = "privileged"
         with self.assertRaises(CompilationError) as ctx:
-            compile_effective_release(
-                MANIFEST, client, POLICY, REGISTRY, release_id="release-trust-denied"
-            )
+            self.compile(client=client, release_id="release-trust-denied")
         self.assertIn("spec.trustProfile", str(ctx.exception))
 
     def test_rejects_ungranted_required_permission(self) -> None:
         client = CLIENT.model_copy(deep=True)
         client.spec.permission_overrides.allow = []
         with self.assertRaises(CompilationError) as ctx:
-            compile_effective_release(
-                MANIFEST, client, POLICY, REGISTRY, release_id="release-002"
-            )
+            self.compile(client=client, release_id="release-002")
         self.assertIn("spec.permissionOverrides.allow", str(ctx.exception))
 
     def test_rejects_missing_tool_binding(self) -> None:
         client = CLIENT.model_copy(deep=True)
         client.spec.tool_bindings = {}
         with self.assertRaises(CompilationError) as ctx:
-            compile_effective_release(
-                MANIFEST, client, POLICY, REGISTRY, release_id="release-003"
-            )
+            self.compile(client=client, release_id="release-003")
         self.assertIn("spec.toolBindings", str(ctx.exception))
 
 
