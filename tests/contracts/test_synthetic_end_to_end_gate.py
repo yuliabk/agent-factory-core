@@ -66,6 +66,11 @@ def capability_registry() -> CapabilityRegistry:
             CapabilityRecord(
                 ref="synthetic.capability",
                 version="1",
+                inputSchemaRef="schema://synthetic.capability/input@1",
+                outputSchemaRef="schema://synthetic.capability/output@1",
+                riskClass="read_only",
+                costClass="zero",
+                allowedDataClassifications=["internal"],
                 environments=["sandbox"],
                 requiredPermissions=["capability.synthetic.invoke"],
                 implementations=[
@@ -160,7 +165,6 @@ class SyntheticEndToEndGateTests(unittest.TestCase):
         )
 
     def test_complete_synthetic_reference_agent_path(self) -> None:
-        # C6.1 - the checked-in reference definition is a valid external contract.
         Draft202012Validator(self.manifest_schema).validate(self.manifest_data)
         Draft202012Validator(self.client_schema).validate(self.client_data)
         Draft202012Validator(self.policy_schema).validate(self.policy_data)
@@ -169,7 +173,6 @@ class SyntheticEndToEndGateTests(unittest.TestCase):
         client = ClientInstanceConfig.model_validate(self.client_data)
         policy = PlatformPolicy.model_validate(self.policy_data)
 
-        # C6.2 - compile the same checked-in definition through Registry resolution.
         release = compile_effective_release(
             manifest,
             client,
@@ -187,7 +190,6 @@ class SyntheticEndToEndGateTests(unittest.TestCase):
         )
         self.assertEqual(release.spec.release_strategy, "policy-auto")
 
-        # C6.3 - derive trusted runtime authority and execute a bounded mixed plan.
         now = datetime.now(timezone.utc)
         context = build_execution_context(
             release,
@@ -207,10 +209,7 @@ class SyntheticEndToEndGateTests(unittest.TestCase):
         )
         self.assertTrue(execution.completed)
         self.assertEqual(len(execution.steps), 5)
-        self.assertEqual(
-            execution.steps[0].output,
-            {"capability": "compiled-binding-ok"},
-        )
+        self.assertEqual(execution.steps[0].output, {"capability": "compiled-binding-ok"})
         self.assertEqual(execution.steps[1].output, "primary:hello synthetic core")
         self.assertEqual(execution.steps[2].output, {"found": True, "value": "A"})
         self.assertEqual(execution.steps[3].output, {"key": "synthetic-result"})
@@ -223,32 +222,11 @@ class SyntheticEndToEndGateTests(unittest.TestCase):
         self.assertTrue(all(item.platform_policy_ref == PLATFORM_POLICY_REF for item in audit_events))
         self.assertTrue(all(item.decision == "allow" for item in audit_events))
 
-        # C6.4 - produce all required eval families and map them through policy.
         eval_specs = (
-            (
-                "eval-functional",
-                "functional.synthetic-plan",
-                "functional_business",
-                {"completed": execution.completed, "steps": len(execution.steps)},
-            ),
-            (
-                "eval-security",
-                "security.synthetic-authority",
-                "security_policy",
-                {"allStepsAudited": len(audit_events) == len(execution.steps)},
-            ),
-            (
-                "eval-cost",
-                "cost.synthetic-zero-cost",
-                "cost_runtime",
-                {"estimatedCost": 0},
-            ),
-            (
-                "eval-portability",
-                "contract.synthetic-portability",
-                "contract_portability",
-                {"providerProfile": release.spec.provider_profile},
-            ),
+            ("eval-functional", "functional.synthetic-plan", "functional_business", {"completed": execution.completed, "steps": len(execution.steps)}),
+            ("eval-security", "security.synthetic-authority", "security_policy", {"allStepsAudited": len(audit_events) == len(execution.steps)}),
+            ("eval-cost", "cost.synthetic-zero-cost", "cost_runtime", {"estimatedCost": 0}),
+            ("eval-portability", "contract.synthetic-portability", "contract_portability", {"providerProfile": release.spec.provider_profile}),
         )
         eval_results = tuple(
             EvalResult(
@@ -280,12 +258,8 @@ class SyntheticEndToEndGateTests(unittest.TestCase):
         )
         self.assertEqual(decision.result, "released")
         self.assertEqual(decision.strategy, "policy-auto")
-        self.assertEqual(
-            set(decision.eval_result_refs),
-            {item.eval_id for item in eval_results},
-        )
+        self.assertEqual(set(decision.eval_result_refs), {item.eval_id for item in eval_results})
 
-        # C6.5 - reconstruct release evidence and verify exact provenance/drift.
         evidence = build_evidence_pack(
             release,
             decision,
@@ -320,7 +294,6 @@ class SyntheticEndToEndGateTests(unittest.TestCase):
         self.assertEqual(drift.mismatches, ())
         self.assertTrue(drift.release_fingerprint.startswith("sha256:"))
 
-        # Evidence is minimized: raw prompts, memory content and secrets are not release artifacts.
         evidence_dump = evidence.model_dump(by_alias=True, mode="json")
         self.assertNotIn("prompt", evidence_dump)
         self.assertNotIn("payload", evidence_dump)
