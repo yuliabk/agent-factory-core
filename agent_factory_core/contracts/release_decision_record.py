@@ -27,7 +27,7 @@ class ReleaseDecisionRecord(FrozenModel):
     blocking_check_refs: tuple[NonEmptyString, ...] = Field(alias="blockingCheckRefs")
     warning_check_refs: tuple[NonEmptyString, ...] = Field(alias="warningCheckRefs")
     advisory_check_refs: tuple[NonEmptyString, ...] = Field(alias="advisoryCheckRefs")
-    eval_result_refs: tuple[NonEmptyString, ...] = Field(alias="evalResultRefs")
+    eval_result_refs: tuple[NonEmptyString, ...] = Field(alias="evalResultRefs", min_length=1)
     approval_ref: Annotated[str, Field(min_length=1)] | None = Field(alias="approvalRef")
     reason: str = Field(min_length=1)
     timestamp: datetime
