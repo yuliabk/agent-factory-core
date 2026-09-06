@@ -11,9 +11,34 @@ The system SHALL keep platform-wide contracts and controls in Agent Factory Core
 - WHEN its repository is created
 - THEN it SHALL consume Core contracts without copying Core policy logic into the Agent repository
 
-### Requirement: CORE-202 - Reusable Agent Manifest and client-specific configuration
+### Requirement: CORE-202 - Minimal reusable AgentManifest and client-specific configuration
 
-Every runnable Agent SHALL provide a versioned machine-readable `AgentManifest` containing reusable identity/intent/capability/requirement information and SHALL keep client-specific grants, budget, retention, provider restrictions, credential references and tenant configuration in `ClientInstanceConfig`.
+Every runnable Agent SHALL provide a versioned machine-readable `AgentManifest` that remains reusable across clients.
+
+The first executable AgentManifest schema SHALL keep only these top-level fields:
+
+- `apiVersion`
+- `kind`
+- `metadata`
+- `spec`
+
+For the first schema, `metadata` SHALL contain `name`, `version` and `description`.
+
+For the first schema, `spec` SHALL contain only:
+
+- `template`
+- `capabilities`
+- `tools`
+- `permissions`
+- `memoryProfile`
+- `budgetProfile`
+- `evalProfile`
+
+Manifest permission/profile fields SHALL represent reusable Agent requirements or profile references, not concrete tenant authorization grants, client budget amounts, credentials or client-specific runtime bindings.
+
+Client-specific grants, budget, retention, provider restrictions, credential references, tenant/environment identity and runtime bindings SHALL remain in `ClientInstanceConfig`.
+
+New AgentManifest fields SHOULD be added only after a real use case demonstrates that the value belongs to the reusable Agent Definition rather than client configuration or PlatformPolicy.
 
 #### Scenario: Same Agent for two clients
 - GIVEN the same Research Agent version is deployed to two tenants
@@ -24,6 +49,11 @@ Every runnable Agent SHALL provide a versioned machine-readable `AgentManifest` 
 - GIVEN AgentManifest requests `web.search`
 - WHEN the client/platform policy does not grant it
 - THEN the Agent SHALL NOT receive the permission simply because it requested it
+
+#### Scenario: Minimal manifest validates
+- GIVEN an AgentManifest contains the required top-level fields, `metadata.name/version/description`, and the seven required `spec` keys
+- WHEN the first Core Skeleton validator runs
+- THEN the manifest SHALL be eligible for compilation without requiring speculative future fields
 
 ### Requirement: CORE-203 - Effective Release compilation
 
