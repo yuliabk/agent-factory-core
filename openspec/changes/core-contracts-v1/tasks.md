@@ -49,7 +49,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C4.2 Add first in-process Capability Registry resolver with authoritative records, override validation and soft/strict resolution behavior. Richer health/version routing remains later depth. Maps: CORE-205, CORE-206.
 - [x] C4.3 Tool Gateway interface + deterministic read-only synthetic tool. Trusted ExecutionContext binding, tenant/permission/trust/classification checks, JSON Schema input/output validation and audit are enforced; costed or write-capable tools remain blocked in this first slice. Maps: CORE-208.
 - [x] C4.4 Memory Gateway interface + ephemeral `session` / `task_working` implementation. Session scope uses trusted request ID; task scope uses trusted trace ID; namespace includes tenant/release/class/scope/key; memory read/write permissions, trust, classification, purpose, retention and enable flags are enforced; malformed config is default-deny; persistent/client-knowledge classes remain blocked. Maps: CORE-209.
-- [ ] C4.5 Hybrid Orchestrator can execute one bounded capability/model/tool/memory plan. Maps: CORE-214.
+- [x] C4.5 Bounded Hybrid Orchestrator executes an Agent-prepared plan across compiled capability/model/tool/memory steps. Tenant/classification come only from trusted ExecutionContext; each step retains its gateway checks; max-step/repeat limits and deadline are enforced; execution fails closed on the first denial and records per-step audit evidence. Maps: CORE-214.
 
 ## C5 - Eval/release kernel
 
