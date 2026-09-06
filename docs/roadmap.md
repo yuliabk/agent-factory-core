@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Architecture synchronization complete; ready to design the first executable Core vertical slice.
+**Current mode:** Architecture synchronization complete; Phase 1A contract shaping has started.
 
 ## North Star
 
@@ -20,6 +20,7 @@ Principles:
 - defaults/profiles reduce manual approvals/configuration;
 - progressive complexity;
 - thin interfaces before sophisticated infrastructure;
+- do not add schema fields before a real use case needs them;
 - Research/Brain Agent becomes the first real reference consumer as soon as the Core slice is usable.
 
 ## Phase 0A - Historical baseline
@@ -52,31 +53,23 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 - [x] Research/Brain Agent remains a separate reusable Agent providing `research.lookup`.
 - [x] Full architecture consistency review recorded in `docs/architecture-review-2026-09-06.md`.
 
-### Remaining architecture decisions that do NOT block starting the Core Skeleton
-
-- exact schema implementation technology: JSON Schema vs Pydantic combination;
-- first physical Registry backend;
-- first two provider adapters;
-- pricing data source/currency normalization;
-- concrete default emergency safety-cap numbers;
-- final production list of non-overridable invariants;
-- exact persistent-memory backend;
-- client-facing UI repository/deployment location.
-
-These should be resolved just-in-time when their implementation task begins.
-
 ## Phase 1 - Core Skeleton Vertical Slice
 
 **Goal:** get a small working Core as quickly as possible without pretending the entire platform exists.
 
 ### 1A. Contract schemas and compiler
 
-- [ ] `AgentManifest` schema.
-- [ ] `ClientInstanceConfig` schema.
-- [ ] `PlatformPolicy` minimal schema.
-- [ ] `ExceptionPolicy` minimal schema.
+- [x] Agree minimal `AgentManifest` contract shape: `apiVersion`, `kind`, `metadata(name/version/description)`, `spec`.
+- [x] Agree first `spec` keys: `template`, `capabilities`, `tools`, `permissions`, `memoryProfile`, `budgetProfile`, `evalProfile`.
+- [ ] Choose executable schema implementation approach (JSON Schema/Pydantic or combined).
+- [ ] Implement `AgentManifest` schema/validator from the agreed minimal contract.
+- [ ] Implement `ClientInstanceConfig` schema/validator.
+- [ ] Implement minimal `PlatformPolicy` schema.
+- [ ] Implement minimal `ExceptionPolicy` schema.
 - [ ] compiler -> immutable `EffectiveReleaseConfig`.
-- [ ] validation errors that clearly state where/how to fix configuration.
+- [ ] validation errors that clearly state exact path/rule/remediation.
+
+**Manifest rule:** fields in AgentManifest are reusable requirements/profile references. Concrete client grants/amounts/bindings remain in ClientInstanceConfig; actual runtime authority exists only in EffectiveReleaseConfig.
 
 ### 1B. Runtime Governance kernel
 
@@ -168,8 +161,8 @@ Deepen only proven needs:
 
 ## Current stop point
 
-**Phase 0B is complete.** The repository architecture/contracts are synchronized and ready to serve as the implementation baseline.
+**Phase 1A has started.** The minimal reusable AgentManifest shape is accepted and synchronized.
 
-**Next executable step:** design and implement Phase 1A/1B as the smallest Core Skeleton, then attach enough adapter/eval functionality to run one synthetic end-to-end vertical slice.
+**Next executable decision:** choose the schema implementation approach, then implement the minimal AgentManifest validator before expanding the contract.
 
-Do not wait for every long-term infrastructure choice before starting. Keep contracts stable, implementations replaceable and decisions just-in-time.
+Keep contracts stable, implementations replaceable and decisions just-in-time.
