@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.io/schemas/runtime-audit-event/v1alpha1.json",
+  "title": "RuntimeAuditEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion", "kind", "timestamp", "tenantId", "requestId", "traceId",
+    "actorId", "actorType", "agentReleaseId", "platformPolicyRef",
+    "exceptionPolicyRefs", "approvalRef", "operation", "targetRef",
+    "decision", "result", "costAmount", "costCurrency"
+  ],
+  "properties": {
+    "apiVersion": {"const": "agentfactory.io/v1alpha1"},
+    "kind": {"const": "RuntimeAuditEvent"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "tenantId": {"type": "string", "minLength": 1},
+    "requestId": {"type": "string", "minLength": 1},
+    "traceId": {"type": "string", "minLength": 1},
+    "actorId": {"type": "string", "minLength": 1},
+    "actorType": {"type": "string", "minLength": 1},
+    "agentReleaseId": {"type": "string", "minLength": 1},
+    "platformPolicyRef": {"type": "string", "minLength": 1},
+    "exceptionPolicyRefs": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "approvalRef": {
+      "anyOf": [
+        {"type": "string", "minLength": 1},
+        {"type": "null"}
+      ]
+    },
+    "operation": {"type": "string", "minLength": 1},
+    "targetRef": {
+      "anyOf": [
+        {"type": "string", "minLength": 1},
+        {"type": "null"}
+      ]
+    },
+    "decision": {"type": "string", "minLength": 1},
+    "result": {"type": "string", "minLength": 1},
+    "costAmount": {
+      "anyOf": [
+        {"type": "string", "pattern": "^[0-9]+(?:\\.[0-9]+)?$"},
+        {"type": "null"}
+      ]
+    },
+    "costCurrency": {
+      "anyOf": [
+        {"type": "string", "minLength": 1},
+        {"type": "null"}
+      ]
+    }
+  }
+}
