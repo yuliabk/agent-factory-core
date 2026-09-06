@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.io/schemas/human-approval-record/v1alpha1.json",
+  "title": "HumanApprovalRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion", "kind", "approvalId", "approverId", "approverRole", "scope",
+    "releaseId", "platformPolicyRef", "exceptionPolicyRefs", "decision",
+    "timestamp", "expiresAt", "comment"
+  ],
+  "properties": {
+    "apiVersion": {"const": "agentfactory.io/v1alpha1"},
+    "kind": {"const": "HumanApprovalRecord"},
+    "approvalId": {"type": "string", "minLength": 1},
+    "approverId": {"type": "string", "minLength": 1},
+    "approverRole": {"type": "string", "minLength": 1},
+    "scope": {"const": "release"},
+    "releaseId": {"type": "string", "minLength": 1},
+    "platformPolicyRef": {"type": "string", "minLength": 1},
+    "exceptionPolicyRefs": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "decision": {"enum": ["approve", "reject"]},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "expiresAt": {"type": "string", "format": "date-time"},
+    "comment": {"type": ["string", "null"]}
+  }
+}
