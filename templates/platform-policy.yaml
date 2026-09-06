@@ -15,6 +15,7 @@ spec:
     - monthlyLimit
   allowedMemoryConfigKeys:
     - retention
+  maxTrustProfile: business
   registryMode: strict
   defaultDataClassification: internal
   exceptionAllowances:
@@ -22,3 +23,5 @@ spec:
     providerProfiles: []
     budgetOverrideKeys: []
     memoryConfigKeys: []
+
+# maxTrustProfile is the non-overridable trust ceiling in this Core Skeleton version.
