@@ -1,0 +1,15 @@
+{
+  "ref": "research.lookup",
+  "version": "1",
+  "inputSchemaRef": "schemas/capabilities/research.lookup.input.v1.json",
+  "outputSchemaRef": "schemas/capabilities/research.lookup.output.v1.json",
+  "riskClass": "read_only",
+  "costClass": "variable",
+  "allowedDataClassifications": ["public", "internal"],
+  "environments": ["sandbox", "production"],
+  "requiredPermissions": ["research.lookup"],
+  "overrideable": {
+    "qualityProfile": ["economy", "balanced", "high"]
+  },
+  "implementations": []
+}
