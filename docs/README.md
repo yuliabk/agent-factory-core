@@ -11,7 +11,7 @@ This folder is the architectural entry point for `Agent Factory Core`.
 5. [`security-model.md`](security-model.md) - mandatory risk/trust security baseline and exception model.
 6. [`governance.md`](governance.md) - policy hierarchy, approvals, exceptions and change governance.
 7. [`orchestration.md`](orchestration.md) - hybrid bounded-autonomy execution contract.
-8. [`capability-registry.md`](capability-registry.md) - soft-strict capability routing without direct coupling.
+8. [`capability-registry.md`](capability-registry.md) - authoritative capability contracts + soft-strict routing.
 9. [`provider-and-cost-policy.md`](provider-and-cost-policy.md) - provider-neutral, policy-driven routing and budget controls.
 10. [`tool-gateway.md`](tool-gateway.md) - governed Tool/API/MCP execution.
 11. [`memory-contract.md`](memory-contract.md) - governed autonomous memory and storage-neutral rules.
@@ -33,6 +33,7 @@ This folder is the architectural entry point for `Agent Factory Core`.
 - ADR-010 - policy-driven release strategy / auto-release when allowed - **Accepted**.
 - ADR-011 - specification as primary platform artifact - **Accepted**.
 - ADR-012 - JSON Schema as external contract, Pydantic as internal Python runtime model - **Accepted**.
+- ADR-013 - Capability Registry as source of truth with lightweight manifest references - **Accepted**.
 
 Historical ADRs remain evidence of previous prototype decisions and do not override newer accepted contracts.
 
@@ -41,6 +42,9 @@ Historical ADRs remain evidence of previous prototype decisions and do not overr
 - Versioned approved/specification history is the primary design truth.
 - JSON Schema is the canonical external machine-readable schema boundary for Core contracts.
 - Pydantic is an internal Python runtime/validation representation and must remain aligned with the canonical schema.
+- Capability Registry is authoritative for capability contract metadata; AgentManifest stores lightweight capability references only.
+- `schemas/` - canonical external JSON Schemas for executable Core contracts.
+- `agent_factory_core/contracts/` - internal Pydantic contract models for the Python Core runtime.
 - `openspec/specs/` - accepted behavior when folded/archived into canonical specs.
 - `openspec/changes/` - active/proposed implementation contract changes.
 - `docs/` - architecture, policies and decision rationale.
@@ -51,7 +55,8 @@ Historical ADRs remain evidence of previous prototype decisions and do not overr
 
 ```text
 Spec
- + AgentManifest
+ + AgentManifest (lightweight capability refs)
+ + Capability Registry (authoritative contracts/metadata)
  + ClientInstanceConfig
  + PlatformPolicy / ExceptionPolicy
  -> EffectiveReleaseConfig
