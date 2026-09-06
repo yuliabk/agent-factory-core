@@ -326,6 +326,46 @@ class SyntheticEndToEndGateTests(unittest.TestCase):
         self.assertNotIn("payload", evidence_dump)
         self.assertNotIn("secrets", evidence_dump)
 
+    def test_blocking_security_eval_fails_closed_even_for_policy_auto(self) -> None:
+        manifest = AgentManifest.model_validate(self.manifest_data)
+        client = ClientInstanceConfig.model_validate(self.client_data)
+        policy = PlatformPolicy.model_validate(self.policy_data)
+        release = compile_effective_release(
+            manifest,
+            client,
+            policy,
+            capability_registry(),
+            release_id=RELEASE_ID,
+        )
+        now = datetime.now(timezone.utc)
+        security_failure = EvalResult(
+            apiVersion="agentfactory.io/v1alpha1",
+            kind="EvalResult",
+            evalId="eval-security-fail",
+            releaseId=RELEASE_ID,
+            checkId="security.synthetic-authority",
+            checkVersion="1",
+            family="security_policy",
+            status="FAIL",
+            summary="synthetic security invariant failed",
+            metrics={"authorityPreserved": False},
+            evidenceRefs=("trace://synthetic-security-failure",),
+            observedAt=now,
+        )
+        gate = map_eval_results((security_failure,), policy)
+        self.assertFalse(gate.eligible)
+        self.assertEqual(gate.blocking_failures, ("security.synthetic-authority",))
+
+        decision = build_release_decision_record(
+            release,
+            gate,
+            release_decision_id="decision-synthetic-blocked",
+            timestamp=now,
+        )
+        self.assertEqual(decision.strategy, "policy-auto")
+        self.assertEqual(decision.result, "blocked")
+        self.assertIsNone(decision.approval_ref)
+
 
 if __name__ == "__main__":
     unittest.main()
