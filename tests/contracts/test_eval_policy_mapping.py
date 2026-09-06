@@ -23,6 +23,7 @@ def policy(*, rules=None, invariants=None) -> PlatformPolicy:
                 "allowedBudgetOverrideKeys": [],
                 "allowedMemoryConfigKeys": [],
                 "maxTrustProfile": "business",
+                "minimumReleaseStrategy": "policy-auto",
                 "registryMode": "strict",
                 "defaultDataClassification": "internal",
                 "evalRules": rules if rules is not None else default_rules,
