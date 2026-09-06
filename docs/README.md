@@ -39,6 +39,7 @@ This folder is the architectural entry point for `Agent Factory Core`.
 - ADR-011 - specification as primary platform artifact - **Accepted**.
 - ADR-012 - JSON Schema as external contract, Pydantic as internal Python runtime model - **Accepted**.
 - ADR-013 - Capability Registry as source of truth with lightweight manifest references - **Accepted**.
+- ADR-014 - trust profile placement and runtime enforcement - **Accepted**.
 
 Historical ADRs remain evidence of previous prototype decisions and do not override newer accepted contracts.
 
