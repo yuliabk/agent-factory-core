@@ -1,43 +1,43 @@
-# כלים ותקציב ניסוי
+# Tooling and Cost Strategy
 
-## עקרון תקציבי
+## Principle
 
-תקרת הניסוי היא 200-500 ₪ בחודש. הסכומים להלן הם מעטפות תקציב פנימיות, לא מחירון ספק. לפני רכישה או מעבר ל-Production יש לאמת מחירים עדכניים.
+The platform does not hard-code one model, search provider, low-code runtime or automation vendor. Providers are selected through approved profiles and adapters according to cost, quality, privacy, latency and availability.
 
-| קטגוריה | כלי מוצע | מעטפת חודשית |
-|---|---|---:|
-| Agent ו-Knowledge Runtime | Dify Cloud או Self-hosted | 0-150 ₪ |
-| Automation | n8n Cloud או Self-hosted | 0-150 ₪ |
-| Model ו-Embeddings | OpenAI API עם Limits | 50-200 ₪ |
-| Storage ו-Backups | Managed Postgres/Object Storage | 0-75 ₪ |
-| Email ו-Website channel | ספק קיים או Free Tier | 0-50 ₪ |
-| WhatsApp | נדחה עד Phase 3 | מחוץ ל-MVP הראשוני |
+See [`provider-and-cost-policy.md`](provider-and-cost-policy.md) for the normative architecture direction.
 
-התקציב בפועל יישמר באמצעות Usage Caps, מודלים חסכוניים למשימות פשוטות, Caching, הגבלת Context ו-Evaluation לפני הרחבת שימוש.
+## Cost control layers
 
-## חלופות ארכיטקטורה
+1. Client/business budget gathered during intake.
+2. Solution profile selection (economy / balanced / premium or equivalent).
+3. Per-request budget check.
+4. Preflight estimate for expensive composite operations where practical.
+5. Warnings before business limit.
+6. Explicit authorized approval before exceeding the business limit.
+7. Independent emergency safety cap for loops/anomalies.
+8. Usage/cost audit events and periodic reporting.
 
-### מסלול A - Cloud Low-Code
+## Provider categories
 
-- יתרון: הקמה מהירה וכמעט ללא תחזוקת שרתים.
-- חסרון: עלות חודשית גבוהה יותר ופחות שליטה על Data Residency.
-- מתאים: פיילוט מהיר ומידע לא רגיש.
+| Category | Examples / options | Core requirement |
+|---|---|---|
+| Model provider | OpenAI, Anthropic, Google, DeepSeek, others | Provider adapter + model profile |
+| Search/research | Web search, search APIs, vertical APIs, MCP, internal KB | Capability/tool contract + provenance |
+| Agent/runtime | Native code, managed low-code, Dify, others | Runtime adapter/contract where needed |
+| Automation | n8n, direct API adapters, other workflow engines | Tool Gateway policy |
+| Storage/RAG | managed DB/object/vector stores | Memory/knowledge contract + tenant isolation |
+| Channels | Web, Email, WhatsApp, CRM | Channel adapter + identity/policy |
 
-### מסלול B - Self-hosted
+Specific vendors can be approved for a particular pilot without becoming a permanent Core dependency.
 
-- יתרון: שליטה טובה יותר ויכולת בידוד.
-- חסרון: דורש תחזוקה, עדכונים, גיבויים ואבטחה.
-- מתאים: לאחר שה-Workflow יציב או כאשר לקוח דורש שליטה בתשתית.
+## Prototype history
 
-### המלצת MVP
+Earlier prototypes explored Dify Cloud, n8n and OpenAI under a bounded experiment budget. Those artifacts remain useful historical evidence and portability test material, but the current Core architecture treats them as replaceable implementations.
 
-להתחיל ב-Cloud או Sandbox מנוהל עם נתונים סינתטיים. רק לאחר שה-Evaluations עוברות, לבחור מסלול Production לפי רגישות הלקוח.
+## Avoid in early Core MVP
 
-## כלים שאינם נדרשים בשלב הראשון
-
-- Kubernetes.
-- מערכת Multi-agent מורכבת.
-- Vector Database ייעודי לפני שנפח המסמכים מצדיק זאת.
-- WhatsApp Production.
-- Fine-tuning.
-
+- Kubernetes/service mesh without a demonstrated need.
+- Complex distributed multi-agent infrastructure.
+- Dedicated vector infrastructure before scale requires it.
+- Provider-specific business logic.
+- Production sensitive-data workflows before security/privacy approval.

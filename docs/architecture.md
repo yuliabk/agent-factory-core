@@ -1,192 +1,329 @@
-# ארכיטקטורת Agent Factory
+# ארכיטקטורת Agent Factory Core
 
-## 1. עיקרון מרכזי
+**Status:** Proposed update for Owner Review  
+**Date:** 2026-09-06
 
-המערכת מחולקת לשתי שכבות:
+## 1. מטרת המערכת
 
-- Control Plane: המתודולוגיה, המפרטים, התבניות, בדיקות הקבלה, רישום ה-Skills והחלטות הארכיטקטורה.
-- Client Data Plane: מופע נפרד של סוכן עבור כל לקוח, כולל מקורות מידע, Credentials, Channels, Logs והרשאות.
+`Agent Factory Core` הוא ה-Control Plane והחוזה המשותף לכל Agent שנבנה על הפלטפורמה. הוא אינו Agent עסקי בפני עצמו ואינו מכיל לוגיקה ספציפית של Travel, Sales, CRM, Research או לקוח מסוים.
 
-ה-Factory אינו מאגר משותף של מידע לקוחות. הוא מייצר תצורה ומפרט שנפרסים למופע מבודד.
+המטרה היא לאפשר לבנות, להחליף, לתקן ולתחזק Agents במהירות, בלי לשנות את כל המערכת כאשר Provider, Model, Tool, Runtime או דרישת לקוח משתנים.
+
+העיקרון המנחה הוא:
+
+> שינוי באחריות אחת צריך להיות מקומי ככל האפשר. לשאלה "איפה משנים את זה?" צריכה להיות בדרך כלל תשובה אחת ברורה.
+
+## 2. חלוקת אחריות
+
+### Core אחראי על
+
+- Spec compilation ו-Agent Manifest validation.
+- Template selection והרכבת Agent.
+- Orchestration ו-Execution Context.
+- Capability Registry וניתוב בין Agents.
+- Model/Provider routing.
+- Tool Gateway והרשאות לכלי.
+- Memory contracts ו-Memory access policy.
+- Security policy, tenant isolation ו-data controls.
+- Budget, quota ו-cost guardrails.
+- Audit, observability, traces ו-release evidence.
+- Evaluations, release gates, rollback ו-drift detection.
+- Runtime adapters וחוזים משותפים.
+
+### Core אינו אחראי על
+
+- Prompts עסקיים של Agent ספציפי.
+- Workflow עסקי ייחודי ללקוח.
+- Knowledge base של לקוח.
+- Credentials של לקוח.
+- Business rules שאינם כלל פלטפורמה.
+- UI עסקי ייחודי ל-Agent מסוים.
+
+### כל Agent repo אחראי על
+
+- Business intent ו-Scope.
+- Agent-specific behavior.
+- Capabilities שהוא מספק ודורש.
+- Agent-specific tools או adapters שאינם כלליים.
+- Acceptance tests ו-evaluation set שלו.
+- Client-specific configuration דרך Manifest ו-Spec, ללא שכפול מנגנוני Core.
+
+## 3. שתי שכבות מערכת
 
 ```mermaid
 flowchart TB
-    subgraph CP["Control Plane - Agent Factory"]
-        OS["OpenSpec + GitHub"]
-        TP["Templates + Skills Registry"]
-        EV["Evaluations + Release Gates"]
-        RP["Versioned Client Release Package"]
+    subgraph CP["Control Plane - Agent Factory Core"]
+        INTAKE["Intent + Spec Compiler"]
+        TMP["Template Engine"]
+        MAN["Manifest Validator"]
+        ORCH["Orchestrator"]
+        REG["Capability Registry"]
+        MR["Model Router"]
+        TG["Tool Gateway"]
+        MEM["Memory Broker"]
+        POL["Security + Policy Engine"]
+        BUD["Budget Guard"]
+        OBS["Audit + Observability"]
+        EV["Evals + Release Gates"]
     end
 
-    subgraph DP["Client Data Plane - Isolated"]
-        CH["Website, Email, Internal Apps"]
-        IAM["Identity + Policy Enforcement"]
-        DF["Dify Agent Runtime"]
-        N8["n8n Action Orchestrator"]
-        DS["Client Knowledge and State"]
-        SEC["Client Secrets Boundary"]
-        AU["Client Audit + Metrics"]
+    subgraph AR["Agent Repositories"]
+        A1["Research Agent"]
+        A2["Travel Agent"]
+        A3["Sales Agent"]
+        A4["Future Agents"]
     end
 
-    OS --> RP
-    TP --> RP
-    EV --> RP
-    RP --> DF
-    CH --> IAM
-    IAM --> DF
-    DF --> DS
-    DF --> N8
-    SEC --> DF
-    SEC --> N8
-    DF --> AU
-    N8 --> AU
+    subgraph DP["Client Data Plane"]
+        DATA["Client Data"]
+        SEC["Client Secrets"]
+        CHANNELS["Channels + Systems"]
+        LOGS["Tenant Audit Partition"]
+    end
+
+    INTAKE --> TMP --> MAN --> ORCH
+    ORCH --> REG
+    ORCH --> MR
+    ORCH --> TG
+    ORCH --> MEM
+    POL --> ORCH
+    BUD --> ORCH
+    ORCH --> OBS
+    EV --> ORCH
+    REG --> A1
+    REG --> A2
+    REG --> A3
+    REG --> A4
+    TG --> CHANNELS
+    MEM --> DATA
+    POL --> SEC
+    OBS --> LOGS
 ```
 
-החץ מ-Control Plane ל-Client Data Plane מייצג חבילת תצורה מאושרת וממוספרת, ולא גישה ישירה של ה-Factory לנתוני הלקוח. מידע לקוח, Credentials ו-Logs לעולם אינם חוזרים ל-Control Plane.
+## 4. Execution Context חובה
 
-## 2. רכיבי הליבה
+כל Agent invocation מקבל Context אחיד מה-Core. Agent אינו רשאי להמציא, להרחיב או לעקוף אותו.
 
-| רכיב | תפקיד | שלב |
-|---|---|---|
-| GitHub + OpenSpec | מקור אמת למפרטים, שינויים ואישור | Phase 0 |
-| Codex | תכנון, יצירת מפרטים ומימוש משימות מאושרות | Phase 0 |
-| Dify | צ'אט, RAG, Workflows וניהול Agent ללא קוד רב | Phase 1 |
-| n8n | אוטומציות, Webhooks וחיבורים למערכות | Phase 1 |
-| OpenAI API | מודל שפה, Embeddings וסיווג לפי צורך | Phase 1 |
-| Managed storage | מסמכים, Metadata ו-State לפי לקוח | Phase 1-2 |
-| Observability | Logs, Traces, Cost ו-Quality Metrics | Phase 2 |
-| WhatsApp provider | ערוץ WhatsApp מאושר ומבוקר | Phase 3 |
-
-## 3. תבנית מופע לקוח
-
-לכל לקוח נוצרים לפחות:
-
-- OpenSpec Change נפרד.
-- Namespace או Project נפרד ב-Dify.
-- Workflows ו-Credentials נפרדים ב-n8n.
-- Knowledge Base נפרד.
-- מפת הרשאות ואישור פעולות.
-- מדיניות שמירה ומחיקה.
-- Evaluation Set ו-Acceptance Tests.
-- מסמך מסירה ו-Runbook.
-
-### רמות בידוד
-
-| גבול | דרישת מינימום | אסור לשתף |
-|---|---|---|
-| Identity | משתמשים, Roles ו-Service Accounts מזוהים ללקוח | חשבון שירות משותף בין לקוחות |
-| Runtime | Project או Environment ייעודי עם מזהי לקוח מפורשים | Context או Session בין לקוחות |
-| Knowledge | Knowledge Base, Index ו-Storage namespace ייעודיים | אינדקס Retrieval משותף |
-| Secrets | Credential set נפרד והרשאות Least Privilege | API key או OAuth grant משותף |
-| Audit | יעד או partition הניתן לבידוד ולמחיקה לפי לקוח | Log ללא tenant identifier |
-| Evaluation | Dataset ותוצאות נפרדים לגרסת הסוכן | נתוני בדיקה אמיתיים של לקוח אחר |
-
-Project לוגי נחשב גבול בידוד רק לאחר בדיקה שמוכיחה כי משתמש או Workflow של Client A אינם יכולים לקרוא, לחפש, להפעיל או לייצא משאבים של Client B. מידע `Confidential`, `Personal` או `Sensitive` עשוי לחייב Account, Workspace או Deployment נפרד לפי יכולות הספק והערכת הסיכון.
-
-## 4. זהות, הרשאות ומדיניות
-
-- כל בקשה מזוהה באמצעות `tenant_id`, `actor_id`, `actor_type`, `channel`, `environment` ו-`request_id`.
-- Roles מינימליים: `Owner`, `Client Process Owner`, `Operator`, `Reviewer`, `End User` ו-`Service Account`.
-- הרשאה נבדקת לפני Retrieval ולפני Tool execution; הסוכן אינו מקור סמכות להרשאות.
-- Service Accounts מקבלים Scope מצומצם לפעולה אחת או לקבוצת פעולות מאושרת.
-- Approval חייב להיות קשור ל-`request_id`, לפעולה המדויקת, למאשר ולזמן תפוגה. אישור כללי בשיחה אינו מספיק.
-
-## 5. סוגי סוכנים
-
-### Knowledge Agent
-
-מקבל מסמכים מאושרים, מאנדקס אותם ומחזיר תשובות עם מקור. כאשר אין מקור מספיק, הוא מצהיר שאין תשובה ולא ממציא.
-
-### Customer Service Agent
-
-משלב Knowledge Agent עם ניהול שיחה, זיהוי כוונה, איסוף פרטים מינימלי, Escalation לאדם והעברת Context מבוקרת.
-
-### Action Agent
-
-מפיק הצעת פעולה מובנית, בודק הרשאות, מבקש אישור כאשר נדרש, מפעיל Workflow ב-n8n ושומר Audit Event.
-
-## 6. זרימת בקשה
-
-```mermaid
-flowchart TD
-    R["User Request"] --> C{"Classify Intent"}
-    C -->|Knowledge| K["Retrieve and Answer"]
-    C -->|Service| S["Answer or Escalate"]
-    C -->|Action| P{"Policy and Approval"}
-    P -->|Approved| A["Execute via n8n"]
-    P -->|Denied or Risky| H["Human Review"]
+```text
+ExecutionContext
+- request_id
+- tenant_id
+- actor_id
+- actor_type
+- environment
+- agent_id
+- agent_release_id
+- permissions
+- data_classification
+- budget_context
+- model_policy
+- tool_policy
+- memory_policy
+- trace_id
+- deadline
 ```
 
-חוזה הבקשה המשותף לכל הערוצים כולל לפחות:
+ה-Context הוא המקור להרשאה, תקציב, Traceability ו-Isolation. Prompt אינו מקור סמכות.
 
-| Field | Purpose |
-|---|---|
-| `request_id` | Correlation ו-Idempotency |
-| `tenant_id` | בידוד וניתוב |
-| `actor_id` / `actor_type` | הרשאה ו-Audit |
-| `channel` | מדיניות ערוץ |
-| `agent_release_id` | שיוך לגרסת מפרט ותצורה |
-| `data_classification` | אכיפת מדיניות מידע |
-| `intent` | Knowledge, Service או Action |
-| `payload` | קלט ממוזער ומאומת לפי Schema |
+## 5. Agent Manifest
 
-## 7. חבילת גרסה ותהליך Release
+כל Agent חייב לספק Manifest תקין לפני Build או Runtime. ה-Manifest מתאר מה ה-Agent הוא, מה הוא יודע לעשות, מה הוא דורש ומה אסור לו לעשות.
 
-כל גרסת לקוח ניתנת לשחזור באמצעות `agent_release_id` ומכילה הפניות ל:
+ה-Core משתמש בו כדי:
 
-- Commit SHA ו-OpenSpec change מאושר.
-- גרסאות Prompt, Workflow, Knowledge manifest ו-Policy.
-- Schemas של קלט ופלט וגרסאות Tool contracts.
-- Evaluation set, תוצאות, מאשרים וזמן אישור.
-- Environment, Provider configuration ו-Rollback target ללא Secrets.
+- לבחור Template.
+- לבדוק Capabilities.
+- להחיל Security profile.
+- לבחור Model/Provider policy.
+- לחבר Tools ו-Memory.
+- להגדיר Budget ו-approval routes.
+- להריץ Evals ו-Release gates.
 
-תהליך השחרור הוא: `Draft Spec → Owner Approval → Synthetic Evaluation → Security Checks → Client Acceptance → Release Manifest → Controlled Deployment`. אין לפרוס ישירות מ-branch לא מאושר ואין להכניס Secrets לחבילת הגרסה.
+הסכמה המלאה מוגדרת ב-`docs/agent-manifest.md` וב-`templates/agent-manifest.yaml`.
 
-## 8. מחזור חיי מופע לקוח
+## 6. Template-first
 
-1. `Intake`: סיווג צורך, מידע, סיכון ותקציב.
-2. `Specified`: OpenSpec ו-Acceptance Tests מאושרים.
-3. `Provisioned`: גבולות Runtime, Storage, Secrets ו-Audit נוצרו.
-4. `Pilot`: נתונים מאושרים בלבד, Limits ו-Human Review פעילים.
-5. `Production`: רק לאחר Gate G4 ותיעוד אחריות.
-6. `Suspended`: פעולות חיצוניות חסומות, Retrieval לפי מדיניות.
-7. `Decommissioned`: גישה בוטלה, נתונים נמחקו או הוחזרו, והמחיקה תועדה.
+Agent חדש אינו נבנה מאפס.
 
-שינוי Classification, Provider, Channel, Tool בעל Side Effect או גבול בידוד מחייב OpenSpec change חדש ובדיקת Regression.
+תהליך ברירת המחדל:
 
-## 9. עמידות ותפעול
+`Client Intent -> Spec -> Template -> Manifest -> Adapters/Tools -> Evals -> Release`
 
-- פעולות חיצוניות נכשלות במצב סגור (`fail closed`).
-- Retry מוגבל לפעולות בטוחות ואידמפוטנטיות בלבד.
-- לכל מופע מוגדרים Owner לתקלה, Runbook, Rollback target ו-Budget cap.
-- גיבוי ושחזור נבדקים לפני Production; יעדי RPO/RTO נקבעים לפי לקוח וסיווג מידע.
-- Degraded mode מאפשר תשובת מידע או Escalation כאשר ספק פעולה אינו זמין, בלי לעקוף Policy.
+ה-Core מחזיק את Template Engine ואת חוזי התבניות. תבניות מערכת בסיסיות יכולות להישמר ב-Core. תבניות Agent עסקיות גדולות יכולות להישמר כריפו או Package נפרד ולהירשם ב-Template Registry.
 
-## 10. גבולות MVP
+המטרה היא להימנע מ-Monorepo שבו כל Agent וכל Business Logic מתערבבים.
 
-ה-MVP הראשון יכלול:
+## 7. תקשורת בין Agents
 
-- צ'אט באתר בסביבת בדיקה.
-- סוכן ידע ממסמכים סינתטיים או לא רגישים.
-- פעולה פנימית אחת הפיכה, לדוגמה יצירת Draft או פתיחת משימה.
-- Escalation לאדם.
-- Audit בסיסי ובדיקות קבלה.
+Agents אינם קוראים זה לזה לפי URL, repo name או implementation detail. Agent מבקש Capability.
 
-ה-MVP לא יכלול:
+דוגמה:
 
-- מידע רפואי או פיננסי אמיתי.
-- פעולות כספיות או שינויי חשבון ללא אדם.
-- Multi-tenant database משותף ללא Row-Level Security מוכח.
-- WhatsApp Production לפני השלמת אבטחה, Consent ו-Retention.
+```text
+Travel Agent requires: research.lookup
+Core resolves: Research Agent v1.3
+```
 
-## 11. החלטות שהתקבלו ופתוחות לפני מימוש
+ה-Core בודק לפני הניתוב:
 
-1. התקבלה החלטה להתחיל במסלול Managed Cloud ל-Prototype עם מידע סינתטי בלבד, כמפורט ב-ADR-001.
-2. התקבלה החלטה להשתמש בבידוד לקוחות מבוסס סיכון, כמפורט ב-ADR-002. מיפוי Isolation tier מדויק לכל Classification נשאר משימת תכנון לפני Production.
-3. התקבלה החלטה לנהל Release manifest ממוספר וראיות Gate, כמפורט ב-ADR-003.
-4. התקבלה החלטה לבחור ב-Dify Cloud Sandbox כ-Runtime המיועד ל-Prototype הסינתטי בלבד, עם Dify Knowledge Base ו-`R-A` כמועמד המיפוי הראשון, כמפורט ב-ADR-004. Provisioning ו-Runtime עדיין אינם מאושרים.
-5. ספק Storage ו-Vector Store לכל מופע לקוח.
-6. יעד Logs, משך שמירה ויעדי RPO/RTO.
-7. מודל תמיכה, SLA ותחומי אחריות מול לקוח.
-8. ספק WhatsApp ודרישות Consent ו-Template Messages במסגרת Change עתידי נפרד.
+- Tenant.
+- Permissions.
+- Data classification.
+- Cost policy.
+- Capability contract version.
+- Availability ו-health.
 
+כך ניתן להחליף Research Agent, להפעיל כמה implementations או לבצע fallback בלי לשנות את Travel Agent.
+
+## 8. Provider ו-Model independence
+
+Business logic אינו תלוי ישירות ב-OpenAI, Anthropic, Google, DeepSeek או Provider אחר.
+
+Agent מבקש `Model Profile`, לדוגמה:
+
+- `fast-cheap`
+- `balanced`
+- `high-reasoning`
+- `private-data-compatible`
+- `long-context`
+
+ה-Model Router ממפה Profile ל-Provider ול-Model בפועל לפי Policy, תקציב, זמינות, latency, data requirements ו-quality target.
+
+החלפת Provider אמורה להיות שינוי Policy/Configuration עם Regression Eval, לא Rewrite של Agent.
+
+## 9. Tool Gateway
+
+Agent אינו מקבל גישה חופשית ל-Network, Files, Database או SaaS.
+
+כל Tool invocation עובר דרך Tool Gateway שמבצע:
+
+1. Schema validation.
+2. Permission check.
+3. Tenant check.
+4. Side-effect classification.
+5. Budget/preflight check כאשר רלוונטי.
+6. Human approval כאשר נדרש.
+7. Timeout ו-retry policy.
+8. Audit event.
+
+Web, MCP, API ו-Agent-to-Agent הם כולם מקורות חיצוניים מבחינת Trust Model. תוכן שמוחזר מהם נחשב Untrusted Data עד Policy evaluation.
+
+## 10. Memory Broker
+
+Memory אינה API ישיר של Agent ל-Storage. ה-Core מספק חוזה Memory אחיד:
+
+- Session memory.
+- User-approved persistent memory.
+- Client knowledge retrieval.
+- Operational state.
+
+כל read/write נבדק לפי Tenant, Classification, Purpose, Retention ו-Permissions.
+
+Agent-specific memory strategy יכולה להשתנות, אבל אינה יכולה לעקוף Isolation או Retention.
+
+## 11. Security as a platform invariant
+
+Security אינו Feature אופציונלי של Agent.
+
+ה-Core אוכף לפחות:
+
+- Least privilege.
+- Default deny.
+- Tenant isolation.
+- Secrets boundary.
+- Prompt injection containment.
+- Tool allowlists.
+- Egress controls לפי סיכון.
+- Human approval לפעולות מוגנות.
+- Audit trail.
+- Budget guardrails.
+- Runtime limits.
+
+Agent repo רשאי להחמיר Policy. הוא אינו רשאי להחליש Minimum Baseline.
+
+## 12. Budget as a first-class control
+
+יש להפריד בין שני סוגי גבול:
+
+1. **Business budget** - גבול שנקבע עם הלקוח. המערכת מתריעה ומתבקשת הרשאה מפורשת לפני חריגה.
+2. **Emergency safety cap** - תקרת בטיחות תפעולית שמונעת runaway spend או loop חריג. היא מוגדרת על ידי הפלטפורמה ואינה תחליף לתקציב העסקי.
+
+ב-Build time ה-Owner מאשר את פרופיל העלות והחלופות. ב-Runtime הלקוח או גורם מאושר אצלו מאשר חריגה מתקציב שהוגדר לו.
+
+## 13. Client-facing Black Box
+
+הלקוח אינו אמור לבחור MCP, API, Model, Vector DB או Runtime.
+
+הוא מתאר מטרה עסקית בשפה רגילה. הפלטפורמה:
+
+1. מזהה Intent.
+2. שואלת רק שאלות קריטיות.
+3. משלימה הנחות לא קריטיות ומציגה אותן לאישור.
+4. מציעה חלופות לפי תקציב.
+5. יוצרת Spec ו-Manifest.
+6. בונה ומעריכה Agent.
+7. מציגה ללקוח את התוצאה, מגבלות, מחיר משוער ואישורים נדרשים.
+
+יעד UX ראשוני: רוב ה-Intake הראשוני מסתיים בפחות מ-10 דקות.
+
+## 14. Client Data Plane
+
+לכל לקוח נשמרים גבולות נפרדים עבור:
+
+- Identity ו-Roles.
+- Runtime context.
+- Knowledge ו-State.
+- Credentials.
+- Audit.
+- Evaluation data.
+- Retention ו-deletion.
+
+מידע לקוח ו-Secrets אינם חוזרים ל-Control Plane כ-raw data. ה-Core מחזיק Metadata ו-Evidence נדרשים בלבד.
+
+## 15. Release contract
+
+כל Release מזוהה באמצעות `agent_release_id` ומקושר ל:
+
+- Agent Manifest version.
+- OpenSpec change.
+- Commit SHA.
+- Template version.
+- Policy versions.
+- Model routing profile.
+- Tool contract versions.
+- Eval results.
+- Security evidence.
+- Human approvals.
+- Rollback target.
+
+Runtime drift שאינו מיוצג ב-Release contract חוסם Promotion.
+
+## 16. גבולות MVP של ה-Core
+
+בשלב הראשון ה-Core צריך להוכיח רק את החוזים הקריטיים:
+
+- Manifest validation.
+- Execution Context.
+- Security/permission gate.
+- Budget precheck.
+- Provider-neutral model call.
+- Capability registration/resolution.
+- Audit event.
+- Eval gate בסיסי.
+
+אין צורך ב-MVP ב-Kubernetes, Service Mesh, multi-region או distributed agent bus מורכב.
+
+## 17. Agent הבא לאחר ייצוב ה-Core
+
+ה-Agent הראשון שנבנה לפי החוזים החדשים יהיה Research/Brain Agent בריפו נפרד.
+
+הוא יספק Capability כללית כגון `research.lookup` ויחליט, תחת Policy, האם להשתמש ב:
+
+- Knowledge פנימי.
+- Web search.
+- API.
+- MCP.
+- Agent אחר.
+- Model knowledge כאשר מותר ומתאים.
+
+Travel Agent ישמש בהמשך Consumer ראשון של Capability זו כדי לבדוק שה-Core אכן מאפשר שימוש חוזר ולא תלות ב-Provider יחיד.

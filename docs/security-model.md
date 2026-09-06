@@ -1,116 +1,248 @@
-# מודל אבטחה ופרטיות
+# מודל אבטחה ופרטיות - Platform Baseline
 
-## 1. סיווג מידע
+**Status:** Proposed update for Owner Review  
+**Principle:** Security is mandatory and inherited by every Agent.
 
-| רמה | דוגמאות | שימוש ב-MVP | בקרות מינימום |
+## 1. כלל יסוד
+
+Agent אינו אחראי להגן על הפלטפורמה מפני עצמו. בקרות קריטיות חייבות להיות מחוץ ל-Prompt ומחוץ ללוגיקה העסקית של Agent, בתוך ה-Core או בתשתית המאושרת.
+
+Agent repo רשאי להוסיף בקרות. הוא אינו רשאי לבטל Minimum Baseline.
+
+## 2. Default deny
+
+ברירת המחדל לכל Capability, Tool, Network egress, Storage, Secret ו-Agent-to-Agent call היא `deny` עד שיש Policy מפורשת שמאפשרת אותו.
+
+Prompt, Tool output או מסמך retrieved אינם יכולים להעניק Permission.
+
+## 3. סיווג מידע
+
+| רמה | דוגמאות | שימוש ראשוני | בקרות מינימום |
 |---|---|---:|---|
-| Public | תוכן אתר ונהלים פומביים | כן | בקרת מקור ושינויים |
-| Internal | נהלים ומסמכים עסקיים רגילים | רק בפיילוט מוגבל | הרשאות, Encryption ו-Logs |
-| Confidential | אסטרטגיה, חוזים ומידע עסקי חסוי | לא לפני Security Review | בידוד לקוח, DPA, Retention, Audit |
-| Personal | פרטי קשר ונתוני לקוח | לא ב-MVP הראשוני | Consent, מינימיזציה, מחיקה והרשאות |
-| Sensitive | מידע רפואי או פיננסי | לא במסלול MVP | מסלול Enterprise נפרד ובדיקה משפטית ואבטחתית |
+| Public | תוכן פומבי | כן | provenance, integrity |
+| Internal | מידע עסקי רגיל | Pilot מוגבל | auth, isolation, encryption, audit |
+| Confidential | חוזים, אסטרטגיה | לאחר review | stronger isolation, DPA, retention, restricted egress |
+| Personal | פרטי אדם/לקוח | לאחר review | purpose limitation, consent/legal basis, deletion, minimization |
+| Sensitive | רפואי, פיננסי וכדומה | מסלול נפרד | enhanced controls, legal/security approval |
 
-## 2. עקרונות
+## 4. Threat model חובה
 
-- Least Privilege לכל משתמש, Connector ו-Workflow.
-- Data Minimization: לאסוף רק את המידע הנדרש לביצוע המטרה.
-- Tenant Isolation: הפרדה מלאה בין לקוחות.
-- Human-in-the-Loop לפעולות בעלות סיכון או השפעה חיצונית.
-- Defense in Depth: בקרות ברמת Channel, Agent, Workflow, Storage ו-Provider.
-- Traceability: אפשרות להבין מה התבצע, על סמך איזה קלט ובאמצעות איזה כלי.
+לפחות:
 
-## 3. בקרות לפי שכבה
+- Direct prompt injection.
+- Indirect prompt injection מתוך Web, Email, Documents, Tool outputs או MCP.
+- Cross-tenant data access.
+- Credential leakage.
+- Data exfiltration דרך Tool, URL, response או logs.
+- Permission escalation.
+- Approval replay או forged approval.
+- Agent-to-Agent confused deputy.
+- Infinite/recursive agent loops.
+- Runaway tool usage ועלות.
+- Malicious or compromised provider/tool response.
+- Runtime drift.
+- Dependency/supply-chain compromise.
 
-### GitHub ו-OpenSpec
+## 5. Untrusted content boundary
 
-- Repository פרטי.
-- Branch Protection לאחר הקמת CI.
-- Pull Request לכל שינוי מהותי.
-- Secret scanning ו-Dependency review כאשר יתווסף קוד.
+כל תוכן שמגיע מ:
 
-### Dify
+- Web.
+- Email.
+- Uploaded files.
+- Retrieved documents.
+- Tool output.
+- MCP server.
+- External Agent.
 
-- Project נפרד לכל לקוח.
-- Knowledge Base נפרד והרשאות מסמך מוגדרות.
-- הגנת Prompt Injection והפרדת System Instructions ממסמכים.
-- הגבלת Context והסרת PII לפי צורך.
+נחשב Data ולא Instruction, אלא אם ה-Core סימן אותו במפורש כ-policy-approved control content.
 
-### n8n
+ה-Orchestrator שומר הפרדה לוגית בין System Policy, trusted configuration ו-untrusted content.
 
-- Credentials נפרדים לכל לקוח.
-- Workflow נפרד לכל פעולה עסקית משמעותית.
-- Idempotency Key לפעולות חוזרות.
-- Timeout, Retry מוגבל ו-Dead-letter path.
-- Approval Gate לפני פעולות מסוכנות.
+## 6. Prompt injection containment
 
-### Providers ו-Storage
+אין מנגנון יחיד שמבטיח חסינות. ההגנה היא שכבתית:
 
-- Encryption in transit and at rest.
-- Region ו-Retention מתועדים.
-- DPA או תנאים חוזיים מתאימים לפני מידע חסוי או אישי.
-- מחיקה ניתנת לאימות.
+1. הפרדת trusted instructions מ-untrusted data.
+2. Tool allowlist ו-schema validation.
+3. Permission checks מחוץ למודל.
+4. Least-privilege credentials.
+5. Egress restrictions.
+6. Human approval לפעולות מוגנות.
+7. Output/data-loss checks לפי סיווג.
+8. Security evaluations עם attack corpus.
+9. Runtime limits ו-audit.
 
-## 4. פעולות המחייבות אישור אנושי
+גם אם המודל "משתכנע" מהזרקה, הוא לא אמור לקבל סמכות לבצע פעולה אסורה.
 
-- שליחת הודעה חיצונית בשם ארגון, אלא אם מדובר בתבנית שאושרה מראש.
-- מחיקה או שינוי של רשומה עסקית.
-- התחייבות כספית, Refund, תשלום או שינוי חיוב.
-- החלטה רפואית, פיננסית, משפטית או זכאותית.
-- שינוי הרשאות משתמש.
-- העברת מידע בין מערכות או בין לקוחות.
+## 7. Identity and tenant isolation
 
-## 5. שער כניסה ל-Production
+כל בקשה כוללת לפחות:
 
-אין להפעיל לקוח אמיתי לפני שכל התנאים הבאים מתקיימים:
+```text
+request_id
+tenant_id
+actor_id
+actor_type
+environment
+agent_release_id
+```
 
-- Data Inventory ו-Data Flow מאושרים.
-- Threat Model ו-Prompt Injection Review הושלמו.
-- Access Control, Retention ו-Deletion נבדקו.
-- Evaluation Set כולל מקרי תקיפה וכשל.
-- Incident Response Owner מוגדר.
-- Backup ו-Restore נבדקו.
-- הלקוח אישר את ה-Scope ואת מגבלות הסוכן.
+Cross-tenant access נחסם מחוץ ל-Agent.
 
-## 6. זהות והרשאות
+Project לוגי נחשב Isolation boundary רק לאחר negative tests שמוכיחים שמשתמש או Workflow של Tenant A אינם יכולים לקרוא, לחפש, להפעיל או לייצא משאבים של Tenant B.
 
-- הרשאות נגזרות מ-Role ומ-Policy מאושרים; Prompt או תשובת מודל אינם מעניקים הרשאה.
-- משתמש אנושי ו-Service Account מזוהים בנפרד ונרשמים ב-Audit.
-- כל Credential מוגבל ללקוח, Environment ופעולות נדרשות בלבד.
-- גישת Admin ניתנת לזמן מוגבל ככל האפשר ונבדקת תקופתית.
-- Approval לפעולה מוגנת כולל מאשר, פעולה, יעד, `request_id`, זמן ותפוגה.
+## 8. Tool security
 
-## 7. Threat Model מינימלי
+כל Tool עובר Tool Gateway עם:
 
-לפני Pilot בודקים לפחות:
+- Typed schema.
+- Authorization.
+- Tenant binding.
+- Side-effect classification.
+- Input validation.
+- Approval check.
+- Timeout.
+- Idempotency כאשר רלוונטי.
+- Retry policy מוגבל.
+- Audit.
 
-- Prompt injection ממסמך, אתר, הודעה או Tool output.
-- Cross-tenant retrieval, logs, cache, export ו-Credentials.
-- Broken authorization ו-Approval replay.
-- Data exfiltration דרך תשובה, Tool, URL או Log.
-- Secret exposure ב-Prompt, Export, Screenshot או Error message.
-- Duplicate או forged action request.
-- ספק חיצוני לא זמין או מחזיר תוכן זדוני.
-- שינוי Runtime ידני שאינו תואם Release מאושר.
+Tools עם file/system/network access מקבלים scope מינימלי.
 
-## 8. Audit, Retention ומחיקה
+## 9. Agent-to-Agent security
 
-Audit event ממוזער כולל: `tenant_id`, `request_id`, `actor_id` או pseudonymous reference, `agent_release_id`, `action`, `policy_decision`, `approval_reference`, `tool`, `result`, `timestamp` ו-`environment`.
+Agent-to-Agent call הוא privileged delegation, לא chat פנימי חופשי.
 
-- אין לשמור Prompt מלא, מסמך מלא או Secret כברירת מחדל.
-- לכל Data type מוגדרים Purpose, Owner, Retention, Access ו-Deletion method.
-- מחיקה כוללת Primary storage, indexes, caches, exports ו-backups לפי חלון מתועד.
-- Decommissioning מסתיים רק לאחר ביטול גישה וראיית מחיקה או החזרה ללקוח.
+- כל call עובר Capability Registry.
+- Provider Agent מקבל רק Context נדרש.
+- אין Permission inheritance אוטומטי.
+- Caller אינו יכול להעניק Permission שאין לו.
+- מספר hops מוגבל.
+- כל hop נרשם ל-trace ול-budget.
 
-## 9. Secrets ושרשרת אספקה
+## 10. Secrets
 
-- Secrets נשמרים ב-Credential store של הסביבה ולא ב-Git, OpenSpec, Prompt או Release manifest.
-- Integrations ו-Skills חיצוניים נשארים חסומים עד Pinning, License review, Scan ו-Owner approval.
-- שינוי Provider, Model major version או Tool schema מחייב Regression evaluation.
+- Secrets אינם ב-Git, Prompt, OpenSpec, Manifest, log או Release bundle.
+- Credentials נפרדים לפי Tenant ו-Environment.
+- Secret reference נפתר רק בזמן Runtime.
+- Rotation ו-revocation חייבים להיות אפשריים בלי שינוי Agent code.
 
-## 10. גיבוי, שחזור ותגובה לאירוע
+## 11. Memory and RAG
 
-- לפני Production מוגדרים RPO, RTO, Backup owner ו-Restore test לפי לקוח.
-- באירוע חשוד עוצרים פעולות חיצוניות, משמרים Audit ממוזער, מסובבים Credentials לפי צורך ומפעילים Runbook.
-- Rollback מחזיר ל-`agent_release_id` ידוע; הוא אינו משחזר אוטומטית פעולה עסקית שכבר בוצעה.
-- Owner, Client Process Owner ו-Security/Privacy Owner מקבלים תחומי אחריות והסלמה מתועדים.
+Memory writes דורשים Purpose ו-Retention profile.
 
+Retrieval חייב לאכוף:
+
+- Tenant.
+- Actor permissions.
+- Document access.
+- Data classification.
+- Query purpose כאשר נדרש.
+
+Retrieved text אינו הופך ל-System instruction.
+
+## 12. Human approval
+
+Approval חובה לפחות עבור:
+
+- External messages כאשר Policy מחייב.
+- Irreversible writes.
+- Payments/refunds/financial commitments.
+- Permission changes.
+- Data transfer בין מערכות או Tenants.
+- פעולה רגישה לפי Domain.
+- Budget overage כאשר חוצה Business Limit.
+
+Approval כולל:
+
+`approver + action + target + request_id + scope + timestamp + expiry`
+
+Approval כללי בשיחה אינו מספיק לפעולה מוגנת.
+
+## 13. Runtime limits
+
+כל Agent מקבל מגבלות על:
+
+- Request timeout.
+- Tool calls.
+- Agent hops.
+- Retries.
+- Parallel tasks.
+- Context size.
+- Cost.
+
+מטרת המגבלות היא למנוע גם abuse וגם failure loops.
+
+## 14. Cost security
+
+Runaway spend הוא אירוע תפעולי-אבטחתי.
+
+- Cost check בסיסי לכל request.
+- Preflight לפעולה יקרה.
+- Warning thresholds.
+- Explicit approval לחריגה מתקציב עסקי.
+- Emergency safety cap ל-loop או anomaly.
+
+## 15. Audit
+
+Audit event ממוזער כולל לפי הצורך:
+
+```text
+tenant_id
+request_id
+trace_id
+actor_id
+agent_id
+agent_release_id
+capability
+tool
+policy_decision
+approval_reference
+cost_event
+result
+timestamp
+environment
+```
+
+אין לשמור raw Prompt, Secret או sensitive content כברירת מחדל.
+
+## 16. Supply chain
+
+Skills, plugins, MCP servers, packages, model providers ו-tools חיצוניים עוברים:
+
+- Source verification.
+- Pinning/versioning.
+- License review.
+- Security scan/review.
+- Permission inventory.
+- Owner approval.
+- Regression evaluation לאחר שינוי מהותי.
+
+## 17. Production gates
+
+אין Production release לפני:
+
+- Manifest validation.
+- Data flow review.
+- Permission review.
+- Prompt injection/security tests.
+- Cost tests.
+- Agent hop/loop tests אם רלוונטי.
+- Retention/deletion policy.
+- Incident owner.
+- Rollback target.
+- Human approvals.
+- Client acceptance.
+
+## 18. Incident response
+
+באירוע חשוד ניתן להפעיל `Suspend` דרך ה-Core:
+
+- Block external actions.
+- Revoke/rotate credentials.
+- Freeze risky capabilities.
+- Preserve minimal audit evidence.
+- Roll back release כאשר רלוונטי.
+- Notify responsible owner.
+
+Rollback של Agent אינו מבטל אוטומטית פעולה עסקית שכבר בוצעה בעולם החיצוני.
