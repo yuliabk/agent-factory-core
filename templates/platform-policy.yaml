@@ -1,0 +1,24 @@
+apiVersion: agentfactory.io/v1alpha1
+kind: PlatformPolicy
+
+metadata:
+  name: platform-default
+  version: "1"
+
+spec:
+  allowedPermissions:
+    - web.search
+  deniedPermissions: []
+  allowedProviderProfiles:
+    - balanced
+  allowedBudgetOverrideKeys:
+    - monthlyLimit
+  allowedMemoryConfigKeys:
+    - retention
+  registryMode: strict
+  defaultDataClassification: internal
+  exceptionAllowances:
+    permissions: []
+    providerProfiles: []
+    budgetOverrideKeys: []
+    memoryConfigKeys: []

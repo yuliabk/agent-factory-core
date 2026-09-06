@@ -3,6 +3,8 @@ import unittest
 from agent_factory_core.compiler import CompilationError, compile_effective_release
 from agent_factory_core.contracts.agent_manifest import AgentManifest
 from agent_factory_core.contracts.client_instance_config import ClientInstanceConfig
+from agent_factory_core.contracts.platform_policy import PlatformPolicy
+from agent_factory_core.registry import CapabilityImplementation, CapabilityRecord, CapabilityRegistry
 
 
 MANIFEST = AgentManifest.model_validate(
@@ -48,14 +50,42 @@ CLIENT = ClientInstanceConfig.model_validate(
     }
 )
 
-POLICY = {
-    "version": "platform-policy-0.1.0",
-    "allowedPermissions": ["web.search"],
-    "deniedPermissions": [],
-    "allowedProviderProfiles": ["balanced"],
-    "allowedBudgetOverrideKeys": ["monthlyUsd"],
-    "allowedMemoryConfigKeys": ["profile"],
-}
+POLICY = PlatformPolicy.model_validate(
+    {
+        "apiVersion": "agentfactory.io/v1alpha1",
+        "kind": "PlatformPolicy",
+        "metadata": {"name": "platform-default", "version": "1"},
+        "spec": {
+            "allowedPermissions": ["web.search"],
+            "deniedPermissions": [],
+            "allowedProviderProfiles": ["balanced"],
+            "allowedBudgetOverrideKeys": ["monthlyUsd"],
+            "allowedMemoryConfigKeys": ["profile"],
+            "registryMode": "strict",
+            "defaultDataClassification": "internal",
+            "exceptionAllowances": {
+                "permissions": [],
+                "providerProfiles": [],
+                "budgetOverrideKeys": [],
+                "memoryConfigKeys": [],
+            },
+        },
+    }
+)
+
+REGISTRY = CapabilityRegistry(
+    [
+        CapabilityRecord(
+            ref="web.search",
+            version="1",
+            environments=["sandbox"],
+            requiredPermissions=["web.search"],
+            implementations=[
+                CapabilityImplementation(id="web-search:test", environments=["sandbox"])
+            ],
+        )
+    ]
+)
 
 
 class EffectiveReleaseCompilerTests(unittest.TestCase):
@@ -64,25 +94,31 @@ class EffectiveReleaseCompilerTests(unittest.TestCase):
             MANIFEST,
             CLIENT,
             POLICY,
+            REGISTRY,
             release_id="release-001",
         )
         self.assertEqual(release.kind, "EffectiveReleaseConfig")
         self.assertEqual(release.metadata.release_id, "release-001")
         self.assertEqual(release.spec.permissions, ("web.search",))
         self.assertEqual(release.spec.tenant.id, "tenant-acme")
+        self.assertEqual(release.spec.capability_bindings["web.search"], "web-search:test")
 
     def test_rejects_ungranted_required_permission(self) -> None:
         client = CLIENT.model_copy(deep=True)
         client.spec.permission_overrides.allow = []
         with self.assertRaises(CompilationError) as ctx:
-            compile_effective_release(MANIFEST, client, POLICY, release_id="release-002")
+            compile_effective_release(
+                MANIFEST, client, POLICY, REGISTRY, release_id="release-002"
+            )
         self.assertIn("spec.permissionOverrides.allow", str(ctx.exception))
 
     def test_rejects_missing_tool_binding(self) -> None:
         client = CLIENT.model_copy(deep=True)
         client.spec.tool_bindings = {}
         with self.assertRaises(CompilationError) as ctx:
-            compile_effective_release(MANIFEST, client, POLICY, release_id="release-003")
+            compile_effective_release(
+                MANIFEST, client, POLICY, REGISTRY, release_id="release-003"
+            )
         self.assertIn("spec.toolBindings", str(ctx.exception))
 
 

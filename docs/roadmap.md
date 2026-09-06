@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1A contract implementation is active; ClientInstanceConfig and the first EffectiveRelease compiler skeleton are in place.
+**Current mode:** Phase 1A is substantially complete; the first trusted ExecutionContext is now defined and the Runtime Governance kernel is next.
 
 ## North Star
 
@@ -11,7 +11,7 @@ The specification and its history remain the primary artifact. Deployments are r
 
 ## Delivery strategy - move fast without building a fragile monolith
 
-We will not implement every subsystem to full maturity one after another. We will build a **thin vertical slice** that proves all critical contracts end-to-end, then deepen only the modules proven necessary.
+We build a thin vertical slice that proves the critical contracts end-to-end, then deepen only the modules proven necessary.
 
 Principles:
 
@@ -25,6 +25,7 @@ Principles:
 - Capability Registry owns capability contracts/metadata; manifests carry lightweight refs;
 - ClientInstanceConfig contains client/environment deployment values only, never reusable business logic;
 - Runtime executes only compiled EffectiveReleaseConfig;
+- ExecutionContext is derived from EffectiveReleaseConfig rather than prompts or drafts;
 - Research/Brain Agent becomes the first real reference consumer as soon as the Core slice is usable.
 
 ## Phase 0A - Historical baseline
@@ -37,73 +38,46 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 
 **Status:** Complete after Owner review and repository-wide architecture synchronization on 2026-09-06.
 
-### Accepted/synchronized decisions
-
-- [x] Platform Vision accepted.
-- [x] Core split logically into Build / Control Plane and Runtime Governance Plane.
-- [x] One Core, separate Agent repositories.
-- [x] Spec/history is the primary artifact.
-- [x] `AgentManifest + ClientInstanceConfig + PlatformPolicy/ExceptionPolicy -> EffectiveReleaseConfig`.
-- [x] Configurable release strategy: `human-required | policy-auto | policy`.
-- [x] Security is platform-level but approvals are risk-based.
-- [x] Trust Profiles: sandbox/internal/business/privileged direction.
-- [x] Controlled ExceptionPolicy for overridable rules.
-- [x] Memory is separated by class; Agents may request/write persistent memory within policy.
-- [x] Capability Registry uses soft-strict dev/production modes.
-- [x] Provider/model selection is policy-driven across cost/quality/privacy/latency/availability.
-- [x] Template is a starting point plus modular composition.
-- [x] Eval thresholds/release eligibility are policy-driven; invariant security failures remain blocking.
-- [x] Hybrid orchestration: Core sets boundaries, Agents plan autonomously inside them.
-- [x] Research/Brain Agent remains a separate reusable Agent providing `research.lookup`.
-- [x] Full architecture consistency review recorded in `docs/architecture-review-2026-09-06.md`.
-
 ## Phase 1 - Core Skeleton Vertical Slice
 
 **Goal:** get a small working Core as quickly as possible without pretending the entire platform exists.
 
 ### 1A. Contract schemas and compiler
 
-- [x] Agree minimal `AgentManifest` contract shape: `apiVersion`, `kind`, `metadata(name/version/description)`, `spec`.
-- [x] Agree first `spec` keys: `template`, `capabilities`, `tools`, `permissions`, `memoryProfile`, `budgetProfile`, `evalProfile`.
-- [x] Choose schema implementation boundary: **JSON Schema is the canonical external contract; Pydantic is the internal Python runtime/validation model**.
-- [x] Agree capability reference model: Registry is source of truth; Manifest uses `ref/version`, optional `optional` on requirements, and bounded `overrides`.
-- [x] Add canonical minimal AgentManifest JSON Schema.
-- [x] Add matching Pydantic AgentManifest models.
-- [x] Add schema/Pydantic alignment tests.
-- [x] Execute AgentManifest + ClientInstanceConfig + compiler contract tests in the implementation environment: 9 tests passed on 2026-09-06.
-- [x] Accept minimal `ClientInstanceConfig`: metadata(name/environment) + spec(agentRef/tenant/variables/providerProfile/secretsRef/memoryConfig/budgetOverrides/permissionOverrides/toolBindings).
-- [x] Add `ClientInstanceConfig` JSON Schema + Pydantic model + aligned template/tests.
-- [x] Add first `EffectiveReleaseConfig` JSON Schema + frozen Pydantic model.
-- [x] Add first compiler skeleton that validates accepted identity/permission/provider/tool/memory/budget rules and emits path/rule/remediation errors.
-- [ ] Replace temporary PlatformPolicy mapping with canonical `PlatformPolicy` JSON Schema + Pydantic model.
-- [ ] Implement minimal `ExceptionPolicy` JSON Schema + Pydantic model and validate exception overlays.
-- [ ] Resolve capability refs against Registry and reject non-overrideable override keys.
-- [ ] Define trusted `ExecutionContext` schema.
+- [x] Minimal `AgentManifest` contract shape accepted.
+- [x] JSON Schema is canonical externally; Pydantic is internal Python validation/runtime representation.
+- [x] Registry-backed capability reference model accepted and implemented.
+- [x] Canonical AgentManifest JSON Schema + matching Pydantic models + alignment tests.
+- [x] Minimal `ClientInstanceConfig` JSON Schema + Pydantic model + tests.
+- [x] Immutable `EffectiveReleaseConfig` JSON Schema + frozen Pydantic model.
+- [x] Minimal typed `PlatformPolicy` JSON Schema + Pydantic model.
+- [x] Minimal scoped/expiring `ExceptionPolicy` JSON Schema + Pydantic model.
+- [x] Compiler now consumes typed PlatformPolicy/ExceptionPolicy rather than a temporary dictionary boundary.
+- [x] Compiler validates scoped exceptions against explicit PlatformPolicy exception allowances.
+- [x] In-process Capability Registry resolves required capability refs and rejects protected/invalid overrides.
+- [x] EffectiveReleaseConfig records resolved capability bindings and applied policy/exception versions.
+- [x] Trusted `ExecutionContext` JSON Schema + Pydantic builder from EffectiveReleaseConfig.
+- [x] Compiler errors expose path/rule/remediation for the current enforced rules.
 
-**Contract rule:** JSON Schema is externally authoritative and usable by non-Python consumers. Pydantic is an internal implementation convenience and must not become a second independent contract.
+**Contract rule:** JSON Schema is externally authoritative. Pydantic is an internal implementation projection and must remain aligned.
 
-**Capability rule:** Registry owns capability contracts/metadata. AgentManifest contains lightweight references and cannot grant itself authority or duplicate protected registry metadata.
-
-**Manifest rule:** fields in AgentManifest are reusable requirements/profile references. Concrete client grants/amounts/bindings remain in ClientInstanceConfig.
-
-**Instance rule:** ClientInstanceConfig contains client/environment deployment data and approved overrides only; no Agent business logic.
-
-**Runtime rule:** actual runtime authority exists only in the versioned compiled `EffectiveReleaseConfig`; material changes produce a new release rather than hand-editing a released artifact.
+**Runtime rule:** `AgentManifest + ClientInstanceConfig + PlatformPolicy/valid ExceptionPolicy + Registry resolution -> EffectiveReleaseConfig -> ExecutionContext`.
 
 ### 1B. Runtime Governance kernel
 
-- [ ] trusted `ExecutionContext`.
-- [ ] trust/risk + permission evaluation.
-- [ ] runtime limits/hop limits.
-- [ ] business-budget precheck + emergency safety cap interface.
+- [x] first trusted `ExecutionContext` contract and builder.
+- [ ] trust/risk + request-time permission evaluation.
+- [ ] runtime limits/hop/cycle enforcement.
+- [ ] business-budget precheck + emergency safety-cap interface.
 - [ ] minimal audit/trace event.
 
 ### 1C. Adapter contracts
 
 - [ ] provider-neutral model interface with one working adapter and one stub/second adapter for portability.
-- [ ] Capability Registry in-process implementation with soft-strict mode and authoritative capability metadata.
+- [x] first in-process Capability Registry resolver with authoritative records, bounded overrides and soft/strict behavior.
 - [ ] Tool Gateway interface and one read-only example capability.
 - [ ] Memory Gateway interface with session/task memory first.
+- [ ] Hybrid Orchestrator can execute one bounded capability/model/tool/memory plan.
 
 ### 1D. Eval/release kernel
 
@@ -116,22 +90,14 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 
 ## Phase 2 - Research/Brain Agent v1 - first real reference Agent
 
-Separate repository.
-
-### Capability
-
-`research.lookup`
-
-### Minimum v1 responsibilities
+Separate repository exposing `research.lookup`.
 
 - [ ] inspect request/context and decide whether available/internal knowledge is sufficient;
-- [ ] choose among internal knowledge, Web search, API, MCP, model knowledge or approved capability according to policy;
+- [ ] choose internal knowledge, Web search, API, MCP, model knowledge or approved capability according to policy;
 - [ ] return structured evidence/provenance;
 - [ ] route model usage through Core policy rather than provider hard-code;
 - [ ] respect data, trust, budget and tool permissions;
 - [ ] degrade gracefully if optional sources are unavailable.
-
-**Speed rule:** start with the smallest useful source set. Add providers/MCP only after the contract works.
 
 ## Phase 3 - Travel Agent as first external consumer
 
@@ -141,11 +107,7 @@ Separate repository.
 - [ ] test provider/capability fallback;
 - [ ] prove no Travel-specific logic was needed in Core.
 
-**Goal:** demonstrate real reuse.
-
 ## Phase 4 - Spec Compiler + Template Factory UX
-
-Build the client-facing creation path only after the vertical Core contracts are proven.
 
 - [ ] `ClientIntent` schema.
 - [ ] conversational intake.
@@ -157,8 +119,6 @@ Build the client-facing creation path only after the vertical Core contracts are
 - [ ] plain-language scope/cost/data/approval summary.
 
 ## Phase 5 - Tool, Memory and Runtime depth
-
-Deepen only proven needs:
 
 - [ ] persistent memory policies/backends;
 - [ ] production Tool Gateway adapters;
@@ -180,8 +140,8 @@ Deepen only proven needs:
 
 ## Current stop point
 
-**Phase 1A is active.** AgentManifest and ClientInstanceConfig now have external JSON Schemas, internal Pydantic models and contract tests. The first EffectiveReleaseConfig model/compiler skeleton is implemented and tested.
+**Phase 1A is now effectively closed for the thin skeleton.** The compilation chain has typed external/internal contracts through `ExecutionContext`.
 
-**Next executable step:** canonicalize `PlatformPolicy` + `ExceptionPolicy`, then replace the compiler's temporary policy mapping and add Registry-backed capability resolution before moving to `ExecutionContext`.
+**Next executable step:** build the minimal Runtime Governance kernel around that ExecutionContext: request-time policy/permission enforcement, limits/budget guard and audit event. Then attach the first Tool/Memory/Model interfaces and run the synthetic end-to-end Agent.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.

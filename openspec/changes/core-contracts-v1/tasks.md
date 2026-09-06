@@ -26,17 +26,17 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C2.2 Add canonical JSON Schema for `AgentManifest` from the accepted minimal shape. Maps: CORE-202.
 - [x] C2.3 Add matching Pydantic AgentManifest models. Maps: CORE-202.
 - [x] C2.4 Add schema/Pydantic semantic-alignment tests. Maps: CORE-202, CORE-203.
-- [x] C2.5 Execute AgentManifest + ClientInstanceConfig + compiler contract tests in the implementation environment: 9 tests passed on 2026-09-06. Repository CI workflow remains a separate infrastructure task if/when added.
+- [x] C2.5 Contract CI is active in GitHub Actions; PR #16 run #4 passed all 16 contract tests on 2026-09-06.
 - [x] C2.6 Implement `ClientInstanceConfig` JSON Schema + Pydantic model/validator and aligned template. Maps: CORE-202.
-- [ ] C2.7 Implement minimal `PlatformPolicy` + `ExceptionPolicy` JSON Schemas + Pydantic models. Maps: CORE-210.
-- [x] C2.8 Add first immutable `EffectiveReleaseConfig` JSON Schema/Pydantic contract and compiler skeleton. The compiler currently accepts a narrow PlatformPolicy mapping until C2.7 replaces it. Maps: CORE-203.
-- [ ] C2.9 Resolve capability refs against Registry and reject non-overrideable override keys. Maps: CORE-202, CORE-205, CORE-206.
-- [ ] C2.10 Define trusted `ExecutionContext` schema. Maps: CORE-204.
+- [x] C2.7 Implement minimal typed `PlatformPolicy` + `ExceptionPolicy` JSON Schemas + Pydantic models. Maps: CORE-210.
+- [x] C2.8 Add immutable `EffectiveReleaseConfig` JSON Schema/Pydantic contract and compiler using typed policy objects. Maps: CORE-203.
+- [x] C2.9 Resolve required capability refs against an in-process Registry and reject non-overrideable override keys. Maps: CORE-202, CORE-205, CORE-206.
+- [x] C2.10 Define trusted `ExecutionContext` JSON Schema + Pydantic model/builder. Maps: CORE-204.
 - [x] C2.11 Compiler validation errors expose path/rule/remediation hints for current enforced rules.
 
 ## C3 - Runtime Governance kernel
 
-- [ ] C3.1 Policy evaluator: default deny, trust ceilings, exception validation. Maps: CORE-208, CORE-210.
+- [ ] C3.1 Complete request-time policy evaluator. Compile-time permission/provider/memory/budget boundaries and scoped ExceptionPolicy validation are already implemented; trust ceilings/runtime checks remain. Maps: CORE-208, CORE-210.
 - [ ] C3.2 Permission/tenant/data-class enforcement tests. Maps: CORE-204, CORE-208.
 - [ ] C3.3 Runtime limits/hop/cycle enforcement. Maps: CORE-205, CORE-214.
 - [ ] C3.4 Business-budget precheck + emergency safety-cap interface/tests. Maps: CORE-211.
@@ -45,7 +45,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 ## C4 - Thin adapter vertical slice
 
 - [ ] C4.1 Provider-neutral model interface with one working adapter and one second test/stub adapter. Maps: CORE-207.
-- [ ] C4.2 In-process Capability Registry with authoritative capability metadata, override declarations and dev/production enforcement modes. Maps: CORE-205, CORE-206.
+- [x] C4.2 Add first in-process Capability Registry resolver with authoritative records, override validation and soft/strict resolution behavior. Richer health/version routing remains later depth. Maps: CORE-205, CORE-206.
 - [ ] C4.3 Tool Gateway interface + one read-only test tool. Maps: CORE-208.
 - [ ] C4.4 Memory Gateway interface + session/task memory implementation. Maps: CORE-209.
 - [ ] C4.5 Hybrid Orchestrator can execute one bounded capability/model/tool/memory plan. Maps: CORE-214.
@@ -61,8 +61,8 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 ## C6 - Synthetic end-to-end gate
 
 - [ ] C6.1 Create a tiny synthetic reference Agent Definition using only the minimal AgentManifest fields.
-- [ ] C6.2 Compile AgentManifest + ClientInstanceConfig + Policy + Registry resolution to EffectiveReleaseConfig.
-- [ ] C6.3 Execute through Runtime Governance kernel.
+- [x] C6.2 Compiler path supports AgentManifest + ClientInstanceConfig + typed Policy/Exception + Registry resolution -> EffectiveReleaseConfig.
+- [ ] C6.3 Execute through Runtime Governance kernel using ExecutionContext.
 - [ ] C6.4 Run required evals and release decision.
 - [ ] C6.5 Verify audit/evidence reconstruction.
 

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.io/schemas/execution-context/v1alpha1.json",
+  "title": "ExecutionContext",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion", "kind", "requestId", "traceId", "actorId", "actorType",
+    "tenantId", "environment", "agentId", "agentReleaseId", "permissions",
+    "dataClassification", "capabilityBindings", "providerProfile", "toolBindings",
+    "memoryConfig", "budgetConfig", "deadline"
+  ],
+  "properties": {
+    "apiVersion": {"const": "agentfactory.io/v1alpha1"},
+    "kind": {"const": "ExecutionContext"},
+    "requestId": {"type": "string", "minLength": 1},
+    "traceId": {"type": "string", "minLength": 1},
+    "actorId": {"type": "string", "minLength": 1},
+    "actorType": {"type": "string", "minLength": 1},
+    "tenantId": {"type": "string", "minLength": 1},
+    "environment": {"type": "string", "minLength": 1},
+    "agentId": {"type": "string", "minLength": 1},
+    "agentReleaseId": {"type": "string", "minLength": 1},
+    "permissions": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "dataClassification": {"type": "string", "minLength": 1},
+    "capabilityBindings": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
+    "providerProfile": {"type": "string", "minLength": 1},
+    "toolBindings": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
+    "memoryConfig": {"type": "object", "additionalProperties": true},
+    "budgetConfig": {"type": "object", "additionalProperties": true},
+    "deadline": {"type": "string", "format": "date-time"}
+  }
+}

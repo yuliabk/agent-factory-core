@@ -8,21 +8,23 @@ This folder is the architectural entry point for `Agent Factory Core`.
 2. [`architecture.md`](architecture.md) - accepted Core architecture and artifact model.
 3. [`agent-manifest.md`](agent-manifest.md) - reusable AgentManifest contract.
 4. [`client-instance-config.md`](client-instance-config.md) - client/environment deployment configuration boundary.
-5. [`effective-release-config.md`](effective-release-config.md) - compiler output and sole runtime-executable configuration artifact.
-6. [`agent-lifecycle.md`](agent-lifecycle.md) - lifecycle and policy-driven release strategy.
-7. [`security-model.md`](security-model.md) - mandatory risk/trust security baseline and exception model.
-8. [`governance.md`](governance.md) - policy hierarchy, approvals, exceptions and change governance.
-9. [`orchestration.md`](orchestration.md) - hybrid bounded-autonomy execution contract.
-10. [`capability-registry.md`](capability-registry.md) - authoritative capability contracts + soft-strict routing.
-11. [`provider-and-cost-policy.md`](provider-and-cost-policy.md) - provider-neutral, policy-driven routing and budget controls.
-12. [`tool-gateway.md`](tool-gateway.md) - governed Tool/API/MCP execution.
-13. [`memory-contract.md`](memory-contract.md) - governed autonomous memory and storage-neutral rules.
-14. [`template-engine.md`](template-engine.md) - hybrid template + modular composition.
-15. [`client-experience.md`](client-experience.md) - non-technical, assumption-aware client intake.
-16. [`evidence-and-evals.md`](evidence-and-evals.md) - policy-driven eval/release decisions, evidence and audit.
-17. [`architecture-review-2026-09-06.md`](architecture-review-2026-09-06.md) - completed synchronization review, resolved inconsistencies and readiness assessment.
-18. [`roadmap.md`](roadmap.md) - optimized implementation sequence and current next step.
-19. [`decision-log.md`](decision-log.md) - concise accepted/open decision index.
+5. [`platform-policy-contract.md`](platform-policy-contract.md) - typed PlatformPolicy and controlled ExceptionPolicy boundary.
+6. [`effective-release-config.md`](effective-release-config.md) - compiler output and sole runtime-executable configuration artifact.
+7. [`execution-context.md`](execution-context.md) - trusted per-request runtime authority projection.
+8. [`agent-lifecycle.md`](agent-lifecycle.md) - lifecycle and policy-driven release strategy.
+9. [`security-model.md`](security-model.md) - mandatory risk/trust security baseline and exception model.
+10. [`governance.md`](governance.md) - policy hierarchy, approvals, exceptions and change governance.
+11. [`orchestration.md`](orchestration.md) - hybrid bounded-autonomy execution contract.
+12. [`capability-registry.md`](capability-registry.md) - authoritative capability contracts + soft-strict routing.
+13. [`provider-and-cost-policy.md`](provider-and-cost-policy.md) - provider-neutral, policy-driven routing and budget controls.
+14. [`tool-gateway.md`](tool-gateway.md) - governed Tool/API/MCP execution.
+15. [`memory-contract.md`](memory-contract.md) - governed autonomous memory and storage-neutral rules.
+16. [`template-engine.md`](template-engine.md) - hybrid template + modular composition.
+17. [`client-experience.md`](client-experience.md) - non-technical, assumption-aware client intake.
+18. [`evidence-and-evals.md`](evidence-and-evals.md) - policy-driven eval/release decisions, evidence and audit.
+19. [`architecture-review-2026-09-06.md`](architecture-review-2026-09-06.md) - completed synchronization review, resolved inconsistencies and readiness assessment.
+20. [`roadmap.md`](roadmap.md) - optimized implementation sequence and current next step.
+21. [`decision-log.md`](decision-log.md) - concise accepted/open decision index.
 
 ## ADRs
 
@@ -62,6 +64,7 @@ Spec
  + ClientInstanceConfig
  + PlatformPolicy / ExceptionPolicy
  -> EffectiveReleaseConfig
+ -> ExecutionContext
  -> bounded Runtime Governance
  -> Evals / Release Decision / Audit
 ```

@@ -18,6 +18,7 @@ class EffectiveReleaseMetadata(FrozenModel):
 
 
 class PolicySnapshot(FrozenModel):
+    platform_policy_name: str = Field(alias="platformPolicyName", min_length=1)
     platform_policy_version: str = Field(alias="platformPolicyVersion", min_length=1)
     exception_policy_refs: tuple[str, ...] = Field(alias="exceptionPolicyRefs", default_factory=tuple)
 
@@ -27,11 +28,13 @@ class EffectiveReleaseSpec(FrozenModel):
     tenant: TenantRef
     variables: dict[str, Any]
     capabilities: Capabilities
+    capability_bindings: dict[str, str] = Field(alias="capabilityBindings")
     provider_profile: str = Field(alias="providerProfile", min_length=1)
     secrets_ref: dict[str, str] = Field(alias="secretsRef")
     memory_config: dict[str, Any] = Field(alias="memoryConfig")
     budget_config: dict[str, Any] = Field(alias="budgetConfig")
     permissions: tuple[str, ...]
+    data_classification: str = Field(alias="dataClassification", min_length=1)
     tool_bindings: dict[str, str] = Field(alias="toolBindings")
     eval_profile: str = Field(alias="evalProfile", min_length=1)
 

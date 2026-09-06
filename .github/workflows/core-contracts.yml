@@ -1,0 +1,30 @@
+name: Core Contract Tests
+
+on:
+  pull_request:
+    paths:
+      - "agent_factory_core/**"
+      - "schemas/**"
+      - "tests/contracts/**"
+      - "requirements-core.txt"
+      - ".github/workflows/core-contracts.yml"
+  push:
+    branches: [main]
+    paths:
+      - "agent_factory_core/**"
+      - "schemas/**"
+      - "tests/contracts/**"
+      - "requirements-core.txt"
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install contract dependencies
+        run: python -m pip install -r requirements-core.txt
+      - name: Run contract tests
+        run: python -m unittest discover -s tests/contracts -v

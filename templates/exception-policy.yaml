@@ -1,0 +1,24 @@
+apiVersion: agentfactory.io/v1alpha1
+kind: ExceptionPolicy
+
+metadata:
+  name: example-exception
+  version: "1"
+
+spec:
+  platformPolicyRef:
+    name: platform-default
+    version: "1"
+  scope:
+    tenantId: example-tenant
+    environment: sandbox
+    agentName: example-agent
+    agentVersion: 0.1.0
+  reason: "Describe why the bounded exception is required"
+  approver: platform-owner
+  expiresAt: "2026-12-31T23:59:59Z"
+  allow:
+    permissions: []
+    providerProfiles: []
+    budgetOverrideKeys: []
+    memoryConfigKeys: []
