@@ -2,58 +2,34 @@ apiVersion: agentfactory.io/v1alpha1
 kind: ClientInstanceConfig
 
 metadata:
-  tenantId: example-tenant
+  name: example-client-instance
   environment: sandbox
-  agentId: example-agent
-  agentVersion: 0.1.0
 
-trust:
-  requestedLevel: sandbox
+spec:
+  agentRef:
+    name: example-agent
+    version: 0.1.0
 
-permissions:
-  grants: []
+  tenant:
+    id: example-tenant
 
-capabilities:
-  enabled: []
+  variables: {}
 
-tools:
-  bindings: []
+  providerProfile: balanced
 
-modelPolicy:
-  profile: balanced
-  disallowedProviders: []
-  privacyProfile: default
+  secretsRef: {}
 
-memoryPolicy:
-  session: enabled
-  persistentUserMemory: disabled
-  clientKnowledge: disabled
-  operationalState: enabled
-  retentionProfile: short
+  memoryConfig: {}
 
-budget:
-  currency: USD
-  businessLimit:
-    period: monthly
-    amount: 25
-    mode: warn-and-approve
-  runtimeApproverRole: client-owner
-  preflightForExpensiveOperations: true
-  emergencySafetyCapProfile: platform-default
+  budgetOverrides: {}
 
-runtime:
-  timeoutSeconds: 120
-  maxToolCallsPerRequest: 12
-  maxAgentHopsPerRequest: 4
-  maxRetries: 2
-  maxParallelTasks: 4
+  permissionOverrides:
+    allow: []
+    deny: []
 
-release:
-  strategy: policy
-  approverRole: client-owner
+  toolBindings: {}
 
-credentials:
-  refs: []
-
-exceptions:
-  refs: []
+# ClientInstanceConfig contains only client/environment-specific deployment values.
+# It MUST NOT contain Agent business logic or reusable Agent behavior.
+# All overrides remain bounded by PlatformPolicy / valid ExceptionPolicy.
+# Runtime executes only the compiled EffectiveReleaseConfig.
