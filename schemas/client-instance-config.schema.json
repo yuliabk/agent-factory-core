@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.io/schemas/client-instance-config/v1alpha1.json",
+  "title": "ClientInstanceConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": {"const": "agentfactory.io/v1alpha1"},
+    "kind": {"const": "ClientInstanceConfig"},
+    "metadata": {"$ref": "#/$defs/metadata"},
+    "spec": {"$ref": "#/$defs/spec"}
+  },
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "environment"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "environment": {"type": "string", "minLength": 1}
+      }
+    },
+    "agentRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "tenant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1}
+      }
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agentRef",
+        "tenant",
+        "variables",
+        "providerProfile",
+        "secretsRef",
+        "memoryConfig",
+        "budgetOverrides",
+        "permissionOverrides",
+        "toolBindings"
+      ],
+      "properties": {
+        "agentRef": {"$ref": "#/$defs/agentRef"},
+        "tenant": {"$ref": "#/$defs/tenant"},
+        "variables": {"type": "object", "additionalProperties": true, "default": {}},
+        "providerProfile": {"type": "string", "minLength": 1},
+        "secretsRef": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}, "default": {}},
+        "memoryConfig": {"type": "object", "additionalProperties": true, "default": {}},
+        "budgetOverrides": {"type": "object", "additionalProperties": true, "default": {}},
+        "permissionOverrides": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allow", "deny"],
+          "properties": {
+            "allow": {"type": "array", "items": {"type": "string", "minLength": 1}, "default": []},
+            "deny": {"type": "array", "items": {"type": "string", "minLength": 1}, "default": []}
+          }
+        },
+        "toolBindings": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}, "default": {}}
+      }
+    }
+  }
+}

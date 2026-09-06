@@ -68,6 +68,37 @@ AgentManifest (reusable requirements)
 
 Agents request authority; they do not grant it to themselves.
 
+### Minimal ClientInstanceConfig
+
+The first external ClientInstanceConfig contract intentionally contains client/environment deployment data only:
+
+```text
+metadata:
+  name
+  environment
+
+spec:
+  agentRef
+  tenant
+  variables
+  providerProfile
+  secretsRef
+  memoryConfig
+  budgetOverrides
+  permissionOverrides
+  toolBindings
+```
+
+It MUST NOT contain Agent prompts, reusable workflows or domain/business logic. Overrides remain bounded by PlatformPolicy and valid ExceptionPolicy.
+
+### EffectiveReleaseConfig compiler
+
+The first compiler produces the only runtime-executable configuration artifact. It currently enforces already-accepted rules for Agent/client identity matching, explicit permission grants, policy permission/provider limits, required tool bindings, policy-bounded memory/budget override keys and release policy references.
+
+Compiler failures expose `path`, `rule` and `remediation` so configuration problems are actionable.
+
+The initial compiler temporarily accepts PlatformPolicy through a narrow mapping boundary. Canonical PlatformPolicy/ExceptionPolicy JSON Schema + Pydantic contracts replace that temporary boundary in the next policy-contract step without changing the role of the compiler.
+
 ## Schema implementation boundary
 
 Core uses a hybrid schema model:
@@ -145,10 +176,11 @@ Client gives a plain-language business goal. The platform asks only critical mis
 Move fast through a thin vertical slice instead of fully building each subsystem in isolation:
 
 1. canonical JSON Schema contracts + Pydantic runtime models -> EffectiveReleaseConfig;
-2. trusted ExecutionContext + policy/budget kernel;
-3. minimal provider/capability/tool/memory interfaces;
-4. eval/release decision kernel;
-5. one synthetic end-to-end reference Agent;
-6. Research/Brain Agent as first real external Agent.
+2. canonical PlatformPolicy/ExceptionPolicy contracts + Registry-backed resolution;
+3. trusted ExecutionContext + policy/budget kernel;
+4. minimal provider/capability/tool/memory interfaces;
+5. eval/release decision kernel;
+6. one synthetic end-to-end reference Agent;
+7. Research/Brain Agent as first real external Agent.
 
 Do not wait for long-term database/service-mesh/registry choices before proving the contracts.

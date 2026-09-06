@@ -6,21 +6,23 @@ This folder is the architectural entry point for `Agent Factory Core`.
 
 1. [`platform-vision.md`](platform-vision.md) - product/platform north star.
 2. [`architecture.md`](architecture.md) - accepted Core architecture and artifact model.
-3. [`agent-manifest.md`](agent-manifest.md) - AgentManifest, ClientInstanceConfig and EffectiveReleaseConfig contracts.
-4. [`agent-lifecycle.md`](agent-lifecycle.md) - lifecycle and policy-driven release strategy.
-5. [`security-model.md`](security-model.md) - mandatory risk/trust security baseline and exception model.
-6. [`governance.md`](governance.md) - policy hierarchy, approvals, exceptions and change governance.
-7. [`orchestration.md`](orchestration.md) - hybrid bounded-autonomy execution contract.
-8. [`capability-registry.md`](capability-registry.md) - authoritative capability contracts + soft-strict routing.
-9. [`provider-and-cost-policy.md`](provider-and-cost-policy.md) - provider-neutral, policy-driven routing and budget controls.
-10. [`tool-gateway.md`](tool-gateway.md) - governed Tool/API/MCP execution.
-11. [`memory-contract.md`](memory-contract.md) - governed autonomous memory and storage-neutral rules.
-12. [`template-engine.md`](template-engine.md) - hybrid template + modular composition.
-13. [`client-experience.md`](client-experience.md) - non-technical, assumption-aware client intake.
-14. [`evidence-and-evals.md`](evidence-and-evals.md) - policy-driven eval/release decisions, evidence and audit.
-15. [`architecture-review-2026-09-06.md`](architecture-review-2026-09-06.md) - completed synchronization review, resolved inconsistencies and readiness assessment.
-16. [`roadmap.md`](roadmap.md) - optimized implementation sequence and current next step.
-17. [`decision-log.md`](decision-log.md) - concise accepted/open decision index.
+3. [`agent-manifest.md`](agent-manifest.md) - reusable AgentManifest contract.
+4. [`client-instance-config.md`](client-instance-config.md) - client/environment deployment configuration boundary.
+5. [`effective-release-config.md`](effective-release-config.md) - compiler output and sole runtime-executable configuration artifact.
+6. [`agent-lifecycle.md`](agent-lifecycle.md) - lifecycle and policy-driven release strategy.
+7. [`security-model.md`](security-model.md) - mandatory risk/trust security baseline and exception model.
+8. [`governance.md`](governance.md) - policy hierarchy, approvals, exceptions and change governance.
+9. [`orchestration.md`](orchestration.md) - hybrid bounded-autonomy execution contract.
+10. [`capability-registry.md`](capability-registry.md) - authoritative capability contracts + soft-strict routing.
+11. [`provider-and-cost-policy.md`](provider-and-cost-policy.md) - provider-neutral, policy-driven routing and budget controls.
+12. [`tool-gateway.md`](tool-gateway.md) - governed Tool/API/MCP execution.
+13. [`memory-contract.md`](memory-contract.md) - governed autonomous memory and storage-neutral rules.
+14. [`template-engine.md`](template-engine.md) - hybrid template + modular composition.
+15. [`client-experience.md`](client-experience.md) - non-technical, assumption-aware client intake.
+16. [`evidence-and-evals.md`](evidence-and-evals.md) - policy-driven eval/release decisions, evidence and audit.
+17. [`architecture-review-2026-09-06.md`](architecture-review-2026-09-06.md) - completed synchronization review, resolved inconsistencies and readiness assessment.
+18. [`roadmap.md`](roadmap.md) - optimized implementation sequence and current next step.
+19. [`decision-log.md`](decision-log.md) - concise accepted/open decision index.
 
 ## ADRs
 

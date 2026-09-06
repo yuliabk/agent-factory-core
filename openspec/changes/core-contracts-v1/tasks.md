@@ -17,6 +17,8 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C1.11 Accept minimal first AgentManifest shape: `apiVersion`, `kind`, `metadata(name/version/description)`, and `spec(template/capabilities/tools/permissions/memoryProfile/budgetProfile/evalProfile)`. Maps: CORE-202.
 - [x] C1.12 Accept hybrid schema boundary: JSON Schema canonical externally; Pydantic internal for Python runtime/validation. Maps: CORE-202, CORE-203. ADR-012.
 - [x] C1.13 Accept Registry-backed capability references and bounded overrides. Maps: CORE-202, CORE-205, CORE-206. ADR-013.
+- [x] C1.14 Accept minimal `ClientInstanceConfig`: metadata(name/environment) + spec(agentRef/tenant/variables/providerProfile/secretsRef/memoryConfig/budgetOverrides/permissionOverrides/toolBindings). Maps: CORE-202, CORE-203.
+- [x] C1.15 Confirm `EffectiveReleaseConfig` is the only runtime-executable configuration artifact. Maps: CORE-203, CORE-218.
 
 ## C2 - Core Skeleton schemas/compiler
 
@@ -24,13 +26,13 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C2.2 Add canonical JSON Schema for `AgentManifest` from the accepted minimal shape. Maps: CORE-202.
 - [x] C2.3 Add matching Pydantic AgentManifest models. Maps: CORE-202.
 - [x] C2.4 Add schema/Pydantic semantic-alignment tests. Maps: CORE-202, CORE-203.
-- [ ] C2.5 Execute the new AgentManifest contract tests in the implementation environment/CI and resolve any drift.
-- [ ] C2.6 Implement `ClientInstanceConfig` JSON Schema + Pydantic model/validator. Maps: CORE-202.
+- [x] C2.5 Execute AgentManifest + ClientInstanceConfig + compiler contract tests in the implementation environment: 9 tests passed on 2026-09-06. Repository CI workflow remains a separate infrastructure task if/when added.
+- [x] C2.6 Implement `ClientInstanceConfig` JSON Schema + Pydantic model/validator and aligned template. Maps: CORE-202.
 - [ ] C2.7 Implement minimal `PlatformPolicy` + `ExceptionPolicy` JSON Schemas + Pydantic models. Maps: CORE-210.
-- [ ] C2.8 Compile inputs into immutable `EffectiveReleaseConfig`. Maps: CORE-203.
+- [x] C2.8 Add first immutable `EffectiveReleaseConfig` JSON Schema/Pydantic contract and compiler skeleton. The compiler currently accepts a narrow PlatformPolicy mapping until C2.7 replaces it. Maps: CORE-203.
 - [ ] C2.9 Resolve capability refs against Registry and reject non-overrideable override keys. Maps: CORE-202, CORE-205, CORE-206.
 - [ ] C2.10 Define trusted `ExecutionContext` schema. Maps: CORE-204.
-- [ ] C2.11 Define clear validation errors with path/rule/remediation hint.
+- [x] C2.11 Compiler validation errors expose path/rule/remediation hints for current enforced rules.
 
 ## C3 - Runtime Governance kernel
 

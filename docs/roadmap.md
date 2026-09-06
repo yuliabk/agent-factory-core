@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1A contract implementation is active.
+**Current mode:** Phase 1A contract implementation is active; ClientInstanceConfig and the first EffectiveRelease compiler skeleton are in place.
 
 ## North Star
 
@@ -23,6 +23,8 @@ Principles:
 - do not add schema fields before a real use case needs them;
 - external contracts stay implementation-neutral even when the first Core runtime is Python;
 - Capability Registry owns capability contracts/metadata; manifests carry lightweight refs;
+- ClientInstanceConfig contains client/environment deployment values only, never reusable business logic;
+- Runtime executes only compiled EffectiveReleaseConfig;
 - Research/Brain Agent becomes the first real reference consumer as soon as the Core slice is usable.
 
 ## Phase 0A - Historical baseline
@@ -68,19 +70,25 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 - [x] Add canonical minimal AgentManifest JSON Schema.
 - [x] Add matching Pydantic AgentManifest models.
 - [x] Add schema/Pydantic alignment tests.
-- [ ] Execute contract tests in the implementation environment/CI and resolve any drift.
-- [ ] Implement `ClientInstanceConfig` JSON Schema + Pydantic model.
-- [ ] Implement minimal `PlatformPolicy` JSON Schema + Pydantic model.
-- [ ] Implement minimal `ExceptionPolicy` JSON Schema + Pydantic model.
-- [ ] compiler -> immutable `EffectiveReleaseConfig`.
-- [ ] compiler validates capability refs and Registry-declared override keys.
-- [ ] validation errors that clearly state exact path/rule/remediation.
+- [x] Execute AgentManifest + ClientInstanceConfig + compiler contract tests in the implementation environment: 9 tests passed on 2026-09-06.
+- [x] Accept minimal `ClientInstanceConfig`: metadata(name/environment) + spec(agentRef/tenant/variables/providerProfile/secretsRef/memoryConfig/budgetOverrides/permissionOverrides/toolBindings).
+- [x] Add `ClientInstanceConfig` JSON Schema + Pydantic model + aligned template/tests.
+- [x] Add first `EffectiveReleaseConfig` JSON Schema + frozen Pydantic model.
+- [x] Add first compiler skeleton that validates accepted identity/permission/provider/tool/memory/budget rules and emits path/rule/remediation errors.
+- [ ] Replace temporary PlatformPolicy mapping with canonical `PlatformPolicy` JSON Schema + Pydantic model.
+- [ ] Implement minimal `ExceptionPolicy` JSON Schema + Pydantic model and validate exception overlays.
+- [ ] Resolve capability refs against Registry and reject non-overrideable override keys.
+- [ ] Define trusted `ExecutionContext` schema.
 
 **Contract rule:** JSON Schema is externally authoritative and usable by non-Python consumers. Pydantic is an internal implementation convenience and must not become a second independent contract.
 
 **Capability rule:** Registry owns capability contracts/metadata. AgentManifest contains lightweight references and cannot grant itself authority or duplicate protected registry metadata.
 
-**Manifest rule:** fields in AgentManifest are reusable requirements/profile references. Concrete client grants/amounts/bindings remain in ClientInstanceConfig; actual runtime authority exists only in EffectiveReleaseConfig.
+**Manifest rule:** fields in AgentManifest are reusable requirements/profile references. Concrete client grants/amounts/bindings remain in ClientInstanceConfig.
+
+**Instance rule:** ClientInstanceConfig contains client/environment deployment data and approved overrides only; no Agent business logic.
+
+**Runtime rule:** actual runtime authority exists only in the versioned compiled `EffectiveReleaseConfig`; material changes produce a new release rather than hand-editing a released artifact.
 
 ### 1B. Runtime Governance kernel
 
@@ -172,8 +180,8 @@ Deepen only proven needs:
 
 ## Current stop point
 
-**Phase 1A is active.** The minimal AgentManifest contract, JSON Schema/Pydantic boundary and Registry-backed capability reference shape are synchronized.
+**Phase 1A is active.** AgentManifest and ClientInstanceConfig now have external JSON Schemas, internal Pydantic models and contract tests. The first EffectiveReleaseConfig model/compiler skeleton is implemented and tested.
 
-**Next executable step:** run the new contract tests, then define the minimal `ClientInstanceConfig` external schema + Pydantic model before implementing the compiler.
+**Next executable step:** canonicalize `PlatformPolicy` + `ExceptionPolicy`, then replace the compiler's temporary policy mapping and add Registry-backed capability resolution before moving to `ExecutionContext`.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
