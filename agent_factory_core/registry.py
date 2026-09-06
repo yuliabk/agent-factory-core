@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Iterable
+from typing import Annotated, Any, Iterable
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .contracts.agent_manifest import RequiredCapabilityRef
+
+
+NonEmptyString = Annotated[str, Field(min_length=1)]
 
 
 class StrictModel(BaseModel):
@@ -14,17 +17,48 @@ class StrictModel(BaseModel):
 
 class CapabilityImplementation(StrictModel):
     id: str = Field(min_length=1)
-    environments: list[str] = Field(default_factory=list)
+    environments: list[NonEmptyString] = Field(default_factory=list)
     enabled: bool = True
+
+    @model_validator(mode="after")
+    def validate_environments(self) -> "CapabilityImplementation":
+        if len(set(self.environments)) != len(self.environments):
+            raise ValueError("environments must be unique")
+        return self
 
 
 class CapabilityRecord(StrictModel):
     ref: str = Field(min_length=1)
     version: str = Field(min_length=1)
-    environments: list[str] = Field(default_factory=list)
-    required_permissions: list[str] = Field(alias="requiredPermissions", default_factory=list)
+    input_schema_ref: str = Field(alias="inputSchemaRef", min_length=1)
+    output_schema_ref: str = Field(alias="outputSchemaRef", min_length=1)
+    risk_class: str = Field(alias="riskClass", min_length=1)
+    cost_class: str = Field(alias="costClass", min_length=1)
+    allowed_data_classifications: list[NonEmptyString] = Field(
+        alias="allowedDataClassifications",
+        min_length=1,
+    )
+    environments: list[NonEmptyString] = Field(default_factory=list)
+    required_permissions: list[NonEmptyString] = Field(
+        alias="requiredPermissions",
+        default_factory=list,
+    )
     overrideable: dict[str, list[Any]] = Field(default_factory=dict)
     implementations: list[CapabilityImplementation] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_unique_metadata(self) -> "CapabilityRecord":
+        for label, values in (
+            ("allowedDataClassifications", self.allowed_data_classifications),
+            ("environments", self.environments),
+            ("requiredPermissions", self.required_permissions),
+        ):
+            if len(set(values)) != len(values):
+                raise ValueError(f"{label} must be unique")
+        implementation_ids = [item.id for item in self.implementations]
+        if len(set(implementation_ids)) != len(implementation_ids):
+            raise ValueError("implementation ids must be unique")
+        return self
 
 
 @dataclass(frozen=True)
@@ -32,6 +66,11 @@ class ResolvedCapability:
     ref: str
     version: str
     implementation_id: str
+    input_schema_ref: str
+    output_schema_ref: str
+    risk_class: str
+    cost_class: str
+    allowed_data_classifications: tuple[str, ...]
     required_permissions: tuple[str, ...]
     overrides: dict[str, Any]
 
@@ -100,6 +139,11 @@ class CapabilityRegistry:
             ref=requirement.ref,
             version=requirement.version,
             implementation_id=implementation.id,
+            input_schema_ref=record.input_schema_ref,
+            output_schema_ref=record.output_schema_ref,
+            risk_class=record.risk_class,
+            cost_class=record.cost_class,
+            allowed_data_classifications=tuple(record.allowed_data_classifications),
             required_permissions=tuple(record.required_permissions),
             overrides=dict(requirement.overrides),
         )
