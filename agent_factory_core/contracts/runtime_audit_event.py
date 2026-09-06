@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+
+NonEmptyString = Annotated[str, Field(min_length=1)]
 
 
 class FrozenModel(BaseModel):
@@ -21,17 +24,19 @@ class RuntimeAuditEvent(FrozenModel):
     actor_type: str = Field(alias="actorType", min_length=1)
     agent_release_id: str = Field(alias="agentReleaseId", min_length=1)
     platform_policy_ref: str = Field(alias="platformPolicyRef", min_length=1)
-    exception_policy_refs: tuple[str, ...] = Field(alias="exceptionPolicyRefs")
-    approval_ref: str | None = Field(alias="approvalRef")
+    exception_policy_refs: tuple[NonEmptyString, ...] = Field(alias="exceptionPolicyRefs")
+    approval_ref: Annotated[str, Field(min_length=1)] | None = Field(alias="approvalRef")
     operation: str = Field(min_length=1)
-    target_ref: str | None = Field(alias="targetRef")
+    target_ref: Annotated[str, Field(min_length=1)] | None = Field(alias="targetRef")
     decision: str = Field(min_length=1)
     result: str = Field(min_length=1)
     cost_amount: str | None = Field(alias="costAmount", pattern=r"^[0-9]+(?:\.[0-9]+)?$")
-    cost_currency: str | None = Field(alias="costCurrency")
+    cost_currency: Annotated[str, Field(min_length=1)] | None = Field(alias="costCurrency")
 
     @model_validator(mode="after")
-    def validate_cost_pair(self) -> "RuntimeAuditEvent":
+    def validate_evidence(self) -> "RuntimeAuditEvent":
+        if len(set(self.exception_policy_refs)) != len(self.exception_policy_refs):
+            raise ValueError("exceptionPolicyRefs must be unique")
         if (self.cost_amount is None) != (self.cost_currency is None):
             raise ValueError("costAmount and costCurrency must either both be set or both be null")
         return self
