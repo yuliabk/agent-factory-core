@@ -36,11 +36,11 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 
 ## C3 - Runtime Governance kernel
 
-- [ ] C3.1 Complete request-time policy evaluator. Compile-time permission/provider/memory/budget boundaries and scoped ExceptionPolicy validation are already implemented; trust ceilings/runtime checks remain. Maps: CORE-208, CORE-210.
-- [ ] C3.2 Permission/tenant/data-class enforcement tests. Maps: CORE-204, CORE-208.
-- [ ] C3.3 Runtime limits/hop/cycle enforcement. Maps: CORE-205, CORE-214.
-- [ ] C3.4 Business-budget precheck + emergency safety-cap interface/tests. Maps: CORE-211.
-- [ ] C3.5 Minimal audit/trace event schema including policy/exception/cost decisions. Maps: CORE-217.
+- [ ] C3.1 Complete request-time policy evaluator. Deadline/tenant/permission/data-classification checks are implemented from trusted ExecutionContext; explicit trust-profile/risk-ceiling representation and runtime enforcement remain. Maps: CORE-208, CORE-210.
+- [x] C3.2 Permission/tenant/data-class enforcement tests, including conservative exact classification matching until a hierarchy is approved. Maps: CORE-204, CORE-208.
+- [x] C3.3 Runtime limits/hop/cycle enforcement. Maps: CORE-205, CORE-214.
+- [x] C3.4 Business-budget precheck + emergency safety-cap interface/tests; safety-cap stop is independent from business overage handling. Maps: CORE-211.
+- [x] C3.5 Minimal audit/trace event canonical JSON Schema + aligned Pydantic model including policy/exception/approval/operation/target/cost/result evidence. Maps: CORE-217.
 
 ## C4 - Thin adapter vertical slice
 
