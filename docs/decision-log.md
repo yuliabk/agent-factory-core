@@ -20,6 +20,9 @@
 | שדות חדשים יתווספו ל-AgentManifest רק כאשר use case אמיתי מוכיח צורך | Accepted | agent-manifest.md |
 | JSON Schema הוא ה-contract החיצוני הקנוני; Pydantic הוא ה-runtime/internal model ב-Python | Accepted | ADR-012 |
 | Pydantic אינו contract עצמאי; הוא חייב להישאר semantically aligned ל-JSON Schema | Accepted | ADR-012 |
+| Capability Registry הוא source of truth ל-capability contract/metadata; Manifest מחזיק lightweight refs בלבד | Accepted | ADR-013 / capability-registry.md |
+| Capability ref כולל `ref`, `version`, optional `overrides`; ב-`requires` מותר גם `optional` | Accepted | ADR-013 / agent-manifest.md |
+| `overrides` מותר רק למפתחות שה-Registry סימן overrideable; compiler דוחה metadata/override לא מאושרים | Accepted | ADR-013 |
 | Release strategy מוגדרת בספציפיקציה/קונפיגורציה ומוגבלת ע"י Policy | Accepted | ADR-010 / agent-lifecycle.md |
 | Release modes: `human-required`, `policy-auto`, `policy` | Accepted | ADR-010 |
 | לא נדרש Human approval לכל שינוי/פעולה; approvals הם risk-based | Accepted | security-model.md / governance.md |
