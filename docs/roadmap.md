@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1B Runtime Governance and Phase 1C adapter/orchestration vertical slice are complete; Phase 1D C5.1 canonical EvalResult is complete and C5.2 policy mapping is next.
+**Current mode:** Phase 1B Runtime Governance and Phase 1C adapter/orchestration vertical slice are complete; Phase 1D C5.1 EvalResult and C5.2 eval policy mapping are complete, and C5.3 release strategy is next.
 
 ## North Star
 
@@ -82,8 +82,8 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 ### 1D. Eval/release kernel
 
 - [x] canonical decision-neutral EvalResult for functional/business, security/policy, cost/runtime and contract/portability families, with raw `PASS`, `PASS_WITH_WARNINGS`, `FAIL` statuses and schema/Pydantic alignment.
-- [ ] policy mapping: blocking/warning/advisory.
-- [ ] `human-required`, `policy-auto`, `policy` release decision logic.
+- [x] typed PlatformPolicy mapping from release-gated `checkId` to `blocking`, `warning`, `advisory`, with fail-closed unmapped/duplicate/mixed-release handling and non-downgradeable security invariants.
+- [ ] `human-required`, `policy-auto`, `policy` release strategy compilation and release action logic.
 - [ ] Evidence Pack + release decision reference.
 
 **Exit gate:** one synthetic reference Agent can be compiled, executed and released through the complete thin path.
@@ -140,8 +140,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Phase 1B, Phase 1C and C5.1 are complete for the thin skeleton.** A trusted ExecutionContext governs the bounded runtime path, and evaluation checks now emit a canonical decision-neutral result artifact that remains separate from release policy.
+**Phase 1B, Phase 1C, C5.1 and C5.2 are complete for the thin skeleton.** Evaluation facts are separate from policy effects, and release-gated checks now map deterministically through PlatformPolicy with security invariants protected from downgrade.
 
-**Next executable step:** Phase 1D C5.2 - add typed PlatformPolicy mapping from `checkId` to `blocking`, `warning` or `advisory`, with non-overridable security invariants remaining blocking. Then C5.3 can consume mapped gate results to select the effective release strategy.
+**Next executable step:** Phase 1D C5.3 - add requested release strategy to ClientInstanceConfig, a policy-required minimum strategy, compile a concrete effective strategy into EffectiveReleaseConfig, then convert an EvalGateSummary into `block`, `auto-release` or `require-human` without yet creating the final release decision/evidence record.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
