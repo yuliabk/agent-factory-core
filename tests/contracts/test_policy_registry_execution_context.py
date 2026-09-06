@@ -10,6 +10,7 @@ from agent_factory_core.contracts import (
     AgentManifest,
     ClientInstanceConfig,
     ExceptionPolicy,
+    ExecutionContext,
     PlatformPolicy,
     build_execution_context,
 )
@@ -103,6 +104,16 @@ class PolicyRegistryExecutionContextTests(unittest.TestCase):
         Draft202012Validator(self.policy_schema).validate(POLICY)
         parsed = PlatformPolicy.model_validate(POLICY)
         self.assertEqual(parsed.spec.registry_mode, "strict")
+
+    def test_external_and_internal_top_level_shapes_stay_aligned(self) -> None:
+        for schema, model in (
+            (self.policy_schema, PlatformPolicy),
+            (self.exception_schema, ExceptionPolicy),
+            (self.context_schema, ExecutionContext),
+        ):
+            generated = model.model_json_schema(by_alias=True)
+            self.assertEqual(set(schema["required"]), set(generated["required"]))
+            self.assertEqual(set(schema["properties"]), set(generated["properties"]))
 
     def test_compiler_resolves_required_capability(self) -> None:
         release = compile_effective_release(
