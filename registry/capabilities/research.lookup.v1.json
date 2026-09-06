@@ -13,9 +13,16 @@
   },
   "implementations": [
     {
-      "id": "github:yuliabk/agent-factory-research-agent@4a8b308aeaf22228c6a03d438509b0717e6daf8b",
+      "id": "github:yuliabk/agent-factory-research-agent@024367572ca001dec385ca0f781495b5fa91d181",
       "environments": ["sandbox"],
-      "enabled": true
+      "enabled": true,
+      "transport": {
+        "type": "http-json",
+        "endpointRef": "research-agent-sandbox",
+        "path": "/capabilities/research.lookup",
+        "auth": "bearer",
+        "timeoutSeconds": 8
+      }
     }
   ]
 }

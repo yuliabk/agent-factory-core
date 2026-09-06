@@ -22,7 +22,7 @@ AGENT_MANIFEST_SCHEMA_PATH = ROOT / "schemas" / "agent-manifest.schema.json"
 RESEARCH_RECORD_PATH = ROOT / "registry" / "capabilities" / "research.lookup.v1.json"
 
 TRAVEL_COMMIT = "9da84b635d1ea3b1d62f4b4e8652acd22e42ead6"
-RESEARCH_RELEASE_ID = "github:yuliabk/agent-factory-research-agent@4a8b308aeaf22228c6a03d438509b0717e6daf8b"
+RESEARCH_RELEASE_ID = "github:yuliabk/agent-factory-research-agent@024367572ca001dec385ca0f781495b5fa91d181"
 
 
 class TravelResearchConsumerTests(unittest.TestCase):
