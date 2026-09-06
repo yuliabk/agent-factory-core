@@ -1,0 +1,7 @@
+{
+  "repository": "yuliabk/travel-agent-bot",
+  "commit": "9da84b635d1ea3b1d62f4b4e8652acd22e42ead6",
+  "path": "agent-factory/research-consumer-manifest.json",
+  "blobSha": "8c4da9af916b808ea741077b6475fe9831414765",
+  "purpose": "Locked external Travel consumer manifest used by the C7.4 cross-repository sandbox compile gate."
+}
