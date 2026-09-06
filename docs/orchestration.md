@@ -1,6 +1,6 @@
 # Orchestration Contract
 
-**Status:** Accepted direction after Owner Review  
+**Status:** Accepted direction; first bounded Hybrid Orchestrator slice implemented  
 **Principle:** Core sets boundaries; Agents may plan autonomously inside those boundaries.
 
 ## 1. Hybrid orchestration model
@@ -151,3 +151,43 @@ Consequential operations use idempotency when supported. Retry policy is risk-aw
 ## 9. Development flexibility
 
 Sandbox/dev may use warnings, mocks and unresolved optional capabilities where policy permits. Production uses stricter resolution for critical dependencies. Security invariants remain enforced in every environment.
+
+## 10. First executable slice - C4.5
+
+The first Hybrid Orchestrator implementation is intentionally deterministic and bounded. Core receives an Agent-prepared `BoundedPlan`; it does **not** generate business plans.
+
+Supported first-slice steps:
+
+- compiled capability invocation;
+- provider-neutral model invocation;
+- governed read-only tool invocation;
+- ephemeral memory write;
+- ephemeral memory read.
+
+First-slice invariants:
+
+- tenant and data classification are always taken from trusted `ExecutionContext`, never from plan fields;
+- capability execution uses only `ExecutionContext.capabilityBindings`; runtime does not re-resolve or let the Agent choose an implementation;
+- every model/tool/memory/capability step passes through its existing gateway/router and therefore retains permission/trust/deadline/classification checks;
+- max plan steps and repeated-operation cycles are bounded using the Runtime Governance limit primitive;
+- execution stops on the first denied step and returns a bounded partial trace;
+- each completed or denied step carries minimized audit evidence;
+- synthetic zero-cost/read-only/ephemeral adapters remain the only executable implementations in this slice.
+
+The synthetic contract test executes:
+
+```text
+compiled capability
+ -> model
+ -> read-only tool
+ -> task memory write
+ -> task memory read
+```
+
+Negative tests cover denied gateway operations, maximum step count, repeated-operation cycle, expired deadline and unbound capability.
+
+Implementation:
+
+- `agent_factory_core/orchestrator.py`
+- `agent_factory_core/capability_gateway.py`
+- `tests/contracts/test_bounded_orchestrator.py`
