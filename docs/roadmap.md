@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1B Runtime Governance and the first Tool, Memory and provider-neutral Model adapter slices are complete; C4.5 bounded Hybrid Orchestrator is next.
+**Current mode:** Phase 1B Runtime Governance and Phase 1C adapter/orchestration vertical slice are complete; Phase 1D Eval/Release kernel starts with C5.1 EvalResult.
 
 ## North Star
 
@@ -77,11 +77,11 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 - [x] first in-process Capability Registry resolver with authoritative records, bounded overrides and soft/strict behavior.
 - [x] Tool Gateway interface with trusted binding resolution, Runtime Governance checks, schema validation, audit and one deterministic read-only synthetic tool. Costed/write-capable tools remain blocked in this first slice.
 - [x] Memory Gateway interface with ephemeral `session` and `task_working` memory. Session scope is trusted request ID; task scope is trusted trace ID; tenant/release namespace isolation, permission/trust/classification/purpose/retention checks and minimized audit are enforced. Persistent memory remains later depth.
-- [ ] Hybrid Orchestrator can execute one bounded capability/model/tool/memory plan.
+- [x] Hybrid Orchestrator executes one Agent-prepared bounded capability/model/tool/memory plan, preserves per-step gateway checks, enforces max-step/repeat/deadline boundaries and fails closed on the first denial.
 
 ### 1D. Eval/release kernel
 
-- [ ] functional/security/cost eval result schema.
+- [ ] functional/security/cost/contract EvalResult schema.
 - [ ] policy mapping: blocking/warning/advisory.
 - [ ] `human-required`, `policy-auto`, `policy` release decision logic.
 - [ ] Evidence Pack + release decision reference.
@@ -140,8 +140,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Runtime Governance and all three first adapter families are available for the thin skeleton.** Model, read-only Tool and ephemeral Memory requests are independently governed by trusted ExecutionContext and emit minimized audit evidence.
+**Phase 1B and Phase 1C are complete for the thin skeleton.** A trusted ExecutionContext now governs compiled capability dispatch, provider-neutral model routing, read-only tools and ephemeral session/task memory through one bounded Hybrid Orchestrator. The Orchestrator receives an Agent-prepared plan and does not contain business planning logic.
 
-**Next executable step:** Phase 1C C4.5 - build the minimal Hybrid Orchestrator that executes one pre-bounded plan across Model/Tool/Memory without moving business planning into Core. It must preserve per-step gateway checks, limits, deadline and fail-closed behavior. Then Phase 1D Eval/Release can start.
+**Next executable step:** Phase 1D C5.1 - define the canonical EvalResult JSON Schema + aligned Pydantic model for functional/business, security/policy, cost/runtime and contract/portability families. After that, map results to blocking/warning/advisory policy before implementing release decisions.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
