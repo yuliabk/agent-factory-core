@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 NonEmptyString = Annotated[str, Field(min_length=1)]
+Sha256Fingerprint = Annotated[str, Field(pattern=r"^sha256:[0-9a-f]{64}$")]
 
 
 class FrozenModel(BaseModel):
@@ -21,7 +22,7 @@ class EvidencePack(FrozenModel):
     spec_ref: str = Field(alias="specRef", min_length=1)
     agent_manifest_ref: str = Field(alias="agentManifestRef", min_length=1)
     client_instance_config_ref: str = Field(alias="clientInstanceConfigRef", min_length=1)
-    effective_release_config_ref: str = Field(alias="effectiveReleaseConfigRef", min_length=1)
+    effective_release_config_ref: Sha256Fingerprint = Field(alias="effectiveReleaseConfigRef")
     platform_policy_ref: str = Field(alias="platformPolicyRef", min_length=1)
     exception_policy_refs: tuple[NonEmptyString, ...] = Field(alias="exceptionPolicyRefs")
     template_module_refs: tuple[NonEmptyString, ...] = Field(alias="templateModuleRefs", min_length=1)

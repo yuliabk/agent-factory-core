@@ -57,7 +57,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C5.2 PlatformPolicy evalRules map every release-gated check explicitly to `blocking`, `warning` or `advisory`; unmapped/duplicate rules, mixed releases and malformed security-invariant policy fail closed; securityInvariantChecks cannot be downgraded from blocking. Maps: CORE-212.
 - [x] C5.3 ClientInstanceConfig requests `human-required`, `policy-auto` or `policy`; PlatformPolicy defines a concrete minimum strategy; compiler writes only concrete `human-required`/`policy-auto` to EffectiveReleaseConfig. Eval gate failures block every strategy; eligible policy-auto can auto-release and eligible human-required requires human approval. Maps: CORE-213.
 - [x] C5.4 Canonical HumanApprovalRecord, ReleaseDecisionRecord and EvidencePack contracts. Approval is bound to exact release/policy/exception refs and validity window; policy-auto/human-required decisions are recorded; blocking evals cannot be overridden; EvidencePack links versioned source/config/policy/component/eval/decision/rollback references without raw sensitive payloads. Maps: CORE-217.
-- [ ] C5.5 Drift check: runtime release maps to approved Spec + EffectiveReleaseConfig. Maps: CORE-218.
+- [x] C5.5 Canonical SHA-256 fingerprint binds EvidencePack to the exact EffectiveReleaseConfig. Drift verification compares approved spec/release/policy/exception/provider evidence plus runtime ExecutionContext authority (release/environment/agent/tenant/trust/permissions/classification/capabilities/provider/tools/memory/budget); any mismatch marks the release unmanaged. Maps: CORE-218.
 
 ## C6 - Synthetic end-to-end gate
 
@@ -65,7 +65,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C6.2 Compiler path supports AgentManifest + ClientInstanceConfig + typed Policy/Exception + Registry resolution -> EffectiveReleaseConfig.
 - [ ] C6.3 Execute through Runtime Governance kernel using ExecutionContext.
 - [ ] C6.4 Run required evals and release decision.
-- [ ] C6.5 Verify audit/evidence reconstruction.
+- [ ] C6.5 Verify audit/evidence reconstruction and C5.5 drift check.
 
 **Exit gate:** one complete thin path works without provider/business lock-in.
 
