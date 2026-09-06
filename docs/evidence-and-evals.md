@@ -51,11 +51,33 @@ Used when changing provider/model/runtime/capability implementation to verify th
 
 ### Domain / client acceptance
 
-Optional or mandatory according to the specification and risk profile.
+Optional or mandatory according to the specification and risk profile. The first executable Core Skeleton keeps the canonical `EvalResult` family vocabulary to the four required CORE-212 families above; domain/client acceptance can later be represented by a dedicated approved check/family extension when a real use case requires it.
+
+## Canonical EvalResult v1
+
+The first executable `EvalResult` is a decision-neutral fact record. It contains:
+
+- `evalId`;
+- `releaseId`;
+- `checkId` and `checkVersion`;
+- one of the four required evaluation families;
+- raw status `PASS`, `PASS_WITH_WARNINGS` or `FAIL`;
+- a short summary;
+- flat scalar metrics;
+- unique evidence references;
+- observation timestamp.
+
+It intentionally does **not** contain `blocking`, `warning`, `advisory`, release eligibility, approval state or a release decision. Those meanings are applied later by PlatformPolicy and the release kernel.
+
+Canonical sources:
+
+- external contract: `schemas/eval-result.schema.json`;
+- Python projection: `agent_factory_core/contracts/eval_result.py`;
+- alignment/negative tests: `tests/contracts/test_eval_result_contract.py`.
 
 ## Eval decision model
 
-Each check produces status/severity such as:
+Each check produces a raw status:
 
 ```text
 PASS
@@ -63,7 +85,7 @@ PASS_WITH_WARNINGS
 FAIL
 ```
 
-PlatformPolicy maps checks to:
+PlatformPolicy then maps checks to:
 
 - `blocking`;
 - `warning`;
