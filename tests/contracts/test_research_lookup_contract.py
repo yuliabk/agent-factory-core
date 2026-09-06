@@ -6,11 +6,7 @@ from pathlib import Path
 from jsonschema import Draft202012Validator, ValidationError
 
 from agent_factory_core.contracts.agent_manifest import RequiredCapabilityRef
-from agent_factory_core.registry import (
-    CapabilityImplementation,
-    CapabilityRecord,
-    CapabilityRegistry,
-)
+from agent_factory_core.registry import CapabilityRecord, CapabilityRegistry
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -18,6 +14,7 @@ RECORD_PATH = ROOT / "registry" / "capabilities" / "research.lookup.v1.json"
 REGISTRY_SCHEMA_PATH = ROOT / "schemas" / "capability-registry-record.schema.json"
 INPUT_SCHEMA_PATH = ROOT / "schemas" / "capabilities" / "research.lookup.input.v1.json"
 OUTPUT_SCHEMA_PATH = ROOT / "schemas" / "capabilities" / "research.lookup.output.v1.json"
+RESEARCH_RELEASE_ID = "github:yuliabk/agent-factory-research-agent@dad37d9147ed4fcb97c0ba268402e93e78e76645"
 
 
 class ResearchLookupContractTests(unittest.TestCase):
@@ -39,22 +36,16 @@ class ResearchLookupContractTests(unittest.TestCase):
         self.assertEqual(record.allowed_data_classifications, ["public", "internal"])
         self.assertEqual(record.required_permissions, ["research.lookup"])
         self.assertNotIn("web.search", record.required_permissions)
-        self.assertEqual(record.implementations, [])
+        self.assertEqual(len(record.implementations), 1)
+        self.assertEqual(record.implementations[0].id, RESEARCH_RELEASE_ID)
+        self.assertEqual(record.implementations[0].environments, ["sandbox"])
 
         generated = CapabilityRecord.model_json_schema(by_alias=True)
         self.assertEqual(set(self.registry_schema["required"]), set(generated["required"]))
         self.assertEqual(set(self.registry_schema["properties"]), set(generated["properties"]))
 
-    def test_registry_resolution_preserves_contract_metadata_without_provider_leakage(self) -> None:
-        data = copy.deepcopy(self.record_data)
-        data["implementations"] = [
-            {
-                "id": "agent.research.synthetic.v1",
-                "environments": ["sandbox"],
-                "enabled": True,
-            }
-        ]
-        registry = CapabilityRegistry([CapabilityRecord.model_validate(data)])
+    def test_registry_resolves_to_exact_external_research_agent_release(self) -> None:
+        registry = CapabilityRegistry([CapabilityRecord.model_validate(self.record_data)])
         resolved = registry.resolve_required(
             RequiredCapabilityRef(
                 ref="research.lookup",
@@ -68,6 +59,7 @@ class ResearchLookupContractTests(unittest.TestCase):
 
         self.assertIsNotNone(resolved)
         assert resolved is not None
+        self.assertEqual(resolved.implementation_id, RESEARCH_RELEASE_ID)
         self.assertEqual(resolved.required_permissions, ("research.lookup",))
         self.assertEqual(
             resolved.input_schema_ref,
@@ -81,6 +73,20 @@ class ResearchLookupContractTests(unittest.TestCase):
         self.assertEqual(resolved.cost_class, "variable")
         self.assertEqual(resolved.allowed_data_classifications, ("public", "internal"))
         self.assertEqual(resolved.overrides, {"qualityProfile": "balanced"})
+
+    def test_v01_provider_is_not_registered_for_production(self) -> None:
+        registry = CapabilityRegistry([CapabilityRecord.model_validate(self.record_data)])
+        with self.assertRaises(ValueError):
+            registry.resolve_required(
+                RequiredCapabilityRef(
+                    ref="research.lookup",
+                    version="1",
+                    optional=False,
+                    overrides={},
+                ),
+                environment="production",
+                mode="strict",
+            )
 
     def test_public_input_is_provider_neutral(self) -> None:
         valid = {
@@ -128,9 +134,7 @@ class ResearchLookupContractTests(unittest.TestCase):
                 Draft202012Validator(self.output_schema).validate(payload)
 
     def test_override_surface_is_bounded_to_quality_profile(self) -> None:
-        data = copy.deepcopy(self.record_data)
-        data["implementations"] = [{"id": "agent.research.synthetic.v1"}]
-        registry = CapabilityRegistry([CapabilityRecord.model_validate(data)])
+        registry = CapabilityRegistry([CapabilityRecord.model_validate(self.record_data)])
 
         with self.assertRaises(ValueError):
             registry.resolve_required(
