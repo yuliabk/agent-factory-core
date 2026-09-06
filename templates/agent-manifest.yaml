@@ -1,0 +1,86 @@
+apiVersion: agentfactory.io/v1alpha1
+kind: AgentManifest
+
+metadata:
+  id: example-agent
+  version: 0.1.0
+  owner: platform-owner
+  status: draft
+
+intent:
+  businessGoal: "Replace with measurable business goal"
+  primaryUsers:
+    - end-user
+  successOutcome: "Replace with measurable outcome"
+
+template:
+  id: general-agent
+  version: 1
+
+capabilities:
+  provides: []
+  requires: []
+
+permissions:
+  default: deny
+  allow: []
+
+modelPolicy:
+  profile: balanced
+  allowFallback: true
+  disallowedProviders: []
+  dataResidencyProfile: default
+
+toolPolicy:
+  default: deny
+  tools: []
+
+memoryPolicy:
+  session: enabled
+  persistentUserMemory: disabled
+  clientKnowledge: disabled
+  operationalState: enabled
+  retentionProfile: short
+
+security:
+  baseline: platform-default
+  dataClasses:
+    - public
+  promptInjectionProfile: strict
+  egressProfile: restricted
+
+budget:
+  currency: USD
+  businessLimit:
+    period: monthly
+    amount: 25
+    mode: warn-and-approve
+  warnings:
+    - 0.50
+    - 0.80
+    - 0.95
+  buildApprover: platform-owner
+  runtimeApprover: client-owner
+  preflightForExpensiveOperations: true
+  emergencySafetyCapProfile: platform-default
+
+runtime:
+  timeoutSeconds: 120
+  maxToolCallsPerRequest: 12
+  maxAgentHopsPerRequest: 4
+  maxRetries: 2
+  maxParallelTasks: 4
+
+observability:
+  audit: required
+  traces: required
+  costEvents: required
+  contentLogging: minimized
+
+release:
+  requiredEvals:
+    - functional
+    - security
+    - cost
+  humanApprovalRequired: true
+  rollbackRequired: true

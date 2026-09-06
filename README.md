@@ -1,54 +1,56 @@
 # Agent Factory Core
 
-תשתית פרטית לבנייה, בדיקה ושכפול של סוכני AI באמצעות Spec-Driven Development ו-OpenSpec.
+A spec-driven control plane for building, testing, releasing and governing reusable AI agents.
 
-המאגר נמצא כרגע בשלב ארכיטקטורה בלבד. אין בו סוכן פעיל, חיבורי Production או מידע אמיתי של לקוחות.
+The repository is currently in architecture/contract hardening. It does not contain a production agent runtime or real customer data.
 
-## מטרת המערכת
+## Platform goal
 
-לבנות תבנית Low-Code שניתן להתאים לשלושה סוגי סוכנים:
+A non-technical client should be able to describe a business need in plain language, answer a small number of critical questions, confirm assumptions/budget and receive an agent built from approved templates and policies.
 
-- סוכן ידע המבוסס על מסמכים.
-- סוכן שירות לקוחות באתר, בדוא"ל ובהמשך ב-WhatsApp.
-- סוכן פעולה שמבצע אוטומציות בין מערכות תחת בקרות ואישורים.
+Behind that simple experience, Core standardizes:
 
-המערכת מפרידה בין שכבת ה-Factory, שבה נשמרים מפרטים ותבניות, לבין Instance נפרד לכל לקוח. ההפרדה מונעת זליגת מידע ומאפשרת שכפול מבוקר.
+- Agent Manifest and lifecycle.
+- Security, tenant isolation and approvals.
+- Orchestration and `ExecutionContext`.
+- Capability-based agent-to-agent routing.
+- Provider-neutral model routing.
+- Tool/API/MCP access through policy.
+- Memory/retrieval contracts.
+- Budget and cost guardrails.
+- Evals, evidence, audit and release controls.
+- Template-first agent composition.
 
-## כללי עבודה
+## Repository boundaries
 
-1. כל שינוי מתחיל בתיקיית `openspec/changes/`.
-2. תחילה כותבים `proposal.md`, `design.md`, Spec Delta ו-`tasks.md`.
-3. Codex אינו מממש קוד לפני אישור מפורש של Owner.
-4. MVP משתמש רק בנתונים סינתטיים או לא רגישים.
-5. Skills חיצוניים אינם מיובאים לפני בדיקת רישיון וסריקת אבטחה.
+`Agent Factory Core` is not a business agent. Travel, Research, Sales, CRM and future agents should live in separate repositories and consume Core contracts.
 
-## מבנה המאגר
+Specific providers such as OpenAI, Dify, n8n, Gemini, DeepSeek or others are adapters/options rather than architectural dependencies unless an approved requirement explicitly fixes one.
 
-```text
-AGENTS.md                         הנחיות קבועות ל-Codex
-openspec/                         מקור האמת לדרישות ולשינויים
-docs/                             ארכיטקטורה, אבטחה, תקציב ותוכנית עבודה
-templates/                        טפסים לשכפול סוכן עבור לקוח
-.agents/skills/                   Skills מקומיים של המאגר
-```
-
-החלטות ארכיטקטורה מוצעות מתועדות ב-`docs/adr-*.md`. מסמך ADR במצב `Proposed` אינו אישור למימוש; הוא נכנס לתוקף רק לאחר החלטת Owner ושינוי הסטטוס ל-`Accepted`.
-
-## מצב נוכחי
-
-- שלב: Architecture Baseline approved at Gate G0; detailed Prototype planning is next
-- Change פעיל: `openspec/changes/agent-factory-v1/`
-- קצב עבודה מתוכנן: 6-10 שעות בשבוע
-- תקציב ניסוי: 200-500 ₪ בחודש
-- החלטת מימוש: לא ניתנה; כל קבוצת משימות דורשת אישור Owner מפורש
-- ADRs מאושרים: ADR-001, ADR-002, ADR-003, ADR-004
-
-## התחלה עם Codex
+## Repository structure
 
 ```text
-Read AGENTS.md and openspec/changes/agent-factory-v1/.
-Review the architecture only. Do not implement code.
-List contradictions, missing decisions, security risks, and proposed spec edits.
-Stop for Owner approval.
+AGENTS.md                         repository governance for coding agents
+docs/                             architecture, security, contracts, ADRs, roadmap
+openspec/                         accepted specs and proposed changes
+templates/                        reusable manifest/intake/spec/test templates
+.agents/skills/                   repo-scoped authoring/build skills
+tools/                            bounded validation/portability tooling
+tests/                            deterministic repository tests
 ```
 
+Start with [`docs/README.md`](docs/README.md).
+
+## Current state
+
+- `main` is the canonical branch.
+- Travel Agent Instance Contract v1 is included as architecture/spec work.
+- The historical Knowledge Agent synthetic smoke closure evidence is consolidated into `main`.
+- Current architectural focus: `Core Contracts v1` before new runtime implementation.
+- Next intended specialized repository after Core contracts are stable: a Research/Brain Agent exposing a reusable `research.lookup` capability.
+
+## Working rule
+
+`Intent -> OpenSpec -> Architecture/ADR -> Tasks -> Owner approval -> Implementation -> Evals -> Release evidence -> Merge`
+
+No production implementation is implied by documentation being present in `main`.
