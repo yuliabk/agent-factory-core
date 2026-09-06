@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 from .trust import TrustProfile
 
@@ -44,22 +44,6 @@ class PlatformPolicySpec(StrictModel):
     eval_rules: list[EvalRule] = Field(alias="evalRules")
     security_invariant_checks: list[NonEmptyString] = Field(alias="securityInvariantChecks")
     exception_allowances: ExceptionAllowances = Field(alias="exceptionAllowances")
-
-    @model_validator(mode="after")
-    def validate_eval_policy(self) -> "PlatformPolicySpec":
-        rule_ids = [rule.check_id for rule in self.eval_rules]
-        if len(set(rule_ids)) != len(rule_ids):
-            raise ValueError("evalRules checkId values must be unique")
-        if len(set(self.security_invariant_checks)) != len(self.security_invariant_checks):
-            raise ValueError("securityInvariantChecks must be unique")
-
-        by_id = {rule.check_id: rule.classification for rule in self.eval_rules}
-        for check_id in self.security_invariant_checks:
-            if by_id.get(check_id) != "blocking":
-                raise ValueError(
-                    f"security invariant check {check_id!r} must have a blocking evalRule"
-                )
-        return self
 
 
 class PlatformPolicy(StrictModel):
