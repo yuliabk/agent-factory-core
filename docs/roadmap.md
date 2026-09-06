@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1B Runtime Governance is complete and Phase 1C C4.3 Tool Gateway read-only slice is complete; C4.4 Memory Gateway is next.
+**Current mode:** Phase 1B Runtime Governance, C4.3 Tool Gateway and C4.4 Memory Gateway are complete for the thin skeleton; C4.1 provider-neutral Model interface is next.
 
 ## North Star
 
@@ -76,7 +76,7 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 - [ ] provider-neutral model interface with one working adapter and one stub/second adapter for portability.
 - [x] first in-process Capability Registry resolver with authoritative records, bounded overrides and soft/strict behavior.
 - [x] Tool Gateway interface with trusted binding resolution, Runtime Governance checks, schema validation, audit and one deterministic read-only synthetic tool. Costed/write-capable tools remain blocked in this first slice.
-- [ ] Memory Gateway interface with session/task memory first.
+- [x] Memory Gateway interface with ephemeral `session` and `task_working` memory. Session scope is trusted request ID; task scope is trusted trace ID; tenant/release namespace isolation, permission/trust/classification/purpose/retention checks and minimized audit are enforced. Persistent memory remains later depth.
 - [ ] Hybrid Orchestrator can execute one bounded capability/model/tool/memory plan.
 
 ### 1D. Eval/release kernel
@@ -140,8 +140,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Phase 1B is complete and C4.3 is complete for the thin skeleton.** Tool execution now has a governed read-only vertical slice on top of trusted Runtime Governance, including trusted binding resolution, tenant/permission/trust/classification/deadline checks, JSON Schema validation and minimized audit evidence.
+**Phase 1B, C4.3 and C4.4 are complete for the thin skeleton.** Runtime authority now governs both read-only tools and ephemeral session/task memory. Memory is scoped by trusted context and cannot cross tenant/release/session/task boundaries; persistent memory classes remain explicitly outside the first implementation.
 
-**Next executable step:** Phase 1C C4.4 - add a storage-neutral Memory Gateway interface with session/task memory first, enforcing tenant, memory class, purpose, classification and compiled runtime authority. Then add the provider-neutral Model interface and bounded orchestrator.
+**Next executable step:** Phase 1C C4.1 - add a provider-neutral Model interface with one deterministic working adapter and a second stub/test adapter to prove portability. After that, C4.5 can bind Model/Tool/Memory through one bounded orchestrator.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
