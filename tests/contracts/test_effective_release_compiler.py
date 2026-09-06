@@ -40,6 +40,7 @@ CLIENT = ClientInstanceConfig.model_validate(
             "agentRef": {"name": "research-agent", "version": "0.1.0"},
             "tenant": {"id": "tenant-acme"},
             "variables": {"locale": "en"},
+            "trustProfile": "internal",
             "providerProfile": "balanced",
             "secretsRef": {"search": "secret://tenant-acme/search"},
             "memoryConfig": {"profile": "session-only"},
@@ -61,6 +62,7 @@ POLICY = PlatformPolicy.model_validate(
             "allowedProviderProfiles": ["balanced"],
             "allowedBudgetOverrideKeys": ["monthlyUsd"],
             "allowedMemoryConfigKeys": ["profile"],
+            "maxTrustProfile": "business",
             "registryMode": "strict",
             "defaultDataClassification": "internal",
             "exceptionAllowances": {
@@ -101,7 +103,17 @@ class EffectiveReleaseCompilerTests(unittest.TestCase):
         self.assertEqual(release.metadata.release_id, "release-001")
         self.assertEqual(release.spec.permissions, ("web.search",))
         self.assertEqual(release.spec.tenant.id, "tenant-acme")
+        self.assertEqual(release.spec.trust_profile, "internal")
         self.assertEqual(release.spec.capability_bindings["web.search"], "web-search:test")
+
+    def test_rejects_trust_profile_above_platform_ceiling(self) -> None:
+        client = CLIENT.model_copy(deep=True)
+        client.spec.trust_profile = "privileged"
+        with self.assertRaises(CompilationError) as ctx:
+            compile_effective_release(
+                MANIFEST, client, POLICY, REGISTRY, release_id="release-trust-denied"
+            )
+        self.assertIn("spec.trustProfile", str(ctx.exception))
 
     def test_rejects_ungranted_required_permission(self) -> None:
         client = CLIENT.model_copy(deep=True)
