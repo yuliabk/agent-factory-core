@@ -56,7 +56,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C5.1 Canonical decision-neutral EvalResult JSON Schema + frozen Pydantic model for functional/business, security/policy, cost/runtime and contract/portability families. Raw statuses are `PASS`, `PASS_WITH_WARNINGS`, `FAIL`; blocking/warning/advisory and release decisions are intentionally excluded from the result contract. Maps: CORE-212.
 - [x] C5.2 PlatformPolicy evalRules map every release-gated check explicitly to `blocking`, `warning` or `advisory`; unmapped/duplicate rules, mixed releases and malformed security-invariant policy fail closed; securityInvariantChecks cannot be downgraded from blocking. Maps: CORE-212.
 - [x] C5.3 ClientInstanceConfig requests `human-required`, `policy-auto` or `policy`; PlatformPolicy defines a concrete minimum strategy; compiler writes only concrete `human-required`/`policy-auto` to EffectiveReleaseConfig. Eval gate failures block every strategy; eligible policy-auto can auto-release and eligible human-required requires human approval. Maps: CORE-213.
-- [ ] C5.4 Build minimal Evidence Pack and release decision record. Maps: CORE-217.
+- [x] C5.4 Canonical HumanApprovalRecord, ReleaseDecisionRecord and EvidencePack contracts. Approval is bound to exact release/policy/exception refs and validity window; policy-auto/human-required decisions are recorded; blocking evals cannot be overridden; EvidencePack links versioned source/config/policy/component/eval/decision/rollback references without raw sensitive payloads. Maps: CORE-217.
 - [ ] C5.5 Drift check: runtime release maps to approved Spec + EffectiveReleaseConfig. Maps: CORE-218.
 
 ## C6 - Synthetic end-to-end gate
