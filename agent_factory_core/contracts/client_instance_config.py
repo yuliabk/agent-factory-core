@@ -4,6 +4,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .trust import TrustProfile
+
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -32,6 +34,7 @@ class ClientInstanceSpec(StrictModel):
     agent_ref: AgentRef = Field(alias="agentRef")
     tenant: TenantRef
     variables: dict[str, Any] = Field(default_factory=dict)
+    trust_profile: TrustProfile = Field(alias="trustProfile")
     provider_profile: str = Field(alias="providerProfile", min_length=1)
     secrets_ref: dict[str, str] = Field(alias="secretsRef", default_factory=dict)
     memory_config: dict[str, Any] = Field(alias="memoryConfig", default_factory=dict)
