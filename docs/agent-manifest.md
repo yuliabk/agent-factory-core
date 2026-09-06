@@ -1,11 +1,11 @@
 # Agent Manifest, Client Instance and Effective Release Contracts
 
-**Status:** Accepted direction after Owner Review  
-**Owner approval:** Required for implementation of the contract schemas
+**Status:** Accepted minimal Core Skeleton direction  
+**Date:** 2026-09-06
 
 ## 1. Purpose
 
-The platform separates reusable agent definition from client-specific authorization and runtime configuration.
+For the first executable Core Skeleton, the reusable `AgentManifest` must stay intentionally small. It describes the Agent Definition, not a concrete client deployment.
 
 ```text
 AgentManifest
@@ -18,156 +18,157 @@ EffectiveReleaseConfig
         -> Deployed Agent Instance
 ```
 
-This separation prevents client budgets, credentials, retention rules and permissions from being embedded in a reusable Agent repository.
+The first implementation should prove this chain end-to-end before the manifest grows additional fields.
 
-## 2. AgentManifest
+## 2. Minimal AgentManifest shape
 
-`AgentManifest` lives with the Agent Definition and describes what the Agent is and what it requires. It is machine-readable, versioned and reusable across clients.
+The MVP manifest has only four top-level elements:
 
-It MUST NOT contain secrets, raw PII, client credentials, client-specific business state or concrete authorization grants.
+- `apiVersion`
+- `kind`
+- `metadata`
+- `spec`
 
-### Required MVP sections
+### `metadata`
 
-| Section | Purpose |
-|---|---|
-| `apiVersion` | Contract schema version |
-| `kind` | `AgentManifest` |
-| `metadata` | Stable identity, version and owner |
-| `intent` | Business purpose and success outcome |
-| `template` | Base/template lineage |
-| `capabilities` | Capabilities provided and required |
-| `requirements` | Requested tools, memory, data classes and runtime needs |
-| `modelRequirements` | Model profile requirements, not hard-coded provider |
-| `evaluationRequirements` | Functional/security/cost/domain eval families |
-| `releaseRequirements` | Default release strategy and rollback expectations |
+For the first schema, metadata contains only:
 
-### Example
+- `name`
+- `version`
+- `description`
+
+### `spec`
+
+For the first schema, `spec` contains only:
+
+- `template` - reference to the starting template/version.
+- `capabilities` - capabilities the Agent provides or requires.
+- `tools` - tool/capability requirements, not client credential bindings.
+- `permissions` - permissions the Agent requires/requests, never grants to itself.
+- `memoryProfile` - reference to the memory behavior/profile required by the Agent.
+- `budgetProfile` - reference to the expected cost/budget behavior, not a concrete client amount.
+- `evalProfile` - reference to the evaluation family/profile required before release.
+
+This is the minimum skeleton, not the final forever-schema. New fields should be added only when a real use case proves they are needed.
+
+## 3. Canonical minimal example
 
 ```yaml
 apiVersion: agentfactory.io/v1alpha1
 kind: AgentManifest
+
 metadata:
-  id: research-agent
+  name: research-agent
   version: 0.1.0
-  owner: platform-owner
-intent:
-  businessGoal: "Provide policy-bounded research to other agents"
-  successOutcome: "Return structured evidence with provenance"
-template:
-  id: general-agent
-  version: 1
-capabilities:
-  provides:
-    - name: research.lookup
-      contractVersion: 1
-  requires:
-    - name: web.search
-      optional: true
-requirements:
-  requestedPermissions:
-    - capability: web.search
-  memoryClasses:
-    - session
-    - client_knowledge
-  dataClasses:
-    - public
-    - internal
-  runtimeProfile: bounded-standard
-modelRequirements:
-  profile: balanced
-  allowFallback: true
-evaluationRequirements:
-  requiredFamilies:
-    - functional
-    - security
-    - cost
-releaseRequirements:
-  strategy: policy
-  rollbackRequired: true
+  description: "Reusable policy-bounded research capability"
+
+spec:
+  template:
+    name: general-agent
+    version: 1
+
+  capabilities:
+    provides:
+      - research.lookup@v1
+    requires:
+      - web.search@v1
+
+  tools:
+    required:
+      - web.search
+
+  permissions:
+    requested:
+      - web.search
+
+  memoryProfile: session-plus-client-knowledge
+  budgetProfile: balanced
+  evalProfile: standard-agent
 ```
 
-The Agent asks for permissions and capabilities. It never grants them to itself.
+## 4. Important authority rule
 
-## 3. ClientInstanceConfig
+Fields in `AgentManifest` are **requirements or profile references**, not runtime authority.
 
-`ClientInstanceConfig` is tenant/environment specific. It binds the reusable Agent Definition to one client deployment.
-
-It includes, as applicable:
-
-- `tenant_id` and environment;
-- enabled capabilities and tools;
-- concrete permission grants within Platform Policy;
-- client data classification and source references;
-- budget envelope and runtime approver;
-- model/provider restrictions;
-- memory and retention configuration;
-- channels and integration bindings;
-- trust level;
-- release strategy override if permitted;
-- approved policy exceptions by reference;
-- credential references, never credential values.
-
-A client may make configuration stricter. It may not exceed the maximum authority permitted by Platform Policy or a valid ExceptionPolicy.
-
-## 4. PlatformPolicy and ExceptionPolicy
-
-PlatformPolicy defines mandatory limits, risk rules, trust-level ceilings, security invariants, cost guardrails and release governance.
-
-ExceptionPolicy is a controlled, explicit override mechanism for rules that are declared overridable. An exception includes scope, reason, approver, expiration/review date and audit reference.
-
-Non-overridable platform invariants cannot be bypassed by Manifest, client configuration, prompt, model output or exception.
-
-## 5. EffectiveReleaseConfig
-
-The Build / Control Plane compiles the three inputs into an immutable `EffectiveReleaseConfig` for a specific `agent_release_id`.
+For example:
 
 ```text
-EffectiveReleaseConfig
-- agent_release_id
-- agent_manifest_version
-- client_instance_config_version
-- platform_policy_version
-- exception_policy_refs[]
-- effective_permissions[]
-- enabled_capabilities[]
-- tool_bindings[]
-- model_routing_profile
-- memory_policy
-- data_classification
-- trust_level
-- business_budget
-- emergency_safety_cap
-- runtime_limits
-- release_strategy
-- required_evals[]
-- approval_routes[]
-- credential_refs[]
-- rollback_target
+AgentManifest says:      "I require web.search"
+ClientInstanceConfig:    "This tenant enables web.search"
+PlatformPolicy:          "web.search is allowed at this trust/data level"
+ExceptionPolicy:         "optional scoped override, if valid"
+Compiler result:         effective grant or denial
 ```
 
-Runtime executes the Effective Release, not raw drafts or conversational assumptions.
+An Agent never authorizes itself by declaring a permission in its manifest.
 
-## 6. Validation invariants
+## 5. ClientInstanceConfig
 
-The compiler/validator rejects a release when:
+`ClientInstanceConfig` adds values belonging to a specific client/environment without modifying the reusable Agent Definition.
 
-- a requested permission is not granted by ClientInstanceConfig + PlatformPolicy;
-- a grant exceeds the trust-level ceiling;
-- a non-overridable invariant would be weakened;
-- a required capability has no acceptable resolution for the target environment;
-- a secret value appears in a versioned config;
-- required budget/runtime controls are absent;
-- a protected side effect lacks a valid approval route;
-- release strategy conflicts with Platform Policy;
-- an ExceptionPolicy is expired, out of scope or invalid;
-- required evals or rollback requirements are missing.
+Typical client-specific values include:
 
-## 7. Change and re-approval rules
+- tenant/environment identity;
+- actual permission grants;
+- enabled tools/capabilities and bindings;
+- concrete budget and runtime approver;
+- trust/data classification;
+- provider restrictions;
+- memory/retention choices;
+- channels/integrations;
+- credential references;
+- release strategy and approved exception references.
 
-A new Effective Release is required when any material input changes. Fresh approval is required when policy classifies the change as material, including permission expansion, higher data class, new consequential tool, increased trust level, material budget expansion, retention change, major capability contract change or release-policy change.
+The same AgentManifest can therefore be deployed to many clients without repository forks.
 
-Provider/model substitutions that preserve the approved profile may use a regression fast path when Platform Policy permits.
+## 6. EffectiveReleaseConfig compiler
 
-## 8. Source of truth
+The Build / Control Plane compiler combines:
 
-The specification and its version history are the primary design artifact. Agent code and deployed instances are reproducible outputs of approved specs, manifests, client configuration and policy versions.
+```text
+AgentManifest
++ ClientInstanceConfig
++ PlatformPolicy
++ valid ExceptionPolicy overlays
+```
+
+and produces one immutable `EffectiveReleaseConfig` for a specific `agent_release_id`.
+
+The compiler resolves profile references into concrete effective values, including:
+
+- effective permissions;
+- enabled tools/capabilities;
+- memory policy;
+- concrete business budget and safety controls;
+- model/provider routing policy where applicable;
+- runtime limits;
+- eval requirements;
+- release strategy/approval route;
+- credential references;
+- policy/exception versions.
+
+Runtime executes the compiled Effective Release, never the raw manifest or conversational assumptions.
+
+## 7. Validation rules for the first skeleton
+
+The first validator/compiler must at minimum reject:
+
+- missing `apiVersion`, `kind`, `metadata` or `spec`;
+- missing `metadata.name`, `metadata.version` or `metadata.description`;
+- unsupported template/profile reference;
+- requested permission not allowed by client/platform policy;
+- secret values embedded in versioned configuration;
+- invalid or expired ExceptionPolicy;
+- compilation that cannot produce a complete EffectiveReleaseConfig for the selected environment.
+
+Errors should identify the exact path, violated rule and a short remediation hint.
+
+## 8. Expansion rule
+
+Do not add fields to the AgentManifest simply because they may be useful someday.
+
+A field moves into the reusable manifest only when it describes stable Agent Definition requirements shared across client instances. Client-specific values stay in `ClientInstanceConfig`; platform-wide rules stay in `PlatformPolicy`; resolved runtime authority stays only in `EffectiveReleaseConfig`.
+
+## 9. Source of truth
+
+The approved specification/history remains the primary artifact. The manifest is a machine-readable projection of the Agent Definition used by the Core compiler.

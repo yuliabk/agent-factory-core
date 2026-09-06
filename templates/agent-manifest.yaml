@@ -2,50 +2,32 @@ apiVersion: agentfactory.io/v1alpha1
 kind: AgentManifest
 
 metadata:
-  id: example-agent
+  name: example-agent
   version: 0.1.0
-  owner: platform-owner
-  status: draft
+  description: "Replace with a short reusable Agent description"
 
-intent:
-  businessGoal: "Replace with measurable business goal"
-  primaryUsers:
-    - end-user
-  successOutcome: "Replace with measurable outcome"
+spec:
+  template:
+    name: general-agent
+    version: 1
 
-template:
-  id: general-agent
-  version: 1
+  capabilities:
+    provides: []
+    requires: []
 
-capabilities:
-  provides: []
-  requires: []
+  tools:
+    required: []
 
-requirements:
-  requestedPermissions: []
-  memoryClasses:
-    - session
-  dataClasses:
-    - public
-  runtimeProfile: bounded-standard
-  toolCapabilities: []
+  permissions:
+    requested: []
 
-modelRequirements:
-  profile: balanced
-  allowFallback: true
-  requiredFeatures: []
+  memoryProfile: session-only
+  budgetProfile: balanced
+  evalProfile: standard-agent
 
-evaluationRequirements:
-  requiredFamilies:
-    - functional
-    - security
-    - cost
-
-releaseRequirements:
-  strategy: policy
-  rollbackRequired: true
-
-# Client-specific values such as tenant permissions, budget, retention,
-# provider restrictions, channels and credential references belong in
-# ClientInstanceConfig and are compiled with PlatformPolicy into an
-# immutable EffectiveReleaseConfig.
+# IMPORTANT:
+# - This file describes reusable Agent requirements, not client-specific grants.
+# - Concrete tenant permissions, budgets, retention, provider restrictions,
+#   channels, integrations and credential references belong in ClientInstanceConfig.
+# - PlatformPolicy / valid ExceptionPolicy determine what is actually allowed.
+# - Core compiles all inputs into immutable EffectiveReleaseConfig before runtime.

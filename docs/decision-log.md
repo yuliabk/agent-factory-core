@@ -14,6 +14,10 @@
 | AgentManifest reusable מופרד מ-ClientInstanceConfig | Accepted | agent-manifest.md |
 | `AgentManifest + ClientInstanceConfig + PlatformPolicy/ExceptionPolicy -> EffectiveReleaseConfig` | Accepted | agent-manifest.md / architecture.md |
 | Agent מבקש Permission/Capability אך אינו מעניק אותם לעצמו | Accepted | agent-manifest.md / security-model.md |
+| AgentManifest הראשון נשמר מינימלי: `apiVersion`, `kind`, `metadata(name, version, description)`, ו-`spec` בלבד | Accepted | agent-manifest.md |
+| `spec` הראשון כולל רק `template`, `capabilities`, `tools`, `permissions`, `memoryProfile`, `budgetProfile`, `evalProfile` | Accepted | agent-manifest.md / templates/agent-manifest.yaml |
+| Manifest profile/permission fields הם requirements/references ולא concrete client grants | Accepted | agent-manifest.md |
+| שדות חדשים יתווספו ל-AgentManifest רק כאשר use case אמיתי מוכיח צורך | Accepted | agent-manifest.md |
 | Release strategy מוגדרת בספציפיקציה/קונפיגורציה ומוגבלת ע"י Policy | Accepted | ADR-010 / agent-lifecycle.md |
 | Release modes: `human-required`, `policy-auto`, `policy` | Accepted | ADR-010 |
 | לא נדרש Human approval לכל שינוי/פעולה; approvals הם risk-based | Accepted | security-model.md / governance.md |
