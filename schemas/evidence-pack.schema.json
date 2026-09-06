@@ -19,7 +19,10 @@
     "specRef": {"type": "string", "minLength": 1},
     "agentManifestRef": {"type": "string", "minLength": 1},
     "clientInstanceConfigRef": {"type": "string", "minLength": 1},
-    "effectiveReleaseConfigRef": {"type": "string", "minLength": 1},
+    "effectiveReleaseConfigRef": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
     "platformPolicyRef": {"type": "string", "minLength": 1},
     "exceptionPolicyRefs": {
       "type": "array",
