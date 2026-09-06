@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1 Core Skeleton and the first real Research/Travel sandbox path are complete end-to-end. A second real external capability, `travel.flight.search@1`, now has a canonical provider-neutral contract, a separate working sandbox provider repository, exact Core Registry binding, and a merged Travel consumer. Production remains disabled. The next executable gate is one real cross-repository `Travel -> Core -> Flight Provider` invocation using the exact merged releases, followed by Eval/Release/Evidence reconstruction on the real commercial-evidence path.
+**Current mode:** Phase 1 Core Skeleton and the first real Research/Travel sandbox path are complete end-to-end. A second external capability, `travel.flight.search@1`, now has a canonical provider-neutral contract, a separate working sandbox provider repository, exact Core Registry binding, and a merged Travel consumer. However, manual testing of the deployed Travel Agent still returns no flight or hotel results: the deployed runtime has not yet been proven to invoke the new Core-governed flight capability, while hotels still depend on the exhausted/non-working SerpApi path. Production remains disabled. The immediate priority is therefore runtime/deployment activation and a real three-repository flight invocation from the deployed Travel path, before Eval/Release/Evidence and before hotel work.
 
 ## North Star
 
@@ -32,6 +32,7 @@ Principles:
 - endpoint URLs and credentials are runtime configuration, not consumer business logic;
 - commercial live evidence and background research remain separate evidence classes;
 - scraper-derived commercial evidence must not be represented as booking-ready or provider-verified;
+- green repository CI is not equivalent to a working deployed customer path; deployment/runtime activation must be proven explicitly;
 - production registration remains blocked until provider-side outbound network access is governed.
 
 ## Phase 0A - Historical baseline
@@ -147,9 +148,12 @@ Canonical capability: `travel.flight.search@1`.
 - [x] current Travel sandbox manifest requests `travel.flight.search` plus optional `research.lookup`, and does not request `web.search` or a provider-specific permission;
 - [x] `FlightSearchConsumerV1` sends a PII-minimized request and maps results to `EvidenceType.FLIGHT` with UNVERIFIED/observed semantics;
 - [x] governed flight evidence can replace legacy flight evidence without replacing hotel evidence;
-- [x] SerpApi remains legacy/fallback code but is not required by the new sandbox flight path;
+- [x] SerpApi remains legacy/fallback code but is not required by the new sandbox flight contract path;
 - [x] Travel `main` Contract v1 CI run `34044510496` passed after the flight consumer merge;
+- [x] manual customer-path test performed after merge: deployed Travel Agent still returns no flight results, proving that merged consumer/Registry/provider code has not yet been activated/proven in the deployed runtime path;
+- [ ] inspect deployed Travel API wiring/environment and activate the Core `travel.flight.search` invoker path instead of the exhausted SerpApi path;
 - [ ] execute one real cross-repository Travel -> Core -> Flight Provider -> live flight source request using the exact merged releases;
+- [ ] repeat the same call through the deployed/manual Travel entry point, not only GitHub Actions;
 - [ ] assert Core audit/correlation preserves Travel request/trace and exact Flight Provider implementation target;
 - [ ] prove Travel runtime authority remains only `travel.flight.search` / `research.lookup`, with no provider internals;
 - [ ] test provider unavailable/parser failure as a full remote scenario while preserving trace/deadline/budget/audit evidence;
@@ -158,16 +162,18 @@ Canonical capability: `travel.flight.search@1`.
 - [ ] keep all flight results non-booking-ready until an official provider contract explicitly proves booking/availability semantics;
 - [ ] keep production disabled until outbound network access of the Flight Provider is Core-governed.
 
-**Phase 3B status:** contract, independent provider, live source gate, Core Registry binding and Travel consumer are all merged and green. The missing proof is the complete three-repository runtime invocation.
+**Phase 3B status:** contract, independent provider, live source gate, Core Registry binding and Travel consumer are merged and green, but the manual deployed Travel path is still non-functional for flights. The immediate gap is runtime/deployment wiring, followed by the complete three-repository invocation proof.
 
-## Phase 3C - Hotels after the flight pattern is proven
+### 3C. Hotels after the flight runtime pattern is proven
 
+- [x] manual test confirms current deployed hotel search is non-functional because the legacy SerpApi path is exhausted/not working;
 - [ ] define provider-neutral `travel.hotel.search@1` contract;
 - [ ] keep hotel evidence separate from flight evidence and background research;
 - [ ] choose a sandbox provider only after contract semantics are fixed;
 - [ ] prove independent provider CI and live source gate;
 - [ ] register exact provider release in Core;
 - [ ] consume through Travel via generic CapabilityInvoker;
+- [ ] activate and prove the deployed/manual hotel path;
 - [ ] run the same remote Eval/Release/Evidence gate used for flights.
 
 **Rule:** do not combine hotel and flight provider contracts merely because one source can return both.
@@ -221,15 +227,17 @@ Apply the existing Core release machinery to real external capability paths rath
 
 **Research path:** complete end-to-end in sandbox. Travel -> Core -> Research -> Wikipedia is a real governed remote path.
 
-**Flight path:** the public contract, separate Flight Provider, live source test, exact Core Registry registration and Travel consumer are all merged and green. The exact current releases are:
+**Flight path:** contract, provider repository, live provider source gate, exact Core Registry registration and Travel consumer are merged and green, but the deployed/manual Travel Agent still returns no flight results. This means CI/contract integration is ahead of runtime deployment activation. Exact merged releases:
 
 - Core: `1aff3bf5e3300202dd46aa24e878d52fbdaba2b7`
 - Travel Agent: `5314ea8be564cac563a6a53eebf7c12247101688`
 - Flight Provider: `d2f4e18d5e8f5911a4365a48da80617b4304e77a`
 
-**Next executable step:** create a cross-repository Flight integration gate that checks out those exact releases, starts the real Flight Provider HTTP service with an ephemeral bearer token, compiles the current Travel manifest through Core, invokes `FlightSearchConsumerV1` through `GovernedCapabilityInvoker`, performs a real flight search, and asserts normalized observed FLIGHT evidence plus Core trace/audit/correlation and authority isolation.
+**Hotel path:** still legacy SerpApi-dependent in the deployed application and currently non-functional because the SerpApi quota/path is exhausted. `travel.hotel.search@1` does not exist yet.
 
-**Immediately after that:** run the existing Eval/Release/Evidence machinery over the real Research + Flight remote paths, then define `travel.hotel.search@1` using the same proven pattern.
+**Immediate next executable step:** inspect and wire the deployed Travel API/runtime so `FlightSearchConsumerV1` receives a real Core `GovernedCapabilityInvoker` configured for `flight-provider-sandbox`, then prove one real customer-path flight response. In parallel create the exact-release cross-repository CI gate for `Travel -> Core -> Flight Provider -> live source`.
+
+**After flight runtime activation:** run the existing Eval/Release/Evidence machinery over the real Research + Flight paths. Only then define `travel.hotel.search@1` and repeat the same pattern for hotels.
 
 **Production remains intentionally disabled** until Research and Flight provider outbound network access is routed through Core-governed network/egress policy and production-specific safety/eval gates pass.
 
