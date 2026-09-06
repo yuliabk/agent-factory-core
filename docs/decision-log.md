@@ -23,6 +23,10 @@
 | Capability Registry הוא source of truth ל-capability contract/metadata; Manifest מחזיק lightweight refs בלבד | Accepted | ADR-013 / capability-registry.md |
 | Capability ref כולל `ref`, `version`, optional `overrides`; ב-`requires` מותר גם `optional` | Accepted | ADR-013 / agent-manifest.md |
 | `overrides` מותר רק למפתחות שה-Registry סימן overrideable; compiler דוחה metadata/override לא מאושרים | Accepted | ADR-013 |
+| ClientInstanceConfig הראשון כולל `metadata(name, environment)` ו-`spec(agentRef, tenant, variables, providerProfile, secretsRef, memoryConfig, budgetOverrides, permissionOverrides, toolBindings)` | Accepted | client-instance-config.md |
+| ClientInstanceConfig אינו מכיל Agent business logic; overrides נשארים bounded by PlatformPolicy/ExceptionPolicy | Accepted | client-instance-config.md |
+| EffectiveReleaseConfig הוא ה-runtime-executable configuration artifact היחיד; runtime לא מריץ raw Manifest/ClientInstanceConfig | Accepted | effective-release-config.md |
+| שינוי material ב-runtime config יוצר release חדש במקום hand-edit ל-EffectiveReleaseConfig קיים | Accepted | effective-release-config.md |
 | Release strategy מוגדרת בספציפיקציה/קונפיגורציה ומוגבלת ע"י Policy | Accepted | ADR-010 / agent-lifecycle.md |
 | Release modes: `human-required`, `policy-auto`, `policy` | Accepted | ADR-010 |
 | לא נדרש Human approval לכל שינוי/פעולה; approvals הם risk-based | Accepted | security-model.md / governance.md |
