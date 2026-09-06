@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.io/schemas/capabilities/research.lookup.output.v1.json",
+  "title": "research.lookup v1 output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "answer", "findings", "evidence", "limitations"],
+  "properties": {
+    "status": {
+      "enum": ["complete", "partial", "unavailable"]
+    },
+    "answer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["statement", "evidenceIds"],
+        "properties": {
+          "statement": {"type": "string", "minLength": 1},
+          "evidenceIds": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1},
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "sourceType", "sourceRef", "summary"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "sourceType": {
+            "enum": ["internal", "web", "api", "capability", "model"]
+          },
+          "sourceRef": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Stable source reference such as a URL, document reference, API record reference, or governed capability reference."
+          },
+          "title": {"type": ["string", "null"], "minLength": 1},
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Minimized description of what the evidence supports; raw sensitive payloads are not required."
+          },
+          "retrievedAt": {"type": ["string", "null"], "format": "date-time"}
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    }
+  }
+}
