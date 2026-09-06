@@ -33,7 +33,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C2.8 Add immutable `EffectiveReleaseConfig` JSON Schema/Pydantic contract and compiler using typed policy objects. Maps: CORE-203.
 - [x] C2.9 Resolve required capability refs against an in-process Registry and reject non-overrideable override keys. Maps: CORE-202, CORE-205, CORE-206.
 - [x] C2.10 Define trusted `ExecutionContext` JSON Schema + Pydantic model/builder. Maps: CORE-204.
-- [x] C2.11 Compiler validation errors expose path/rule/remediation hints for current enforced rules.
+- [x] C2.11 Compiler validation errors expose path/rule/remediation for the current enforced rules.
 
 ## C3 - Runtime Governance kernel
 
@@ -61,13 +61,13 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 
 ## C6 - Synthetic end-to-end gate
 
-- [ ] C6.1 Create a tiny synthetic reference Agent Definition using only the minimal AgentManifest fields.
+- [x] C6.1 Checked-in `examples/synthetic-reference-agent/agent-manifest.json` uses only the accepted minimal AgentManifest fields; companion client/policy fixtures remain outside reusable Agent behavior and are validated against canonical JSON Schemas.
 - [x] C6.2 Compiler path supports AgentManifest + ClientInstanceConfig + typed Policy/Exception + Registry resolution -> EffectiveReleaseConfig.
-- [ ] C6.3 Execute through Runtime Governance kernel using ExecutionContext.
-- [ ] C6.4 Run required evals and release decision.
-- [ ] C6.5 Verify audit/evidence reconstruction and C5.5 drift check.
+- [x] C6.3 The checked-in synthetic definition compiles to trusted ExecutionContext and executes one bounded capability -> model -> read-only tool -> task-memory write/read plan through Runtime Governance.
+- [x] C6.4 The same end-to-end path emits functional/business, security/policy, cost/runtime and contract/portability EvalResults, maps them through PlatformPolicy and produces a policy-auto ReleaseDecisionRecord.
+- [x] C6.5 Per-step audit evidence, EvidencePack reconstruction, canonical release fingerprint and C5.5 drift verification are proven on the same release/context/spec chain.
 
-**Exit gate:** one complete thin path works without provider/business lock-in.
+**Exit gate: PASSED.** One complete thin Core path works end-to-end without provider or business-domain lock-in; PR #27 Core Contract Tests run #87 passed the synthetic gate.
 
 ## C7 - Research/Brain Agent gate
 
