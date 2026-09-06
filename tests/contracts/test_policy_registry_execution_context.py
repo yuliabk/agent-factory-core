@@ -50,6 +50,7 @@ CLIENT = {
         "agentRef": {"name": "research-agent", "version": "0.1.0"},
         "tenant": {"id": "tenant-a"},
         "variables": {},
+        "trustProfile": "internal",
         "providerProfile": "balanced",
         "secretsRef": {},
         "memoryConfig": {"retention": "short"},
@@ -69,6 +70,7 @@ POLICY = {
         "allowedProviderProfiles": ["balanced"],
         "allowedBudgetOverrideKeys": ["monthlyLimit"],
         "allowedMemoryConfigKeys": ["retention"],
+        "maxTrustProfile": "business",
         "registryMode": "strict",
         "defaultDataClassification": "internal",
         "exceptionAllowances": {
@@ -104,6 +106,7 @@ class PolicyRegistryExecutionContextTests(unittest.TestCase):
         Draft202012Validator(self.policy_schema).validate(POLICY)
         parsed = PlatformPolicy.model_validate(POLICY)
         self.assertEqual(parsed.spec.registry_mode, "strict")
+        self.assertEqual(parsed.spec.max_trust_profile, "business")
 
     def test_external_and_internal_top_level_shapes_stay_aligned(self) -> None:
         for schema, model in (
@@ -125,6 +128,7 @@ class PolicyRegistryExecutionContextTests(unittest.TestCase):
         )
         self.assertEqual(release.spec.capability_bindings["web.search"], "web-search:test")
         self.assertEqual(release.spec.data_classification, "internal")
+        self.assertEqual(release.spec.trust_profile, "internal")
 
     def test_registry_rejects_non_overrideable_key(self) -> None:
         manifest = json.loads(json.dumps(MANIFEST))
@@ -186,6 +190,7 @@ class PolicyRegistryExecutionContextTests(unittest.TestCase):
         Draft202012Validator(self.context_schema).validate(dumped)
         self.assertEqual(dumped["agentReleaseId"], "release-4")
         self.assertEqual(dumped["tenantId"], "tenant-a")
+        self.assertEqual(dumped["trustProfile"], "internal")
 
 
 if __name__ == "__main__":
