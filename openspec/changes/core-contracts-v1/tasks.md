@@ -71,7 +71,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 
 ## C7 - Research/Brain Agent gate
 
-- [x] C7.1 Authoritative `research.lookup@1` Registry contract is defined with canonical Registry/Input/Output JSON Schemas, `read_only` risk, `variable` cost, `public/internal` data scope, consumer permission `research.lookup`, bounded `qualityProfile` override, provider-neutral payload and structured evidence/provenance output. Provider-internal `web.search`/API/model/tool permissions do not leak into consumer authority. No implementation is registered until C7.2.
-- [ ] C7.2 Create Research/Brain Agent in a separate repository using a lightweight `research.lookup` capability ref and register its first compatible implementation/release.
-- [ ] C7.3 Start with the smallest useful source set and expand only after contract validation.
+- [x] C7.1 Authoritative `research.lookup@1` Registry contract is defined with canonical Registry/Input/Output JSON Schemas, `read_only` risk, `variable` cost, `public/internal` data scope, consumer permission `research.lookup`, bounded `qualityProfile` override, provider-neutral payload and structured evidence/provenance output. Provider-internal `web.search`/API/model/tool permissions do not leak into consumer authority.
+- [x] C7.2 Research/Brain Agent v0.1 exists in separate repository `yuliabk/agent-factory-research-agent`, provides lightweight `research.lookup@1`, is contract-locked to Core, passes its own CI, and is registered in the Core Registry by exact sandbox release commit `dad37d9147ed4fcb97c0ba268402e93e78e76645`. Core resolution tests verify the exact external implementation and fail closed for production.
+- [ ] C7.3 Start with the smallest useful real source set and expand only after contract validation; replace the synthetic external retriever without widening public capability authority.
 - [ ] C7.4 Use Travel Agent as the first external consumer after Research v1 is stable.
