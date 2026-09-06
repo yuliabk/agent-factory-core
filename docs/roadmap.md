@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1B Runtime Governance, Phase 1C adapter/orchestration and Phase 1D Eval/Release kernel through C5.5 drift verification are complete for the thin skeleton; C6 synthetic end-to-end gate is next.
+**Current mode:** Phase 1 Core Skeleton thin vertical slice is complete end-to-end through the C6 synthetic gate; the next executable step is C7 / Research-Brain Agent as the first real external reference consumer.
 
 ## North Star
 
@@ -92,27 +92,30 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 
 ## Phase 1E - Synthetic end-to-end gate
 
-- [ ] create a tiny synthetic reference Agent Definition using only minimal AgentManifest fields;
+- [x] checked-in tiny synthetic reference Agent Definition uses only the accepted minimal AgentManifest fields;
 - [x] compiler path supports AgentManifest + ClientInstanceConfig + typed Policy/Exception + Registry resolution -> EffectiveReleaseConfig;
-- [ ] execute the synthetic Agent through trusted ExecutionContext + Runtime Governance + bounded Hybrid Orchestrator;
-- [ ] exercise capability, model, tool and memory steps in one governed flow;
-- [ ] generate EvalResults and apply PlatformPolicy gate mapping;
-- [ ] create ReleaseDecisionRecord and EvidencePack;
-- [ ] run C5.5 drift verification and reconstruct minimized audit/evidence chain;
-- [ ] test at least one fail-closed negative path.
+- [x] synthetic Agent executes through trusted ExecutionContext + Runtime Governance + bounded Hybrid Orchestrator;
+- [x] capability, provider-neutral model, read-only tool and task-memory steps execute in one governed flow;
+- [x] all four EvalResult families are generated and mapped through PlatformPolicy;
+- [x] policy-auto ReleaseDecisionRecord and EvidencePack are created from the same exact release;
+- [x] C5.5 drift verification reconstructs a managed release and minimized audit/evidence chain;
+- [x] blocking security invariant failure is proven fail-closed even under `policy-auto`.
 
-**Exit gate:** one complete thin path can be compiled, executed, evaluated, released and reconstructed without provider/business lock-in.
+**Exit gate: PASSED.** One complete thin path can be compiled, executed, evaluated, released and reconstructed without provider or business-domain lock-in. C6 is the executable proof that the first Core Skeleton works as a system rather than only as isolated contracts.
 
 ## Phase 2 - Research/Brain Agent v1 - first real reference Agent
 
 Separate repository exposing `research.lookup`.
 
+- [ ] define and approve the authoritative `research.lookup` Capability Registry contract;
+- [ ] create the Research/Brain Agent in a separate repository with a lightweight capability reference rather than Core business logic;
 - [ ] inspect request/context and decide whether available/internal knowledge is sufficient;
 - [ ] choose internal knowledge, Web search, API, MCP, model knowledge or approved capability according to policy;
 - [ ] return structured evidence/provenance;
 - [ ] route model usage through Core policy rather than provider hard-code;
 - [ ] respect data, trust, budget and tool permissions;
-- [ ] degrade gracefully if optional sources are unavailable.
+- [ ] degrade gracefully if optional sources are unavailable;
+- [ ] run the first external-Agent integration/eval/release path through Core.
 
 ## Phase 3 - Travel Agent as first external consumer
 
@@ -155,8 +158,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Core Skeleton through C5.5 is complete for the thin skeleton.** The system can compile immutable runtime authority, execute through governed adapters/orchestration, evaluate release gates, create human/automated release evidence, fingerprint the exact EffectiveReleaseConfig and detect drift between approved evidence and runtime authority.
+**Phase 1 Core Skeleton is complete end-to-end.** A checked-in synthetic Agent definition validates against canonical contracts, compiles to immutable EffectiveReleaseConfig, derives trusted ExecutionContext, executes capability/model/tool/memory through bounded governance, emits minimized audit evidence, passes all four eval families, creates release/evidence artifacts and verifies exact provenance/drift. A blocking security invariant also fails closed under policy-auto.
 
-**Next executable step:** C6 synthetic end-to-end gate. Build one tiny synthetic Agent and prove the entire path in one testable flow: compile -> ExecutionContext -> orchestrate -> eval -> release decision -> EvidencePack -> drift/audit verification. Only after this complete path is green should the Research/Brain Agent become the first real external Agent repository.
+**Next executable step:** C7 / Phase 2 - define the authoritative `research.lookup` Registry contract and create the Research/Brain Agent in a separate repository as the first real external consumer of Core. Do not deepen production providers, persistent memory or domain-specific Core logic before this reference integration proves which depth is actually needed.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.

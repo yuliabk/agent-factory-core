@@ -1,0 +1,40 @@
+{
+  "apiVersion": "agentfactory.io/v1alpha1",
+  "kind": "AgentManifest",
+  "metadata": {
+    "name": "synthetic-reference-agent",
+    "version": "0.1.0",
+    "description": "Minimal synthetic Agent used only to prove the Core end-to-end contract path."
+  },
+  "spec": {
+    "template": {
+      "name": "general-agent",
+      "version": 1
+    },
+    "capabilities": {
+      "provides": [],
+      "requires": [
+        {
+          "ref": "synthetic.capability",
+          "version": "1",
+          "optional": false
+        }
+      ]
+    },
+    "tools": {
+      "required": ["synthetic.lookup"]
+    },
+    "permissions": {
+      "requested": [
+        "capability.synthetic.invoke",
+        "memory.read",
+        "memory.write",
+        "model.invoke",
+        "synthetic.lookup"
+      ]
+    },
+    "memoryProfile": "session-task",
+    "budgetProfile": "synthetic-zero-cost",
+    "evalProfile": "synthetic-gate"
+  }
+}
