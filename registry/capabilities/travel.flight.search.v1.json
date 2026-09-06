@@ -1,0 +1,13 @@
+{
+  "ref": "travel.flight.search",
+  "version": "1",
+  "inputSchemaRef": "schemas/capabilities/travel.flight.search.input.v1.json",
+  "outputSchemaRef": "schemas/capabilities/travel.flight.search.output.v1.json",
+  "riskClass": "read_only",
+  "costClass": "variable",
+  "allowedDataClassifications": ["public", "internal"],
+  "environments": ["sandbox", "production"],
+  "requiredPermissions": ["travel.flight.search"],
+  "overrideable": {},
+  "implementations": []
+}
