@@ -1,0 +1,45 @@
+{
+  "apiVersion": "agentfactory.io/v1alpha1",
+  "kind": "PlatformPolicy",
+  "metadata": {
+    "name": "synthetic-platform-policy",
+    "version": "1"
+  },
+  "spec": {
+    "allowedPermissions": [
+      "capability.synthetic.invoke",
+      "memory.read",
+      "memory.write",
+      "model.invoke",
+      "synthetic.lookup"
+    ],
+    "deniedPermissions": [],
+    "allowedProviderProfiles": ["balanced"],
+    "allowedBudgetOverrideKeys": [],
+    "allowedMemoryConfigKeys": [
+      "allowedClasses",
+      "allowedPurposes",
+      "allowedRetentionProfiles",
+      "readEnabled",
+      "writeEnabled",
+      "minimumTrustProfile"
+    ],
+    "maxTrustProfile": "internal",
+    "registryMode": "strict",
+    "defaultDataClassification": "internal",
+    "evalRules": [
+      {"checkId": "functional.synthetic-plan", "classification": "blocking"},
+      {"checkId": "security.synthetic-authority", "classification": "blocking"},
+      {"checkId": "cost.synthetic-zero-cost", "classification": "blocking"},
+      {"checkId": "contract.synthetic-portability", "classification": "blocking"}
+    ],
+    "securityInvariantChecks": ["security.synthetic-authority"],
+    "minimumReleaseStrategy": "policy-auto",
+    "exceptionAllowances": {
+      "permissions": [],
+      "providerProfiles": [],
+      "budgetOverrideKeys": [],
+      "memoryConfigKeys": []
+    }
+  }
+}
