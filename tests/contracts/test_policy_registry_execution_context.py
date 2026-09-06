@@ -102,6 +102,11 @@ class PolicyRegistryExecutionContextTests(unittest.TestCase):
             CapabilityRecord(
                 ref="web.search",
                 version="1",
+                inputSchemaRef="schema://web.search/input@1",
+                outputSchemaRef="schema://web.search/output@1",
+                riskClass="read_only",
+                costClass="variable",
+                allowedDataClassifications=["internal"],
                 environments=["sandbox", "production"],
                 requiredPermissions=["web.search"],
                 overrideable={"qualityProfile": ["economy", "balanced", "high"]},
