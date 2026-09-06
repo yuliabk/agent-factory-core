@@ -19,6 +19,7 @@ VALID_CONFIG = {
         "agentRef": {"name": "research-agent", "version": "0.1.0"},
         "tenant": {"id": "tenant-acme"},
         "variables": {"locale": "en"},
+        "trustProfile": "internal",
         "providerProfile": "balanced",
         "secretsRef": {"search": "secret://tenant-acme/search"},
         "memoryConfig": {"profile": "session-only"},
@@ -39,11 +40,20 @@ class ClientInstanceConfigContractTests(unittest.TestCase):
         self.validator.validate(VALID_CONFIG)
         parsed = ClientInstanceConfig.model_validate(VALID_CONFIG)
         self.assertEqual(parsed.spec.agent_ref.name, "research-agent")
+        self.assertEqual(parsed.spec.trust_profile, "internal")
         self.assertEqual(parsed.model_dump(by_alias=True)["kind"], "ClientInstanceConfig")
 
     def test_business_logic_field_is_rejected(self) -> None:
         config = json.loads(json.dumps(VALID_CONFIG))
         config["spec"]["businessLogic"] = {"prompt": "do sales"}
+        with self.assertRaises(ValidationError):
+            self.validator.validate(config)
+        with self.assertRaises(PydanticValidationError):
+            ClientInstanceConfig.model_validate(config)
+
+    def test_missing_trust_profile_is_rejected(self) -> None:
+        config = json.loads(json.dumps(VALID_CONFIG))
+        del config["spec"]["trustProfile"]
         with self.assertRaises(ValidationError):
             self.validator.validate(config)
         with self.assertRaises(PydanticValidationError):
