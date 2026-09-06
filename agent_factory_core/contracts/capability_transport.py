@@ -35,7 +35,7 @@ class CapabilityInvocationEnvelope(FrozenModel):
     deadline: datetime
     hop_count: int = Field(alias="hopCount", ge=0)
     max_hops: int = Field(alias="maxHops", ge=1, le=64)
-    budget_context: dict[str, Any] = Field(alias="budgetContext", default_factory=dict)
+    budget_context: dict[str, Any] = Field(alias="budgetContext")
     payload: dict[str, Any]
 
     @model_validator(mode="after")
@@ -58,7 +58,7 @@ class CapabilityInvocationResponse(FrozenModel):
     status: Literal["success", "error"]
     output: dict[str, Any] | None = None
     error_code: str | None = Field(alias="errorCode", default=None, min_length=1)
-    limitations: tuple[str, ...] = ()
+    limitations: tuple[str, ...]
 
     @model_validator(mode="after")
     def validate_status(self) -> "CapabilityInvocationResponse":
