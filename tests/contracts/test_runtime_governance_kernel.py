@@ -31,6 +31,7 @@ def context() -> ExecutionContext:
         environment="sandbox",
         agentId="research-agent",
         agentReleaseId="release-1",
+        trustProfile="internal",
         permissions=("web.search",),
         dataClassification="internal",
         capabilityBindings={"web.search": "web-search:test"},
@@ -54,6 +55,7 @@ class RuntimeGovernanceKernelTests(unittest.TestCase):
             tenant_id="tenant-a",
             permission="web.search",
             data_classification="internal",
+            required_trust_profile="sandbox",
         )
         self.assertTrue(allowed.allowed)
 
@@ -73,6 +75,16 @@ class RuntimeGovernanceKernelTests(unittest.TestCase):
         )
         self.assertFalse(denied.allowed)
         self.assertEqual(denied.rule, "data_classification")
+
+    def test_request_authority_rejects_trust_escalation(self) -> None:
+        decision = evaluate_request_authority(
+            context(),
+            tenant_id="tenant-a",
+            permission="web.search",
+            required_trust_profile="business",
+        )
+        self.assertFalse(decision.allowed)
+        self.assertEqual(decision.rule, "trust_profile")
 
     def test_request_authority_rejects_expired_deadline(self) -> None:
         ctx = context()
