@@ -14,6 +14,10 @@ INPUT_PATH = ROOT / "schemas" / "capabilities" / "travel.flight.search.input.v1.
 OUTPUT_PATH = ROOT / "schemas" / "capabilities" / "travel.flight.search.output.v1.json"
 RECORD_PATH = ROOT / "registry" / "capabilities" / "travel.flight.search.v1.json"
 REGISTRY_SCHEMA_PATH = ROOT / "schemas" / "capability-registry-record.schema.json"
+FLIGHT_PROVIDER_RELEASE = (
+    "github:yuliabk/agent-factory-flight-provider@"
+    "d2f4e18d5e8f5911a4365a48da80617b4304e77a"
+)
 
 
 class TravelFlightSearchContractTests(unittest.TestCase):
@@ -24,7 +28,7 @@ class TravelFlightSearchContractTests(unittest.TestCase):
         cls.record_data = json.loads(RECORD_PATH.read_text(encoding="utf-8"))
         cls.registry_schema = json.loads(REGISTRY_SCHEMA_PATH.read_text(encoding="utf-8"))
 
-    def test_registry_contract_is_provider_neutral_and_not_yet_bound(self) -> None:
+    def test_registry_contract_is_provider_neutral_and_bound_only_in_sandbox(self) -> None:
         Draft202012Validator(self.registry_schema).validate(self.record_data)
         record = CapabilityRecord.model_validate(self.record_data)
         self.assertEqual(record.ref, "travel.flight.search")
@@ -32,10 +36,31 @@ class TravelFlightSearchContractTests(unittest.TestCase):
         self.assertEqual(record.risk_class, "read_only")
         self.assertEqual(record.cost_class, "variable")
         self.assertEqual(record.required_permissions, ["travel.flight.search"])
-        self.assertEqual(record.implementations, [])
-        self.assertNotIn("serpapi", json.dumps(self.record_data).lower())
-        self.assertNotIn("google", json.dumps(self.record_data).lower())
-        self.assertNotIn("fast-flights", json.dumps(self.record_data).lower())
+        self.assertEqual(len(record.implementations), 1)
+        implementation = record.implementations[0]
+        self.assertEqual(implementation.id, FLIGHT_PROVIDER_RELEASE)
+        self.assertEqual(implementation.environments, ["sandbox"])
+        self.assertTrue(implementation.enabled)
+        self.assertIsNotNone(implementation.transport)
+        assert implementation.transport is not None
+        self.assertEqual(implementation.transport.type, "http-json")
+        self.assertEqual(implementation.transport.endpoint_ref, "flight-provider-sandbox")
+        self.assertEqual(implementation.transport.path, "/capabilities/travel.flight.search")
+        self.assertEqual(implementation.transport.auth, "bearer")
+        self.assertEqual(implementation.transport.timeout_seconds, 12)
+
+        public_contract = json.dumps(
+            {
+                "inputSchemaRef": self.record_data["inputSchemaRef"],
+                "outputSchemaRef": self.record_data["outputSchemaRef"],
+                "requiredPermissions": self.record_data["requiredPermissions"],
+                "overrideable": self.record_data["overrideable"],
+            }
+        ).lower()
+        self.assertNotIn("serpapi", public_contract)
+        self.assertNotIn("google", public_contract)
+        self.assertNotIn("fast-flights", public_contract)
+        self.assertNotIn("faster-flights", public_contract)
 
     def test_input_supports_one_way_and_round_trip_without_provider_selector(self) -> None:
         one_way = {
@@ -166,8 +191,27 @@ class TravelFlightSearchContractTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             Draft202012Validator(self.output_schema).validate(response)
 
-    def test_registry_fails_closed_until_a_sandbox_provider_is_registered(self) -> None:
+    def test_registry_resolves_exact_sandbox_release_and_production_fails_closed(self) -> None:
         registry = CapabilityRegistry([CapabilityRecord.model_validate(self.record_data)])
+        resolved = registry.resolve_required(
+            RequiredCapabilityRef(
+                ref="travel.flight.search",
+                version="1",
+                optional=False,
+                overrides={},
+            ),
+            environment="sandbox",
+            mode="strict",
+        )
+        self.assertIsNotNone(resolved)
+        assert resolved is not None
+        self.assertEqual(resolved.implementation_id, FLIGHT_PROVIDER_RELEASE)
+        self.assertEqual(resolved.required_permissions, ("travel.flight.search",))
+        self.assertEqual(resolved.allowed_data_classifications, ("public", "internal"))
+        self.assertIsNotNone(resolved.transport)
+        assert resolved.transport is not None
+        self.assertEqual(resolved.transport.endpoint_ref, "flight-provider-sandbox")
+
         with self.assertRaises(ValueError):
             registry.resolve_required(
                 RequiredCapabilityRef(
@@ -176,7 +220,7 @@ class TravelFlightSearchContractTests(unittest.TestCase):
                     optional=False,
                     overrides={},
                 ),
-                environment="sandbox",
+                environment="production",
                 mode="strict",
             )
 

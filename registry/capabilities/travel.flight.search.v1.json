@@ -9,5 +9,18 @@
   "environments": ["sandbox", "production"],
   "requiredPermissions": ["travel.flight.search"],
   "overrideable": {},
-  "implementations": []
+  "implementations": [
+    {
+      "id": "github:yuliabk/agent-factory-flight-provider@d2f4e18d5e8f5911a4365a48da80617b4304e77a",
+      "environments": ["sandbox"],
+      "enabled": true,
+      "transport": {
+        "type": "http-json",
+        "endpointRef": "flight-provider-sandbox",
+        "path": "/capabilities/travel.flight.search",
+        "auth": "bearer",
+        "timeoutSeconds": 12
+      }
+    }
+  ]
 }
