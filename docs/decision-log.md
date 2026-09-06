@@ -18,9 +18,11 @@
 | Business budget הוא warn-and-approve, לא silent overrun | Agreed direction; documented in main | ADR-008 |
 | Runtime budget overage מאושר על ידי גורם מאושר אצל הלקוח | Agreed direction; documented in main | ADR-008 |
 | Emergency safety cap נפרד מ-business budget | Agreed direction; ADR acceptance pending | provider-and-cost-policy.md |
-| Client UX הוא Black Box ללא jargon טכני | Agreed direction; documented in main | client-experience.md |
-| Intake רגיל צריך להיות קצר, בדרך כלל פחות מ-10 דקות | Agreed direction; documented in main | client-experience.md |
-| ה-Intake שואל מינימום שאלות קריטיות ומשלים assumptions לא קריטיות | Agreed direction; documented in main | client-experience.md |
+| Client UX הוא Black Box טכני אך שקוף לגבי scope, assumptions, services, cost ו-approvals | Accepted | platform-vision.md |
+| Intake רגיל מכוון לפחות מ-10 דקות ובדרך כלל 5-6 שאלות קריטיות; זה UX target ולא hard limit | Accepted | platform-vision.md |
+| ה-Intake שואל מינימום שאלות קריטיות ומשלים assumptions לא קריטיות | Accepted | platform-vision.md |
+| בבקשה עמומה ה-Factory רשאי infer configuration סביר ואז להציג assumptions ל-confirm/correct | Accepted | platform-vision.md |
+| Progressive complexity: מתחילים ב-Agent הפשוט ביותר שמספק outcome ורק אז מוסיפים autonomy/integrations/premium models | Accepted | platform-vision.md |
 | Research/Brain Agent יהיה Agent נפרד ומשותף לכל המערכת | Agreed direction; planned | roadmap.md |
 | Research Agent יבחר בין internal knowledge, web, API, MCP ו-approved capabilities | Agreed direction; planned | roadmap.md |
 | Travel Agent יהיה consumer ראשון לבדיקת reusability | Planned after Core gate | roadmap.md |
