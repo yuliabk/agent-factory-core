@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": [
     "apiVersion", "kind", "requestId", "traceId", "actorId", "actorType",
-    "tenantId", "environment", "agentId", "agentReleaseId", "permissions",
+    "tenantId", "environment", "agentId", "agentReleaseId", "trustProfile", "permissions",
     "dataClassification", "capabilityBindings", "providerProfile", "toolBindings",
     "memoryConfig", "budgetConfig", "deadline"
   ],
@@ -21,6 +21,7 @@
     "environment": {"type": "string", "minLength": 1},
     "agentId": {"type": "string", "minLength": 1},
     "agentReleaseId": {"type": "string", "minLength": 1},
+    "trustProfile": {"enum": ["sandbox", "internal", "business", "privileged"]},
     "permissions": {"type": "array", "items": {"type": "string", "minLength": 1}},
     "dataClassification": {"type": "string", "minLength": 1},
     "capabilityBindings": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
