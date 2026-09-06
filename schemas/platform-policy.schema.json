@@ -23,7 +23,8 @@
       "required": [
         "allowedPermissions", "deniedPermissions", "allowedProviderProfiles",
         "allowedBudgetOverrideKeys", "allowedMemoryConfigKeys", "maxTrustProfile",
-        "registryMode", "defaultDataClassification", "exceptionAllowances"
+        "registryMode", "defaultDataClassification", "evalRules",
+        "securityInvariantChecks", "exceptionAllowances"
       ],
       "properties": {
         "allowedPermissions": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
@@ -34,6 +35,24 @@
         "maxTrustProfile": {"enum": ["sandbox", "internal", "business", "privileged"]},
         "registryMode": {"enum": ["soft", "strict"]},
         "defaultDataClassification": {"type": "string", "minLength": 1},
+        "evalRules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["checkId", "classification"],
+            "properties": {
+              "checkId": {"type": "string", "minLength": 1},
+              "classification": {"enum": ["blocking", "warning", "advisory"]}
+            }
+          },
+          "uniqueItems": true
+        },
+        "securityInvariantChecks": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
         "exceptionAllowances": {
           "type": "object",
           "additionalProperties": false,
