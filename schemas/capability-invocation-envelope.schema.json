@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.io/schemas/capability-invocation-envelope/v1alpha1.json",
+  "title": "CapabilityInvocationEnvelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "kind",
+    "invocationId",
+    "requestId",
+    "traceId",
+    "callerAgentId",
+    "callerAgentReleaseId",
+    "tenantId",
+    "environment",
+    "capabilityRef",
+    "implementationId",
+    "dataClassification",
+    "delegatedPermissions",
+    "deadline",
+    "hopCount",
+    "maxHops",
+    "budgetContext",
+    "payload"
+  ],
+  "properties": {
+    "apiVersion": {"const": "agentfactory.io/v1alpha1"},
+    "kind": {"const": "CapabilityInvocationEnvelope"},
+    "invocationId": {"type": "string", "minLength": 1},
+    "requestId": {"type": "string", "minLength": 1},
+    "traceId": {"type": "string", "minLength": 1},
+    "callerAgentId": {"type": "string", "minLength": 1},
+    "callerAgentReleaseId": {"type": "string", "minLength": 1},
+    "tenantId": {"type": "string", "minLength": 1},
+    "environment": {"type": "string", "minLength": 1},
+    "capabilityRef": {"type": "string", "minLength": 1},
+    "implementationId": {"type": "string", "minLength": 1},
+    "dataClassification": {"type": "string", "minLength": 1},
+    "delegatedPermissions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "deadline": {"type": "string", "format": "date-time"},
+    "hopCount": {"type": "integer", "minimum": 0},
+    "maxHops": {"type": "integer", "minimum": 1, "maximum": 64},
+    "budgetContext": {"type": "object"},
+    "payload": {"type": "object"}
+  }
+}

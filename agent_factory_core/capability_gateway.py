@@ -31,12 +31,18 @@ class CapabilitySpec:
 
 
 CapabilityHandler = Callable[[Mapping[str, Any]], Mapping[str, Any]]
+ContextCapabilityHandler = Callable[[ExecutionContext, Mapping[str, Any]], Mapping[str, Any]]
 
 
 @dataclass(frozen=True)
 class CapabilityRegistration:
     spec: CapabilitySpec
-    handler: CapabilityHandler
+    handler: CapabilityHandler | None = None
+    context_handler: ContextCapabilityHandler | None = None
+
+    def __post_init__(self) -> None:
+        if (self.handler is None) == (self.context_handler is None):
+            raise ValueError("exactly one of handler or context_handler is required")
 
 
 @dataclass(frozen=True)
@@ -137,7 +143,12 @@ class CapabilityGateway:
                 now=now,
             )
 
-        output = dict(registration.handler(dict(payload)))
+        if registration.context_handler is not None:
+            output = dict(registration.context_handler(context, dict(payload)))
+        else:
+            assert registration.handler is not None
+            output = dict(registration.handler(dict(payload)))
+
         return CapabilityInvocationResult(
             allowed=True,
             rule="capability_gateway",
