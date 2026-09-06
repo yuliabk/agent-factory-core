@@ -51,6 +51,7 @@ CLIENT = {
         "tenant": {"id": "tenant-a"},
         "variables": {},
         "trustProfile": "internal",
+        "releaseStrategy": "policy",
         "providerProfile": "balanced",
         "secretsRef": {},
         "memoryConfig": {"retention": "short"},
@@ -71,6 +72,7 @@ POLICY = {
         "allowedBudgetOverrideKeys": ["monthlyLimit"],
         "allowedMemoryConfigKeys": ["retention"],
         "maxTrustProfile": "business",
+        "minimumReleaseStrategy": "policy-auto",
         "registryMode": "strict",
         "defaultDataClassification": "internal",
         "evalRules": [
@@ -112,6 +114,7 @@ class PolicyRegistryExecutionContextTests(unittest.TestCase):
         parsed = PlatformPolicy.model_validate(POLICY)
         self.assertEqual(parsed.spec.registry_mode, "strict")
         self.assertEqual(parsed.spec.max_trust_profile, "business")
+        self.assertEqual(parsed.spec.minimum_release_strategy, "policy-auto")
         self.assertEqual(parsed.spec.eval_rules[0].classification, "blocking")
 
     def test_external_and_internal_top_level_shapes_stay_aligned(self) -> None:
@@ -135,6 +138,7 @@ class PolicyRegistryExecutionContextTests(unittest.TestCase):
         self.assertEqual(release.spec.capability_bindings["web.search"], "web-search:test")
         self.assertEqual(release.spec.data_classification, "internal")
         self.assertEqual(release.spec.trust_profile, "internal")
+        self.assertEqual(release.spec.release_strategy, "policy-auto")
 
     def test_registry_rejects_non_overrideable_key(self) -> None:
         manifest = json.loads(json.dumps(MANIFEST))
