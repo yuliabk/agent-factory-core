@@ -28,6 +28,7 @@ The compiler now validates:
 - `ClientInstanceConfig.spec.agentRef` matches the AgentManifest name/version;
 - Agent-requested permissions are explicitly granted by the client and allowed by effective policy;
 - PlatformPolicy `deniedPermissions` remain blocking;
+- requested `trustProfile` does not exceed `PlatformPolicy.spec.maxTrustProfile`;
 - scoped, unexpired ExceptionPolicy overlays only expand dimensions declared overrideable by PlatformPolicy;
 - provider profile is allowed by effective policy;
 - every required tool has a concrete binding;
@@ -48,6 +49,7 @@ The first `EffectiveReleaseConfig` records:
 - Agent reference and tenant;
 - variables and declared capabilities;
 - resolved `capabilityBindings` from capability ref to implementation ID;
+- compiled `trustProfile`;
 - provider profile;
 - secret references;
 - memory and budget configuration;
@@ -55,6 +57,8 @@ The first `EffectiveReleaseConfig` records:
 - data classification;
 - tool bindings;
 - evaluation profile.
+
+The compiled `trustProfile` is runtime authority for trust-sensitive operations. It does not independently grant permissions.
 
 The Pydantic release model is frozen. Operationally, a released artifact is immutable: any material change produces a new `releaseId` instead of editing an existing release.
 
