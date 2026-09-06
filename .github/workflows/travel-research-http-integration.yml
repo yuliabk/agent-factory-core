@@ -1,0 +1,98 @@
+name: Travel Research HTTP Integration
+
+on:
+  pull_request:
+    paths:
+      - 'agent_factory_core/**'
+      - 'registry/**'
+      - 'schemas/**'
+      - 'tests/integration/**'
+      - '.github/workflows/travel-research-http-integration.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'agent_factory_core/**'
+      - 'registry/**'
+      - 'schemas/**'
+      - 'tests/integration/**'
+      - '.github/workflows/travel-research-http-integration.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  travel-core-research:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Core
+        uses: actions/checkout@v4
+
+      - name: Checkout exact Research Agent release
+        uses: actions/checkout@v4
+        with:
+          repository: yuliabk/agent-factory-research-agent
+          ref: 024367572ca001dec385ca0f781495b5fa91d181
+          path: _integration/research
+          persist-credentials: false
+
+      - name: Checkout exact Travel Agent consumer release
+        uses: actions/checkout@v4
+        with:
+          repository: yuliabk/travel-agent-bot
+          ref: 9da84b635d1ea3b1d62f4b4e8652acd22e42ead6
+          path: _integration/travel
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install integration dependencies
+        run: |
+          python -m pip install -r requirements-core.txt
+          python -m pip install -e _integration/research
+          python -m pip install email-validator
+
+      - name: Start exact Research Agent HTTP release
+        env:
+          CORE_CAPABILITY_TOKEN: ci-sandbox-capability-token
+          AGENT_IMPLEMENTATION_ID: github:yuliabk/agent-factory-research-agent@024367572ca001dec385ca0f781495b5fa91d181
+        run: |
+          python -m uvicorn research_brain.api:app --host 127.0.0.1 --port 8765 > /tmp/research-agent.log 2>&1 &
+          echo "RESEARCH_PID=$!" >> "$GITHUB_ENV"
+
+      - name: Verify Research service health
+        run: |
+          python - <<'PY'
+          import time
+          from urllib.request import urlopen
+
+          for _ in range(30):
+              try:
+                  with urlopen('http://127.0.0.1:8765/health', timeout=1) as response:
+                      if response.status == 200:
+                          break
+              except Exception:
+                  time.sleep(0.5)
+          else:
+              raise SystemExit('Research service did not become healthy')
+          PY
+
+      - name: Run real Travel -> Core -> Research -> Wikipedia integration
+        env:
+          TRAVEL_REPO_PATH: ${{ github.workspace }}/_integration/travel
+          RESEARCH_BASE_URL: http://127.0.0.1:8765
+          RESEARCH_CAPABILITY_TOKEN: ci-sandbox-capability-token
+        run: python -m unittest tests.integration.test_travel_core_research_http -v
+
+      - name: Show Research log on failure
+        if: failure()
+        run: cat /tmp/research-agent.log || true
+
+      - name: Stop Research service
+        if: always()
+        run: |
+          if [ -n "${RESEARCH_PID:-}" ]; then
+            kill "$RESEARCH_PID" 2>/dev/null || true
+          fi
