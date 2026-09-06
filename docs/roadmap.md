@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1 Core Skeleton is complete end-to-end; C7.1 `research.lookup@1`, C7.2 external Research/Brain Agent registration, and C7.3 first real sandbox source slice are complete. The next executable step is C7.4: use Travel Agent as the first sandbox consumer of `research.lookup@1` while keeping production disabled.
+**Current mode:** Phase 1 Core Skeleton is complete end-to-end; C7.1-C7.3 and the C7.4a Travel sandbox consumer/authority gate are complete. The next executable step is C7.4b: define and prove one governed Travel -> Core -> Research sandbox invocation path without direct peer URL coupling.
 
 ## North Star
 
@@ -28,6 +28,7 @@ Principles:
 - ExecutionContext is derived from EffectiveReleaseConfig rather than prompts or drafts;
 - release evidence is bound to the exact EffectiveReleaseConfig fingerprint and approved specification;
 - external capability consumers receive only their consumer authority, not provider-internal tool/provider permissions;
+- remote Agent-to-Agent invocation must preserve Core authority/trace/budget/deadline/audit boundaries rather than introduce direct peer URLs;
 - Research/Brain Agent is the first real external reference provider/consumer boundary test.
 
 ## Phase 0A - Historical baseline
@@ -124,14 +125,20 @@ Separate repository exposing `research.lookup`.
 
 ## Phase 3 - Travel Agent as first external consumer
 
-- [ ] consume `research.lookup@1` through Capability Registry in sandbox;
-- [ ] grant Travel Agent only `research.lookup`, not Research-provider internal web/API/model permissions;
-- [ ] exercise one real background-research request through the registered Research Agent release;
-- [ ] verify structured evidence/limitations reach the Travel consumer unchanged;
-- [ ] run consumer-side quality/security/cost/contract evals;
-- [ ] test provider/capability unavailable fallback;
-- [ ] prove no Travel-specific logic was needed in Core;
-- [ ] keep production disabled until provider-side network/tool governance is routed through Core.
+- [x] Travel Agent external commit `9da84b635d1ea3b1d62f4b4e8652acd22e42ead6` contains a provider-neutral `research.lookup@1` consumer slice and green Contract v1 CI;
+- [x] locked Travel manifest resolves through Core Capability Registry in sandbox to the exact Research Agent release;
+- [x] Travel EffectiveReleaseConfig/ExecutionContext contain only `research.lookup`; provider-internal `web.search` and direct tool bindings do not leak;
+- [x] Travel maps research output into separate non-commercial background evidence and keeps commercial SerpAPI evidence distinct;
+- [x] Travel background-research requests are PII-minimized and do not contain caller-selected provider/model/tool IDs;
+- [x] consumer capability failure degrades safely without failing the draft workflow;
+- [ ] execute one real Travel -> Core -> Research sandbox request through a governed remote capability transport;
+- [ ] verify real structured evidence/limitations from the registered Research release reach the Travel workflow unchanged;
+- [ ] run consumer-side quality/security/cost/contract evals on the real remote path;
+- [ ] test remote provider/capability unavailable fallback with trace/budget/deadline/audit preservation;
+- [ ] prove no Travel-specific routing/business logic is needed in Core remote transport;
+- [ ] keep production disabled until Research provider-side network/tool governance is routed through Core.
+
+**C7.4a status:** complete. Travel is now the first external sandbox consumer at the contract, workflow and authority-compile layers. The remaining C7.4b gate is actual governed cross-repository invocation.
 
 ## Phase 4 - Spec Compiler + Template Factory UX
 
@@ -166,8 +173,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Phase 1 Core Skeleton and C7.1-C7.3 are complete for sandbox.** The first real Research Agent source path is live: Core resolves `research.lookup@1` to the exact sandbox Research release, and that release can retrieve real background evidence from Wikipedia while preserving the public contract, freshness semantics and graceful failure behavior.
+**Phase 1 Core Skeleton, C7.1-C7.3 and C7.4a are complete for sandbox.** Research has a real governed-by-contract source path; Travel now consumes the public capability contract through a provider-neutral adapter, and Core proves the external Travel release receives only `research.lookup` authority while resolving to the exact registered Research release.
 
-**Next executable step:** C7.4 / Phase 3 - make Travel Agent the first sandbox consumer of `research.lookup@1`. The goal is to prove the consumer/provider boundary with real evidence while granting Travel only `research.lookup`. Production stays disabled until Research provider-side external network/tool access is itself routed through Core Runtime Governance.
+**Next executable step:** C7.4b - define the thinnest governed remote capability transport that carries the trusted caller context across a real Travel -> Core -> Research sandbox call. The transport must preserve request/trace IDs, deadline, hop/cycle limits, budget state, delegated authority and audit, and it must not expose Research URLs or provider-internal permissions to Travel business code. This is the next material architecture decision before implementation.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
