@@ -10,6 +10,16 @@ from agent_factory_core.memory_gateway import (
 )
 
 
+DEFAULT_MEMORY_CONFIG = {
+    "allowedClasses": ["session", "task_working"],
+    "allowedPurposes": ["conversation", "task"],
+    "allowedRetentionProfiles": ["session", "task"],
+    "readEnabled": True,
+    "writeEnabled": True,
+    "minimumTrustProfile": "internal",
+}
+
+
 def context(
     *,
     tenant_id: str = "tenant-a",
@@ -36,15 +46,7 @@ def context(
         capabilityBindings={},
         providerProfile="balanced",
         toolBindings={},
-        memoryConfig=memory_config
-        or {
-            "allowedClasses": ["session", "task_working"],
-            "allowedPurposes": ["conversation", "task"],
-            "allowedRetentionProfiles": ["session", "task"],
-            "readEnabled": True,
-            "writeEnabled": True,
-            "minimumTrustProfile": "internal",
-        },
+        memoryConfig=DEFAULT_MEMORY_CONFIG if memory_config is None else memory_config,
         budgetConfig={},
         deadline=datetime.now(timezone.utc) + timedelta(minutes=2),
     )
