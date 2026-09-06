@@ -17,8 +17,9 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C1.11 Accept minimal first AgentManifest shape: `apiVersion`, `kind`, `metadata(name/version/description)`, and `spec(template/capabilities/tools/permissions/memoryProfile/budgetProfile/evalProfile)`. Maps: CORE-202.
 - [x] C1.12 Accept hybrid schema boundary: JSON Schema canonical externally; Pydantic internal for Python runtime/validation. Maps: CORE-202, CORE-203. ADR-012.
 - [x] C1.13 Accept Registry-backed capability references and bounded overrides. Maps: CORE-202, CORE-205, CORE-206. ADR-013.
-- [x] C1.14 Accept minimal `ClientInstanceConfig`: metadata(name/environment) + spec(agentRef/tenant/variables/providerProfile/secretsRef/memoryConfig/budgetOverrides/permissionOverrides/toolBindings). Maps: CORE-202, CORE-203.
+- [x] C1.14 Accept minimal `ClientInstanceConfig`: metadata(name/environment) + spec(agentRef/tenant/variables/trustProfile/providerProfile/secretsRef/memoryConfig/budgetOverrides/permissionOverrides/toolBindings). Maps: CORE-202, CORE-203, CORE-210.
 - [x] C1.15 Confirm `EffectiveReleaseConfig` is the only runtime-executable configuration artifact. Maps: CORE-203, CORE-218.
+- [x] C1.16 Accept trust placement/enforcement: ClientInstanceConfig requests one of `sandbox/internal/business/privileged`; PlatformPolicy sets `maxTrustProfile`; compiler rejects requests above the ceiling; EffectiveReleaseConfig and ExecutionContext carry the compiled trust profile; trust does not grant permissions. Maps: CORE-204, CORE-208, CORE-210.
 
 ## C2 - Core Skeleton schemas/compiler
 
@@ -36,7 +37,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 
 ## C3 - Runtime Governance kernel
 
-- [ ] C3.1 Complete request-time policy evaluator. Deadline/tenant/permission/data-classification checks are implemented from trusted ExecutionContext; explicit trust-profile/risk-ceiling representation and runtime enforcement remain. Maps: CORE-208, CORE-210.
+- [x] C3.1 Complete request-time policy evaluator: deadline/tenant/permission/data-classification plus compiled trust-profile enforcement. Compile-time trust ceiling is `ClientInstanceConfig.trustProfile <= PlatformPolicy.maxTrustProfile`; runtime cannot elevate above `ExecutionContext.trustProfile`. Maps: CORE-208, CORE-210.
 - [x] C3.2 Permission/tenant/data-class enforcement tests, including conservative exact classification matching until a hierarchy is approved. Maps: CORE-204, CORE-208.
 - [x] C3.3 Runtime limits/hop/cycle enforcement. Maps: CORE-205, CORE-214.
 - [x] C3.4 Business-budget precheck + emergency safety-cap interface/tests; safety-cap stop is independent from business overage handling. Maps: CORE-211.
