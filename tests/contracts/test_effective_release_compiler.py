@@ -73,6 +73,10 @@ POLICY = PlatformPolicy.model_validate(
             "maxTrustProfile": "business",
             "registryMode": "strict",
             "defaultDataClassification": "internal",
+            "evalRules": [
+                {"checkId": "security.cross-tenant-isolation", "classification": "blocking"}
+            ],
+            "securityInvariantChecks": ["security.cross-tenant-isolation"],
             "exceptionAllowances": {
                 "permissions": [],
                 "providerProfiles": [],
