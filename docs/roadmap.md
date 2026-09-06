@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1A is substantially complete; the first trusted ExecutionContext is now defined and the Runtime Governance kernel is next.
+**Current mode:** Phase 1B Runtime Governance kernel is mostly implemented; trust/risk request-time enforcement remains the last open C3 boundary.
 
 ## North Star
 
@@ -66,10 +66,10 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 ### 1B. Runtime Governance kernel
 
 - [x] first trusted `ExecutionContext` contract and builder.
-- [ ] trust/risk + request-time permission evaluation.
-- [ ] runtime limits/hop/cycle enforcement.
-- [ ] business-budget precheck + emergency safety-cap interface.
-- [ ] minimal audit/trace event.
+- [ ] trust/risk + request-time permission evaluation - deadline/tenant/permission/classification checks are implemented; explicit trust-profile runtime enforcement remains.
+- [x] runtime limits/hop/cycle enforcement.
+- [x] business-budget precheck + emergency safety-cap interface.
+- [x] minimal audit/trace event with canonical JSON Schema + aligned Pydantic model.
 
 ### 1C. Adapter contracts
 
@@ -140,8 +140,10 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Phase 1A is now effectively closed for the thin skeleton.** The compilation chain has typed external/internal contracts through `ExecutionContext`.
+**Phase 1B is mostly implemented for the thin skeleton.** Request-time tenant/permission/classification/deadline enforcement, runtime hop/cycle limits, business-budget vs independent safety-cap handling and minimized audit evidence are now covered by contract tests.
 
-**Next executable step:** build the minimal Runtime Governance kernel around that ExecutionContext: request-time policy/permission enforcement, limits/budget guard and audit event. Then attach the first Tool/Memory/Model interfaces and run the synthetic end-to-end Agent.
+**Remaining C3 decision:** define how effective `trustProfile`/risk ceilings are represented in the compiled release and trusted `ExecutionContext`, then enforce them at request time without allowing prompts or Agent output to change authority.
+
+After that boundary is explicit, continue to the first Tool/Memory/Model adapter interfaces and the synthetic end-to-end Agent.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
