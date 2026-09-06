@@ -6,9 +6,13 @@
 
 | Decision | Status | ADR / Doc |
 |---|---|---|
-| Agent Factory Core הוא Platform Control Plane, לא Agent עסקי | Agreed direction; documented in main | ADR-005 |
-| כל Agent עסקי יהיה בריפו נפרד | Agreed direction; documented in main | ADR-005 |
-| Core מחזיק Contracts ומנגנונים משותפים: security, tools, memory, orchestration, budget, observability | Agreed direction; documented in main | architecture.md |
+| Agent Factory Core הוא Platform Core, לא Agent עסקי | Accepted | ADR-005 |
+| Core מחולק לוגית ל-Build / Control Plane ול-Runtime Governance Plane | Accepted | ADR-005 |
+| שני ה-Planes יכולים להתחיל באותו repo/project, אך נשמר ביניהם Contract boundary שמאפשר פיצול עתידי | Accepted | ADR-005 |
+| כל Agent עסקי יהיה בריפו נפרד | Accepted | ADR-005 |
+| Agent Definition + Client Instance Configuration + Core Policy/Contract Versions = Deployed Agent Instance | Accepted | architecture.md |
+| Agent Definition reusable אינו מחזיק Secrets, PII או Client-specific business state | Accepted | architecture.md |
+| Core מחזיק Contracts ומנגנונים משותפים: security, tools, memory, orchestration, budget, observability | Accepted | architecture.md |
 | Agent-to-Agent דרך Capability Registry ולא direct calls | Agreed direction; documented in main | ADR-006 |
 | Model/Provider אינם hard-coded ב-Agent | Agreed direction; documented in main | ADR-007 |
 | Model Router בוחר לפי profile, cost, privacy, quality ו-availability | Agreed direction; documented in main | provider-and-cost-policy.md |
