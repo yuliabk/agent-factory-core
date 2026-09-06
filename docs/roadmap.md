@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1B Runtime Governance and Phase 1C adapter/orchestration vertical slice are complete; Phase 1D Eval/Release kernel starts with C5.1 EvalResult.
+**Current mode:** Phase 1B Runtime Governance and Phase 1C adapter/orchestration vertical slice are complete; Phase 1D C5.1 canonical EvalResult is complete and C5.2 policy mapping is next.
 
 ## North Star
 
@@ -81,7 +81,7 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 
 ### 1D. Eval/release kernel
 
-- [ ] functional/security/cost/contract EvalResult schema.
+- [x] canonical decision-neutral EvalResult for functional/business, security/policy, cost/runtime and contract/portability families, with raw `PASS`, `PASS_WITH_WARNINGS`, `FAIL` statuses and schema/Pydantic alignment.
 - [ ] policy mapping: blocking/warning/advisory.
 - [ ] `human-required`, `policy-auto`, `policy` release decision logic.
 - [ ] Evidence Pack + release decision reference.
@@ -140,8 +140,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Phase 1B and Phase 1C are complete for the thin skeleton.** A trusted ExecutionContext now governs compiled capability dispatch, provider-neutral model routing, read-only tools and ephemeral session/task memory through one bounded Hybrid Orchestrator. The Orchestrator receives an Agent-prepared plan and does not contain business planning logic.
+**Phase 1B, Phase 1C and C5.1 are complete for the thin skeleton.** A trusted ExecutionContext governs the bounded runtime path, and evaluation checks now emit a canonical decision-neutral result artifact that remains separate from release policy.
 
-**Next executable step:** Phase 1D C5.1 - define the canonical EvalResult JSON Schema + aligned Pydantic model for functional/business, security/policy, cost/runtime and contract/portability families. After that, map results to blocking/warning/advisory policy before implementing release decisions.
+**Next executable step:** Phase 1D C5.2 - add typed PlatformPolicy mapping from `checkId` to `blocking`, `warning` or `advisory`, with non-overridable security invariants remaining blocking. Then C5.3 can consume mapped gate results to select the effective release strategy.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
