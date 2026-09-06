@@ -22,8 +22,8 @@
       "additionalProperties": false,
       "required": [
         "allowedPermissions", "deniedPermissions", "allowedProviderProfiles",
-        "allowedBudgetOverrideKeys", "allowedMemoryConfigKeys", "registryMode",
-        "defaultDataClassification", "exceptionAllowances"
+        "allowedBudgetOverrideKeys", "allowedMemoryConfigKeys", "maxTrustProfile",
+        "registryMode", "defaultDataClassification", "exceptionAllowances"
       ],
       "properties": {
         "allowedPermissions": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
@@ -31,6 +31,7 @@
         "allowedProviderProfiles": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
         "allowedBudgetOverrideKeys": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
         "allowedMemoryConfigKeys": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "maxTrustProfile": {"enum": ["sandbox", "internal", "business", "privileged"]},
         "registryMode": {"enum": ["soft", "strict"]},
         "defaultDataClassification": {"type": "string", "minLength": 1},
         "exceptionAllowances": {
