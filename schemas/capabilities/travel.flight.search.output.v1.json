@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.io/schemas/capabilities/travel.flight.search.output.v1.json",
+  "title": "travel.flight.search v1 output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "searchId", "observedAt", "options", "limitations"],
+  "properties": {
+    "status": {"enum": ["complete", "partial", "unavailable"]},
+    "searchId": {"type": "string", "minLength": 1},
+    "observedAt": {"type": "string", "format": "date-time"},
+    "options": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "optionId",
+          "carrierText",
+          "departureText",
+          "arrivalText",
+          "durationText",
+          "stops",
+          "price",
+          "isBest",
+          "bookingReady",
+          "evidenceStatus",
+          "sourceRef"
+        ],
+        "properties": {
+          "optionId": {"type": "string", "minLength": 1},
+          "carrierText": {"type": "string", "minLength": 1},
+          "departureText": {"type": "string", "minLength": 1},
+          "arrivalText": {"type": "string", "minLength": 1},
+          "durationText": {"type": "string", "minLength": 1},
+          "stops": {"type": "integer", "minimum": 0},
+          "price": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["displayText", "amount", "currency"],
+            "properties": {
+              "displayText": {"type": "string", "minLength": 1},
+              "amount": {"type": ["string", "null"], "pattern": "^[0-9]+(?:\\.[0-9]+)?$"},
+              "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"}
+            },
+            "oneOf": [
+              {"properties": {"amount": {"type": "string"}, "currency": {"type": "string"}}},
+              {"properties": {"amount": {"const": null}, "currency": {"const": null}}}
+            ]
+          },
+          "isBest": {"type": "boolean"},
+          "bookingReady": {"type": "boolean"},
+          "evidenceStatus": {"enum": ["observed", "provider-verified"]},
+          "sourceRef": {"type": ["string", "null"], "minLength": 1}
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    }
+  }
+}
