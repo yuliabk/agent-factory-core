@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1B Runtime Governance and Phase 1C adapter/orchestration vertical slice are complete; Phase 1D C5.1 EvalResult and C5.2 eval policy mapping are complete, and C5.3 release strategy is next.
+**Current mode:** Phase 1B Runtime Governance, Phase 1C adapter/orchestration and Phase 1D Eval/Release kernel through C5.5 drift verification are complete for the thin skeleton; C6 synthetic end-to-end gate is next.
 
 ## North Star
 
@@ -26,6 +26,7 @@ Principles:
 - ClientInstanceConfig contains client/environment deployment values only, never reusable business logic;
 - Runtime executes only compiled EffectiveReleaseConfig;
 - ExecutionContext is derived from EffectiveReleaseConfig rather than prompts or drafts;
+- release evidence is bound to the exact EffectiveReleaseConfig fingerprint and approved specification;
 - Research/Brain Agent becomes the first real reference consumer as soon as the Core slice is usable.
 
 ## Phase 0A - Historical baseline
@@ -52,12 +53,12 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 - [x] Immutable `EffectiveReleaseConfig` JSON Schema + frozen Pydantic model.
 - [x] Minimal typed `PlatformPolicy` JSON Schema + Pydantic model.
 - [x] Minimal scoped/expiring `ExceptionPolicy` JSON Schema + Pydantic model.
-- [x] Compiler now consumes typed PlatformPolicy/ExceptionPolicy rather than a temporary dictionary boundary.
+- [x] Compiler consumes typed PlatformPolicy/ExceptionPolicy.
 - [x] Compiler validates scoped exceptions against explicit PlatformPolicy exception allowances.
 - [x] In-process Capability Registry resolves required capability refs and rejects protected/invalid overrides.
 - [x] EffectiveReleaseConfig records resolved capability bindings and applied policy/exception versions.
 - [x] Trusted `ExecutionContext` JSON Schema + Pydantic builder from EffectiveReleaseConfig.
-- [x] Compiler errors expose path/rule/remediation for the current enforced rules.
+- [x] Compiler errors expose path/rule/remediation for enforced rules.
 
 **Contract rule:** JSON Schema is externally authoritative. Pydantic is an internal implementation projection and must remain aligned.
 
@@ -65,28 +66,42 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 
 ### 1B. Runtime Governance kernel
 
-- [x] first trusted `ExecutionContext` contract and builder.
+- [x] trusted `ExecutionContext` contract and builder.
 - [x] trust/risk + request-time permission evaluation, including compile-time trust ceiling and request-time minimum trust enforcement.
 - [x] runtime limits/hop/cycle enforcement.
 - [x] business-budget precheck + emergency safety-cap interface.
-- [x] minimal audit/trace event with canonical JSON Schema + aligned Pydantic model.
+- [x] minimized audit/trace event with canonical JSON Schema + aligned Pydantic model.
 
 ### 1C. Adapter contracts
 
-- [x] provider-neutral Model Router with deterministic primary + compatible stub adapter, Core-owned profile routing, bounded fallback and Runtime Governance checks. Costed adapters remain blocked until budget accounting is connected.
-- [x] first in-process Capability Registry resolver with authoritative records, bounded overrides and soft/strict behavior.
-- [x] Tool Gateway interface with trusted binding resolution, Runtime Governance checks, schema validation, audit and one deterministic read-only synthetic tool. Costed/write-capable tools remain blocked in this first slice.
-- [x] Memory Gateway interface with ephemeral `session` and `task_working` memory. Session scope is trusted request ID; task scope is trusted trace ID; tenant/release namespace isolation, permission/trust/classification/purpose/retention checks and minimized audit are enforced. Persistent memory remains later depth.
-- [x] Hybrid Orchestrator executes one Agent-prepared bounded capability/model/tool/memory plan, preserves per-step gateway checks, enforces max-step/repeat/deadline boundaries and fails closed on the first denial.
+- [x] provider-neutral Model Router with deterministic primary + compatible stub adapter, Core-owned profile routing, bounded fallback and Runtime Governance checks.
+- [x] in-process Capability Registry resolver with authoritative records, bounded overrides and soft/strict behavior.
+- [x] Tool Gateway with trusted binding resolution, Runtime Governance checks, schema validation, audit and deterministic read-only synthetic tool.
+- [x] Memory Gateway with ephemeral `session` and `task_working` memory, trusted scope isolation and governed reads/writes.
+- [x] Hybrid Orchestrator executes one Agent-prepared bounded capability/model/tool/memory plan, preserves per-step gateway checks, enforces max-step/repeat/deadline boundaries and fails closed on denial.
 
 ### 1D. Eval/release kernel
 
-- [x] canonical decision-neutral EvalResult for functional/business, security/policy, cost/runtime and contract/portability families, with raw `PASS`, `PASS_WITH_WARNINGS`, `FAIL` statuses and schema/Pydantic alignment.
-- [x] typed PlatformPolicy mapping from release-gated `checkId` to `blocking`, `warning`, `advisory`, with fail-closed unmapped/duplicate/mixed-release handling and non-downgradeable security invariants.
-- [ ] `human-required`, `policy-auto`, `policy` release strategy compilation and release action logic.
-- [ ] Evidence Pack + release decision reference.
+- [x] canonical decision-neutral EvalResult for functional/business, security/policy, cost/runtime and contract/portability families.
+- [x] typed PlatformPolicy eval mapping to blocking/warning/advisory with fail-closed handling and non-downgradeable security invariants.
+- [x] requested `human-required` / `policy-auto` / `policy` strategy compiled to a concrete effective strategy.
+- [x] HumanApprovalRecord, ReleaseDecisionRecord and EvidencePack contracts with exact release/policy/exception binding.
+- [x] canonical SHA-256 EffectiveReleaseConfig fingerprint and drift verification against approved spec/evidence and runtime ExecutionContext authority.
 
-**Exit gate:** one synthetic reference Agent can be compiled, executed and released through the complete thin path.
+**Phase 1D status:** complete for the thin skeleton.
+
+## Phase 1E - Synthetic end-to-end gate
+
+- [ ] create a tiny synthetic reference Agent Definition using only minimal AgentManifest fields;
+- [x] compiler path supports AgentManifest + ClientInstanceConfig + typed Policy/Exception + Registry resolution -> EffectiveReleaseConfig;
+- [ ] execute the synthetic Agent through trusted ExecutionContext + Runtime Governance + bounded Hybrid Orchestrator;
+- [ ] exercise capability, model, tool and memory steps in one governed flow;
+- [ ] generate EvalResults and apply PlatformPolicy gate mapping;
+- [ ] create ReleaseDecisionRecord and EvidencePack;
+- [ ] run C5.5 drift verification and reconstruct minimized audit/evidence chain;
+- [ ] test at least one fail-closed negative path.
+
+**Exit gate:** one complete thin path can be compiled, executed, evaluated, released and reconstructed without provider/business lock-in.
 
 ## Phase 2 - Research/Brain Agent v1 - first real reference Agent
 
@@ -140,8 +155,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Phase 1B, Phase 1C, C5.1 and C5.2 are complete for the thin skeleton.** Evaluation facts are separate from policy effects, and release-gated checks now map deterministically through PlatformPolicy with security invariants protected from downgrade.
+**Core Skeleton through C5.5 is complete for the thin skeleton.** The system can compile immutable runtime authority, execute through governed adapters/orchestration, evaluate release gates, create human/automated release evidence, fingerprint the exact EffectiveReleaseConfig and detect drift between approved evidence and runtime authority.
 
-**Next executable step:** Phase 1D C5.3 - add requested release strategy to ClientInstanceConfig, a policy-required minimum strategy, compile a concrete effective strategy into EffectiveReleaseConfig, then convert an EvalGateSummary into `block`, `auto-release` or `require-human` without yet creating the final release decision/evidence record.
+**Next executable step:** C6 synthetic end-to-end gate. Build one tiny synthetic Agent and prove the entire path in one testable flow: compile -> ExecutionContext -> orchestrate -> eval -> release decision -> EvidencePack -> drift/audit verification. Only after this complete path is green should the Research/Brain Agent become the first real external Agent repository.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
