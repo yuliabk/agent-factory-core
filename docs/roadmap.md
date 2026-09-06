@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Architecture synchronized; preparing the first executable Core vertical slice.
+**Current mode:** Architecture synchronization complete; ready to design the first executable Core vertical slice.
 
 ## North Star
 
@@ -30,7 +30,7 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 
 ## Phase 0B - Core architecture/contracts synchronization
 
-**Status:** Substantially complete after Owner brainstorming on 2026-09-06.
+**Status:** Complete after Owner review and repository-wide architecture synchronization on 2026-09-06.
 
 ### Accepted/synchronized decisions
 
@@ -50,6 +50,7 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 - [x] Eval thresholds/release eligibility are policy-driven; invariant security failures remain blocking.
 - [x] Hybrid orchestration: Core sets boundaries, Agents plan autonomously inside them.
 - [x] Research/Brain Agent remains a separate reusable Agent providing `research.lookup`.
+- [x] Full architecture consistency review recorded in `docs/architecture-review-2026-09-06.md`.
 
 ### Remaining architecture decisions that do NOT block starting the Core Skeleton
 
@@ -167,7 +168,7 @@ Deepen only proven needs:
 
 ## Current stop point
 
-Architecture synchronization is being completed in the repository now.
+**Phase 0B is complete.** The repository architecture/contracts are synchronized and ready to serve as the implementation baseline.
 
 **Next executable step:** design and implement Phase 1A/1B as the smallest Core Skeleton, then attach enough adapter/eval functionality to run one synthetic end-to-end vertical slice.
 
