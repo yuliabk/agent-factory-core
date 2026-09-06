@@ -36,9 +36,11 @@ For the first schema, `spec` SHALL contain only:
 
 Manifest permission/profile fields SHALL represent reusable Agent requirements or profile references, not concrete tenant authorization grants, client budget amounts, credentials or client-specific runtime bindings.
 
+Capability Registry SHALL be the source of truth for capability contract metadata. AgentManifest capability entries SHALL be lightweight references containing `ref`, `version`, optional bounded `overrides`, and `optional` only for required capabilities. AgentManifest SHALL NOT duplicate Registry-owned provider identity, input/output schemas, risk class, cost class or implementation metadata. The compiler SHALL reject override keys not declared overrideable by the resolved Registry record.
+
 Client-specific grants, budget, retention, provider restrictions, credential references, tenant/environment identity and runtime bindings SHALL remain in `ClientInstanceConfig`.
 
-New AgentManifest fields SHOULD be added only after a real use case demonstrates that the value belongs to the reusable Agent Definition rather than client configuration or PlatformPolicy.
+New AgentManifest fields SHOULD be added only after a real use case demonstrates that the value belongs to the reusable Agent Definition rather than client configuration, Capability Registry or PlatformPolicy.
 
 #### Scenario: Same Agent for two clients
 - GIVEN the same Research Agent version is deployed to two tenants
@@ -55,9 +57,19 @@ New AgentManifest fields SHOULD be added only after a real use case demonstrates
 - WHEN the first Core Skeleton validator runs
 - THEN the manifest SHALL be eligible for compilation without requiring speculative future fields
 
+#### Scenario: Capability metadata stays in Registry
+- GIVEN AgentManifest provides `research.lookup`
+- WHEN the capability declares its risk, schemas, cost class and provider implementations
+- THEN that metadata SHALL live in Capability Registry and the AgentManifest SHALL reference the capability by `ref` and `version`
+
+#### Scenario: Non-overrideable capability metadata
+- GIVEN an AgentManifest capability reference contains an override key not marked overrideable by Registry
+- WHEN compilation runs
+- THEN compilation SHALL reject the override with a typed validation error
+
 ### Requirement: CORE-203 - Effective Release compilation
 
-The Build / Control Plane SHALL compile `AgentManifest + ClientInstanceConfig + PlatformPolicy + valid ExceptionPolicy overlays` into an immutable `EffectiveReleaseConfig` for each `agent_release_id`.
+The Build / Control Plane SHALL compile `AgentManifest + ClientInstanceConfig + PlatformPolicy + valid ExceptionPolicy overlays + resolved Capability Registry contracts` into an immutable `EffectiveReleaseConfig` for each `agent_release_id`.
 
 #### Scenario: Runtime receives drafts
 - GIVEN an uncompiled client draft differs from the last EffectiveReleaseConfig
@@ -75,12 +87,12 @@ Every Agent invocation SHALL receive a trusted ExecutionContext containing tenan
 
 ### Requirement: CORE-205 - Capability-based Agent routing
 
-Agent-to-Agent delegation SHALL use versioned capabilities resolved by Core rather than direct repository/URL coupling by default.
+Agent-to-Agent delegation SHALL use versioned capability references resolved by Core through Capability Registry rather than direct repository/URL coupling by default.
 
 #### Scenario: Research implementation replaced
 - GIVEN Travel Agent requires `research.lookup`
-- WHEN a contract-compatible Research implementation is replaced
-- THEN Travel Agent SHALL continue to request the same capability without business-code changes
+- WHEN a contract-compatible Research implementation is replaced in Registry
+- THEN Travel Agent SHALL continue to request the same capability reference without business-code changes
 
 #### Scenario: Delegation exceeds hop limit
 - GIVEN a delegation chain reaches its configured maximum hop count
@@ -91,6 +103,8 @@ Agent-to-Agent delegation SHALL use versioned capabilities resolved by Core rath
 
 Capability Registry enforcement SHALL permit policy-defined warnings/mocks/degraded optional resolution in sandbox/development while requiring critical/consequential production capabilities to resolve to registered, compatible and policy-approved implementations.
 
+Registry SHALL define authoritative capability contract metadata and MAY define which capability options are overrideable by consumer manifests.
+
 #### Scenario: Optional dev capability missing
 - GIVEN an optional capability is missing in sandbox
 - WHEN policy marks it non-critical
@@ -100,6 +114,11 @@ Capability Registry enforcement SHALL permit policy-defined warnings/mocks/degra
 - GIVEN a required consequential capability is unresolved in production
 - WHEN execution/release is attempted
 - THEN the affected operation/release SHALL be blocked according to policy
+
+#### Scenario: Valid bounded override
+- GIVEN a Registry record marks `qualityProfile` overrideable with an allowed value set
+- WHEN a consumer capability reference requests an allowed value
+- THEN compilation MAY apply the override while keeping all non-overrideable Registry metadata authoritative
 
 ### Requirement: CORE-207 - Provider-neutral policy-driven routing
 

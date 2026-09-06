@@ -12,8 +12,16 @@ spec:
     version: 1
 
   capabilities:
-    provides: []
-    requires: []
+    provides:
+      # Registry is the source of truth for schemas/risk/cost/provider metadata.
+      # - ref: research.lookup
+      #   version: "1"
+      #   overrides: {}
+    requires:
+      # - ref: web.search
+      #   version: "1"
+      #   optional: true
+      #   overrides: {}
 
   tools:
     required: []
@@ -26,6 +34,11 @@ spec:
   evalProfile: standard-agent
 
 # IMPORTANT:
+# - Capability entries are lightweight references into Capability Registry.
+# - Do not copy registry-owned metadata (risk, schemas, provider identity, cost class)
+#   into the AgentManifest.
+# - `overrides` may contain only keys explicitly declared overrideable by the
+#   resolved registry record; the compiler rejects unknown override keys.
 # - This file describes reusable Agent requirements, not client-specific grants.
 # - Concrete tenant permissions, budgets, retention, provider restrictions,
 #   channels, integrations and credential references belong in ClientInstanceConfig.
