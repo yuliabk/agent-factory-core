@@ -1,6 +1,6 @@
 # EffectiveReleaseConfig Compiler Contract
 
-**Status:** Accepted skeleton direction  
+**Status:** Core Skeleton v1 implementation contract  
 **Date:** 2026-09-06
 
 ## Purpose
@@ -14,24 +14,28 @@ AgentManifest
 + ClientInstanceConfig
 + PlatformPolicy
 + valid ExceptionPolicy overlays
++ Capability Registry resolution
 -> compiler
 -> EffectiveReleaseConfig
 ```
 
 Runtime MUST execute the compiled Effective Release rather than raw Manifest, client configuration or conversational assumptions.
 
-## First compiler skeleton
+## Current compiler skeleton
 
-The first compiler validates already-accepted rules only:
+The compiler now validates:
 
 - `ClientInstanceConfig.spec.agentRef` matches the AgentManifest name/version;
-- Agent-requested permissions are explicitly granted by the client and allowed by PlatformPolicy;
-- explicit client/platform denies win;
-- provider profile is allowed by policy;
+- Agent-requested permissions are explicitly granted by the client and allowed by effective policy;
+- PlatformPolicy `deniedPermissions` remain blocking;
+- scoped, unexpired ExceptionPolicy overlays only expand dimensions declared overrideable by PlatformPolicy;
+- provider profile is allowed by effective policy;
 - every required tool has a concrete binding;
-- budget and memory override keys are policy-allowed;
-- the PlatformPolicy version is recorded;
-- ExceptionPolicy references are recorded for the release.
+- budget and memory override keys are allowed by effective policy;
+- required capability refs resolve through Capability Registry;
+- capability override keys/values obey the Registry record;
+- Registry-required permissions are declared by the Agent;
+- exact PlatformPolicy and applied ExceptionPolicy references are recorded.
 
 Validation failures expose `path`, `rule` and a short `remediation` hint.
 
@@ -40,26 +44,29 @@ Validation failures expose `path`, `rule` and a short `remediation` hint.
 The first `EffectiveReleaseConfig` records:
 
 - release ID and environment;
-- platform/exception policy references;
+- platform policy name/version and applied exception references;
 - Agent reference and tenant;
-- resolved variables and capabilities;
+- variables and declared capabilities;
+- resolved `capabilityBindings` from capability ref to implementation ID;
 - provider profile;
 - secret references;
 - memory and budget configuration;
 - effective permissions;
+- data classification;
 - tool bindings;
 - evaluation profile.
 
 The Pydantic release model is frozen. Operationally, a released artifact is immutable: any material change produces a new `releaseId` instead of editing an existing release.
 
-## Current limitation
+## Runtime handoff
 
-The first compiler temporarily receives PlatformPolicy through a narrow mapping interface. The dedicated `PlatformPolicy` and `ExceptionPolicy` JSON Schema/Pydantic contracts remain the next policy-contract task and will replace that temporary boundary without changing the compiler's role.
+The trusted per-request `ExecutionContext` is derived from this compiled object plus request identity/trace/deadline values. Runtime authority is never reconstructed from the raw inputs.
 
 ## Canonical implementation
 
 - External contract: `schemas/effective-release-config.schema.json`
 - Python model: `agent_factory_core/contracts/effective_release_config.py`
 - Compiler: `agent_factory_core/compiler.py`
-- Example: `templates/effective-release-config.yaml`
-- Tests: `tests/contracts/test_effective_release_compiler.py`
+- Policy contracts: `schemas/platform-policy.schema.json`, `schemas/exception-policy.schema.json`
+- Registry resolver: `agent_factory_core/registry.py`
+- ExecutionContext: `schemas/execution-context.schema.json`, `agent_factory_core/contracts/execution_context.py`
