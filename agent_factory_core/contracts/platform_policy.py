@@ -4,6 +4,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .trust import TrustProfile
+
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -27,6 +29,7 @@ class PlatformPolicySpec(StrictModel):
     allowed_provider_profiles: list[str] = Field(alias="allowedProviderProfiles", default_factory=list)
     allowed_budget_override_keys: list[str] = Field(alias="allowedBudgetOverrideKeys", default_factory=list)
     allowed_memory_config_keys: list[str] = Field(alias="allowedMemoryConfigKeys", default_factory=list)
+    max_trust_profile: TrustProfile = Field(alias="maxTrustProfile")
     registry_mode: Literal["soft", "strict"] = Field(alias="registryMode")
     default_data_classification: str = Field(alias="defaultDataClassification", min_length=1)
     exception_allowances: ExceptionAllowances = Field(alias="exceptionAllowances")
