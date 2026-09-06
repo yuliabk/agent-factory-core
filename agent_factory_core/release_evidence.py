@@ -8,6 +8,7 @@ from .contracts.evidence_pack import EvidencePack
 from .contracts.human_approval_record import HumanApprovalRecord
 from .contracts.release_decision_record import ReleaseDecisionRecord
 from .eval_policy import EvalGateSummary
+from .provenance import effective_release_fingerprint
 from .release_kernel import decide_release_action
 
 
@@ -117,7 +118,6 @@ def build_evidence_pack(
     spec_ref: str,
     agent_manifest_ref: str,
     client_instance_config_ref: str,
-    effective_release_config_ref: str,
     template_module_refs: Sequence[str],
     config_diff_ref: str,
     capability_tool_contract_refs: Sequence[str] = (),
@@ -147,7 +147,7 @@ def build_evidence_pack(
         specRef=spec_ref,
         agentManifestRef=agent_manifest_ref,
         clientInstanceConfigRef=client_instance_config_ref,
-        effectiveReleaseConfigRef=effective_release_config_ref,
+        effectiveReleaseConfigRef=effective_release_fingerprint(release),
         platformPolicyRef=_platform_policy_ref(release),
         exceptionPolicyRefs=release.policy.exception_policy_refs,
         templateModuleRefs=tuple(template_module_refs),
