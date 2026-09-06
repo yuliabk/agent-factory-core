@@ -149,7 +149,27 @@ The compiler resolves profile references into concrete effective values, includi
 
 Runtime executes the compiled Effective Release, never the raw manifest or conversational assumptions.
 
-## 7. Validation rules for the first skeleton
+## 7. Schema implementation boundary
+
+The accepted implementation model is hybrid:
+
+```text
+Approved contract/spec
+      -> canonical JSON Schema
+      -> Pydantic runtime models/validators
+      -> compiler/runtime logic
+```
+
+Rules:
+
+- JSON Schema is the canonical external machine-readable contract.
+- Pydantic is the internal Python representation and validation layer.
+- External consumers must be able to validate without importing Python/Pydantic.
+- Pydantic must not define a second independent meaning for the contract.
+- Schema/Pydantic alignment must be covered by automated tests so drift is detected early.
+- If Core moves away from Python in the future, the external JSON Schema should remain stable while the internal type implementation can change.
+
+## 8. Validation rules for the first skeleton
 
 The first validator/compiler must at minimum reject:
 
@@ -163,12 +183,12 @@ The first validator/compiler must at minimum reject:
 
 Errors should identify the exact path, violated rule and a short remediation hint.
 
-## 8. Expansion rule
+## 9. Expansion rule
 
 Do not add fields to the AgentManifest simply because they may be useful someday.
 
 A field moves into the reusable manifest only when it describes stable Agent Definition requirements shared across client instances. Client-specific values stay in `ClientInstanceConfig`; platform-wide rules stay in `PlatformPolicy`; resolved runtime authority stays only in `EffectiveReleaseConfig`.
 
-## 9. Source of truth
+## 10. Source of truth
 
-The approved specification/history remains the primary artifact. The manifest is a machine-readable projection of the Agent Definition used by the Core compiler.
+The approved specification/history remains the primary artifact. JSON Schema is the canonical external schema projection of the contract. Pydantic models are internal runtime projections and must remain aligned with that schema.

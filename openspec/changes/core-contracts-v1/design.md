@@ -68,6 +68,23 @@ AgentManifest (reusable requirements)
 
 Agents request authority; they do not grant it to themselves.
 
+## Schema implementation boundary
+
+Core uses a hybrid schema model:
+
+```text
+Approved Spec
+ -> Canonical JSON Schema
+ -> Pydantic runtime models/validators
+ -> compiler/runtime implementation
+```
+
+- JSON Schema is the external, language-neutral contract for versioned Core objects.
+- Pydantic is the internal Python representation/validation layer when the Core runtime is Python.
+- Pydantic must remain semantically aligned with JSON Schema and must not create a second independent contract.
+- Alignment/round-trip tests should fail if generated/handwritten representations drift.
+- A future non-Python runtime can replace Pydantic without changing the external JSON Schema contracts.
+
 ## Security and governance model
 
 - default deny + least privilege + policy-before-execution;
@@ -127,7 +144,7 @@ Client gives a plain-language business goal. The platform asks only critical mis
 
 Move fast through a thin vertical slice instead of fully building each subsystem in isolation:
 
-1. schemas/compiler -> EffectiveReleaseConfig;
+1. canonical JSON Schema contracts + Pydantic runtime models -> EffectiveReleaseConfig;
 2. trusted ExecutionContext + policy/budget kernel;
 3. minimal provider/capability/tool/memory interfaces;
 4. eval/release decision kernel;

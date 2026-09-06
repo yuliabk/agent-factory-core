@@ -32,12 +32,15 @@ This folder is the architectural entry point for `Agent Factory Core`.
 - ADR-009 - risk-based Trust Profiles + controlled exceptions - **Accepted**.
 - ADR-010 - policy-driven release strategy / auto-release when allowed - **Accepted**.
 - ADR-011 - specification as primary platform artifact - **Accepted**.
+- ADR-012 - JSON Schema as external contract, Pydantic as internal Python runtime model - **Accepted**.
 
 Historical ADRs remain evidence of previous prototype decisions and do not override newer accepted contracts.
 
 ## Source of truth
 
 - Versioned approved/specification history is the primary design truth.
+- JSON Schema is the canonical external machine-readable schema boundary for Core contracts.
+- Pydantic is an internal Python runtime/validation representation and must remain aligned with the canonical schema.
 - `openspec/specs/` - accepted behavior when folded/archived into canonical specs.
 - `openspec/changes/` - active/proposed implementation contract changes.
 - `docs/` - architecture, policies and decision rationale.

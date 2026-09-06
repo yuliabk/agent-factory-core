@@ -15,16 +15,19 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C1.9 Accept ADR-005 through ADR-011.
 - [x] C1.10 Synchronize roadmap and decision log.
 - [x] C1.11 Accept minimal first AgentManifest shape: `apiVersion`, `kind`, `metadata(name/version/description)`, and `spec(template/capabilities/tools/permissions/memoryProfile/budgetProfile/evalProfile)`. Maps: CORE-202.
+- [x] C1.12 Accept hybrid schema boundary: JSON Schema canonical externally; Pydantic internal for Python runtime/validation. Maps: CORE-202, CORE-203. ADR-012.
 
 ## C2 - Core Skeleton schemas/compiler
 
-- [ ] C2.1 Choose minimal executable schema approach (JSON Schema, Pydantic or combined). Maps: CORE-202, CORE-203.
-- [ ] C2.2 Implement `AgentManifest` schema/validator exactly from the accepted minimal shape before adding optional fields. Maps: CORE-202.
-- [ ] C2.3 Implement `ClientInstanceConfig` schema/validator. Maps: CORE-202.
-- [ ] C2.4 Implement minimal `PlatformPolicy` + `ExceptionPolicy` schemas. Maps: CORE-210.
-- [ ] C2.5 Compile inputs into immutable `EffectiveReleaseConfig`. Maps: CORE-203.
-- [ ] C2.6 Define trusted `ExecutionContext` schema. Maps: CORE-204.
-- [ ] C2.7 Define clear validation errors with path/rule/remediation hint.
+- [x] C2.1 Choose executable schema approach: JSON Schema external contract + Pydantic internal models/validation. Maps: CORE-202, CORE-203.
+- [ ] C2.2 Implement canonical JSON Schema for `AgentManifest` exactly from the accepted minimal shape before adding optional fields. Maps: CORE-202.
+- [ ] C2.3 Implement matching Pydantic AgentManifest models/validator. Maps: CORE-202.
+- [ ] C2.4 Add schema/Pydantic semantic-alignment tests. Maps: CORE-202, CORE-203.
+- [ ] C2.5 Implement `ClientInstanceConfig` JSON Schema + Pydantic model/validator. Maps: CORE-202.
+- [ ] C2.6 Implement minimal `PlatformPolicy` + `ExceptionPolicy` JSON Schemas + Pydantic models. Maps: CORE-210.
+- [ ] C2.7 Compile inputs into immutable `EffectiveReleaseConfig`. Maps: CORE-203.
+- [ ] C2.8 Define trusted `ExecutionContext` schema. Maps: CORE-204.
+- [ ] C2.9 Define clear validation errors with path/rule/remediation hint.
 
 ## C3 - Runtime Governance kernel
 

@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Architecture synchronization complete; Phase 1A contract shaping has started.
+**Current mode:** Phase 1A contract implementation is starting.
 
 ## North Star
 
@@ -21,6 +21,7 @@ Principles:
 - progressive complexity;
 - thin interfaces before sophisticated infrastructure;
 - do not add schema fields before a real use case needs them;
+- external contracts stay implementation-neutral even when the first Core runtime is Python;
 - Research/Brain Agent becomes the first real reference consumer as soon as the Core slice is usable.
 
 ## Phase 0A - Historical baseline
@@ -61,13 +62,17 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 
 - [x] Agree minimal `AgentManifest` contract shape: `apiVersion`, `kind`, `metadata(name/version/description)`, `spec`.
 - [x] Agree first `spec` keys: `template`, `capabilities`, `tools`, `permissions`, `memoryProfile`, `budgetProfile`, `evalProfile`.
-- [ ] Choose executable schema implementation approach (JSON Schema/Pydantic or combined).
-- [ ] Implement `AgentManifest` schema/validator from the agreed minimal contract.
-- [ ] Implement `ClientInstanceConfig` schema/validator.
-- [ ] Implement minimal `PlatformPolicy` schema.
-- [ ] Implement minimal `ExceptionPolicy` schema.
+- [x] Choose schema implementation boundary: **JSON Schema is the canonical external contract; Pydantic is the internal Python runtime/validation model**.
+- [ ] Implement canonical JSON Schema for the minimal `AgentManifest`.
+- [ ] Implement matching Pydantic models and validator.
+- [ ] Add schema/Pydantic alignment tests to prevent semantic drift.
+- [ ] Implement `ClientInstanceConfig` JSON Schema + Pydantic model.
+- [ ] Implement minimal `PlatformPolicy` JSON Schema + Pydantic model.
+- [ ] Implement minimal `ExceptionPolicy` JSON Schema + Pydantic model.
 - [ ] compiler -> immutable `EffectiveReleaseConfig`.
 - [ ] validation errors that clearly state exact path/rule/remediation.
+
+**Contract rule:** JSON Schema is externally authoritative and usable by non-Python consumers. Pydantic is an internal implementation convenience and must not become a second independent contract.
 
 **Manifest rule:** fields in AgentManifest are reusable requirements/profile references. Concrete client grants/amounts/bindings remain in ClientInstanceConfig; actual runtime authority exists only in EffectiveReleaseConfig.
 
@@ -161,8 +166,8 @@ Deepen only proven needs:
 
 ## Current stop point
 
-**Phase 1A has started.** The minimal reusable AgentManifest shape is accepted and synchronized.
+**Phase 1A is active.** The minimal AgentManifest shape and the hybrid schema boundary are accepted and synchronized.
 
-**Next executable decision:** choose the schema implementation approach, then implement the minimal AgentManifest validator before expanding the contract.
+**Next executable step:** implement the minimal AgentManifest JSON Schema and matching Pydantic model/validator, then add alignment tests before expanding the contract.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
