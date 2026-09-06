@@ -1,118 +1,120 @@
 # Client Experience and Conversational Intake
 
-**Status:** Proposed
+**Status:** Accepted direction after Owner Review
 
-## 1. עיקרון
+## 1. Principle: technical black box, business transparency
 
-הלקוח רואה Black Box פשוט. הוא לא צריך לדעת מהו MCP, API, Vector DB, Model Router, Prompt Injection או Runtime Adapter.
+The client should not need to understand MCP, API, Vector DB, Model Router, prompt-injection controls or Runtime adapters.
 
-הוא צריך להיות מסוגל לומר משהו כמו:
+They should be able to say:
 
-> "אני רוצה Agent שימכור בשבילי ויענה ללקוחות."
+> "I want an Agent that sells for me and answers customers."
 
-והמערכת תתרגם את זה למפרט טכני מאחורי הקלעים.
+The platform translates that into a technical specification behind the scenes.
 
-## 2. יעד זמן
+Black box does **not** mean opaque. The client should see material business facts: scope, assumptions, connected business services, expected cost, data-use summary, limitations and actions requiring approval.
 
-יעד ל-Initial Intake:
+## 2. UX target
 
-- בדרך כלל פחות מ-10 דקות.
-- תיאור חופשי אחד בתחילת התהליך.
-- עד 5-6 שאלות קריטיות נוספות ברוב המקרים.
-- שאלות נוספות רק אם חסר מידע שחוסם החלטה בטוחה או תמחור סביר.
+Initial intake target:
+
+- usually under 10 minutes;
+- one free-form description first;
+- typically 5-6 critical follow-up questions;
+- additional questions only when needed for safe scope, cost, data or consequential-action decisions.
+
+This is a UX target, not a hard technical limit.
 
 ## 3. Progressive clarification
 
-המערכת לא מנסה לקבל 100% מהמידע מראש.
+The system does not try to collect 100% of information up front.
 
-היא מחלקת מידע ל-3 קבוצות:
+Information is divided into:
 
-1. **Blocking** - חייבים לשאול עכשיו.
-2. **Inferable** - אפשר להסיק ולהציג כהנחה לאישור.
-3. **Deferred** - אפשר להשלים בזמן Build או Onboarding.
+1. **Blocking** - must be known now.
+2. **Inferable** - Factory may infer and show as an assumption.
+3. **Deferred** - can be resolved during Build/Onboarding.
 
-## 4. שאלות קריטיות לדוגמה
+For ambiguous requests the default pattern is:
 
-הניסוח צריך להיות עסקי, לא טכני.
+`infer -> show assumptions -> client confirms/corrects`
 
-1. מה היית רוצה שה-Agent יעשה בשבילך?
-2. עם מי הוא ידבר או עבור מי הוא יעבוד?
-3. איפה השיחות או העבודה קורות היום - אתר, WhatsApp, מייל, CRM או מקום אחר?
-4. איזה מידע הוא צריך כדי לעשות את העבודה טוב?
-5. מה הוא בשום אופן לא צריך לעשות בלי אישור שלך?
-6. מה התקציב החודשי שאתה מוכן להקדיש להפעלה שלו?
+## 4. Progressive complexity
 
-לא כל Agent יקבל את כל השאלות. ה-Intake engine בוחר את המינימום הנדרש.
+The Factory initially proposes the simplest Agent architecture that can deliver the requested outcome.
 
-## 5. Handling "I don't know"
+Extra autonomy, integrations, persistent memory, premium models or channels are added only when they materially improve the approved outcome or are required by policy.
 
-כאשר לקוח אינו יודע לענות, המערכת מציעה ברירת מחדל או 2-3 אפשרויות ברורות.
+## 5. Critical question areas
 
-במקום:
+Questions are business-oriented, not technical. Typical areas:
 
-> "איזה MCP server תרצה?"
+- desired business outcome;
+- who the Agent serves/communicates with;
+- where work happens today;
+- information required;
+- actions that should never happen without approval;
+- budget/range;
+- data sensitivity or regulatory constraints when relevant.
 
-שואלים:
+Not every Agent receives every question.
 
-> "כדי שה-Agent יענה ללקוחות שלך ב-WhatsApp, נצטרך לחבר אותו לחשבון העסקי שלך. תרצה שהוא רק ינסח תשובות או גם ישלח אותן?"
+## 6. Handling "I don't know"
 
-## 6. Assumption confirmation
+When the client does not know, the Factory recommends a default or 2-3 understandable options.
 
-במקום עוד סבב שאלות ארוך, המערכת מסכמת:
+Instead of asking which MCP server/provider/model they want, explain the business consequence and ask about the desired outcome/permission.
 
-```text
-הבנתי שאתה רוצה:
-- Agent שעונה ללידים חדשים.
-- עובד בעיקר ב-WhatsApp.
-- משתמש במידע על השירותים והמחירים שלך.
-- לא נותן הנחות ולא שולח הצעת מחיר סופית בלי אישור.
-- פועל במסגרת תקציב חודשי שהגדרת.
+## 7. Assumption confirmation
 
-זה נכון?
-```
+The platform summarizes the inferred solution in plain language, especially assumptions affecting:
 
-רק הנחות שמשפיעות על Scope, Cost, Security או Side Effects דורשות אישור מפורש.
+- scope;
+- cost;
+- security/data use;
+- side effects;
+- approval boundaries.
 
-## 7. Budget early, jargon late
+Low-impact technical assumptions do not need separate confirmation one by one.
 
-תקציב צריך להישאל מוקדם, כי הוא משפיע על ארכיטקטורה ו-Provider selection.
+## 8. Budget early, jargon late
 
-פרטים טכניים מוצגים רק כאשר הם משפיעים ישירות על:
+Budget/range is collected early because it affects solution architecture and routing policy.
 
-- מחיר.
-- פרטיות.
-- מגבלה עסקית.
-- אחריות.
-- פעולה שהלקוח צריך לאשר.
+Technical detail is surfaced only when it materially affects price, privacy, business limitations, responsibility or a required client action.
 
-## 8. תוצר ה-Intake
+The client can choose business-level options such as economical, balanced/recommended or advanced rather than provider/model brands.
 
-הלקוח אינו נדרש לכתוב Spec. המערכת מפיקה מאחורי הקלעים:
+## 9. Intake output
+
+The client does not write the Spec. The Factory produces, behind the scenes:
 
 ```text
 ClientIntent
 Assumptions
-RiskProfile
-BudgetProfile
-CapabilityRequirements
-ChannelRequirements
-DataRequirements
-HumanApprovalPoints
-SuccessMetrics
+Risk/Trust recommendation
+Budget/Optimization Profile
+Capability Requirements
+Channel Requirements
+Data Requirements
+Consequential Action Boundaries
+Success Metrics
+Release/Eval Requirements
 ```
 
-לאחר מכן Spec Compiler יוצר OpenSpec + Draft Manifest.
+Spec Compiler then creates/updates the versioned Spec, AgentManifest and ClientInstanceConfig drafts.
 
-## 9. Client-facing completion
+## 10. Client-facing completion
 
-בסיום ה-Build הלקוח רואה:
+At build/release time, the client sees:
 
-- מה ה-Agent עושה.
-- מה הוא לא עושה.
-- מה דורש אישור אנושי.
-- אילו חשבונות צריך לחבר, בשפה פשוטה.
-- עלות משוערת וטווח.
-- מה קורה אם מגיעים לתקציב.
-- איך עוצרים או משנים אותו.
+- what the Agent does and does not do;
+- material assumptions;
+- allowed actions and approval points;
+- business services/accounts that need connection;
+- expected cost/range and budget-overage behavior;
+- material data-use/retention summary;
+- known limitations;
+- how to pause/change/decommission the Agent.
 
-הוא אינו נדרש להבין את מימוש ה-Backend.
+Backend implementation remains hidden unless requested or necessary for an informed decision.

@@ -1,45 +1,63 @@
 # Architecture Decision Log
 
-מסמך זה אינו מחליף ADR. הוא משמש אינדקס קצר כדי לדעת במהירות מה כבר סוכם ומה עדיין פתוח.
+מסמך זה הוא אינדקס מהיר להחלטות. ADRs ו-contract docs הם המקור המפורט.
 
-## 2026-09-06
+## 2026-09-06 - Accepted directions
 
-| Decision | Status | ADR / Doc |
+| Decision | Status | Source |
 |---|---|---|
 | Agent Factory Core הוא Platform Core, לא Agent עסקי | Accepted | ADR-005 |
-| Core מחולק לוגית ל-Build / Control Plane ול-Runtime Governance Plane | Accepted | ADR-005 |
-| שני ה-Planes יכולים להתחיל באותו repo/project, אך נשמר ביניהם Contract boundary שמאפשר פיצול עתידי | Accepted | ADR-005 |
-| כל Agent עסקי יהיה בריפו נפרד | Accepted | ADR-005 |
-| Agent Definition + Client Instance Configuration + Core Policy/Contract Versions = Deployed Agent Instance | Accepted | architecture.md |
-| Agent Definition reusable אינו מחזיק Secrets, PII או Client-specific business state | Accepted | architecture.md |
-| Core מחזיק Contracts ומנגנונים משותפים: security, tools, memory, orchestration, budget, observability | Accepted | architecture.md |
-| Agent-to-Agent דרך Capability Registry ולא direct calls | Agreed direction; documented in main | ADR-006 |
-| Model/Provider אינם hard-coded ב-Agent | Agreed direction; documented in main | ADR-007 |
-| Model Router בוחר לפי profile, cost, privacy, quality ו-availability | Agreed direction; documented in main | provider-and-cost-policy.md |
-| Agent נבנה מ-Template + Manifest + Client Spec | Agreed direction; documented in main | architecture.md |
-| Manifest כולל permissions, budget, model policy, tools, memory, security, runtime limits, audit | Agreed direction; documented in main | agent-manifest.md |
-| Permissions ו-limits מוצעים על ידי builder/master flow ומאושרים על ידי Owner בזמן Build | Agreed direction; documented in main | agent-lifecycle.md |
-| Business budget הוא warn-and-approve, לא silent overrun | Agreed direction; documented in main | ADR-008 |
-| Runtime budget overage מאושר על ידי גורם מאושר אצל הלקוח | Agreed direction; documented in main | ADR-008 |
-| Emergency safety cap נפרד מ-business budget | Agreed direction; ADR acceptance pending | provider-and-cost-policy.md |
-| Client UX הוא Black Box טכני אך שקוף לגבי scope, assumptions, services, cost ו-approvals | Accepted | platform-vision.md |
-| Intake רגיל מכוון לפחות מ-10 דקות ובדרך כלל 5-6 שאלות קריטיות; זה UX target ולא hard limit | Accepted | platform-vision.md |
-| ה-Intake שואל מינימום שאלות קריטיות ומשלים assumptions לא קריטיות | Accepted | platform-vision.md |
-| בבקשה עמומה ה-Factory רשאי infer configuration סביר ואז להציג assumptions ל-confirm/correct | Accepted | platform-vision.md |
-| Progressive complexity: מתחילים ב-Agent הפשוט ביותר שמספק outcome ורק אז מוסיפים autonomy/integrations/premium models | Accepted | platform-vision.md |
-| Research/Brain Agent יהיה Agent נפרד ומשותף לכל המערכת | Agreed direction; planned | roadmap.md |
-| Research Agent יבחר בין internal knowledge, web, API, MCP ו-approved capabilities | Agreed direction; planned | roadmap.md |
-| Travel Agent יהיה consumer ראשון לבדיקת reusability | Planned after Core gate | roadmap.md |
+| Core מחולק לוגית ל-Build/Control Plane ול-Runtime Governance Plane | Accepted | ADR-005 / architecture.md |
+| שני ה-Planes יכולים להתחיל באותו repo עם contract boundary לפיצול עתידי | Accepted | ADR-005 |
+| Business Agents נמצאים בריפו נפרד | Accepted | ADR-005 |
+| Specification וה-history שלה הם הארטיפקט הראשי; Agent/deployment הם reproducible outputs | Accepted | ADR-011 / architecture.md |
+| AgentManifest reusable מופרד מ-ClientInstanceConfig | Accepted | agent-manifest.md |
+| `AgentManifest + ClientInstanceConfig + PlatformPolicy/ExceptionPolicy -> EffectiveReleaseConfig` | Accepted | agent-manifest.md / architecture.md |
+| Agent מבקש Permission/Capability אך אינו מעניק אותם לעצמו | Accepted | agent-manifest.md / security-model.md |
+| Release strategy מוגדרת בספציפיקציה/קונפיגורציה ומוגבלת ע"י Policy | Accepted | ADR-010 / agent-lifecycle.md |
+| Release modes: `human-required`, `policy-auto`, `policy` | Accepted | ADR-010 |
+| לא נדרש Human approval לכל שינוי/פעולה; approvals הם risk-based | Accepted | security-model.md / governance.md |
+| Trust Levels משמשים profiles: sandbox/internal/business/privileged | Accepted direction | ADR-009 / security-model.md |
+| Factory מציע trust; PlatformPolicy קובעת ceiling; client יכול להחמיר בתוך הגבול | Accepted | ADR-009 |
+| יש Non-overridable invariants ויש overridable rules עם ExceptionPolicy מבוקרת | Accepted | ADR-009 / governance.md |
+| הרשימה הסופית של non-overridable production invariants תיקבע לפני Production | Open implementation detail | security-model.md |
+| Agent-to-Agent דרך Capability Registry ולא direct coupling | Accepted | ADR-006 |
+| Capability Registry הוא soft-strict: warnings/mocks ב-dev, strict critical resolution ב-production | Accepted | capability-registry.md |
+| Orchestration הוא hybrid: Core קובע גבולות, Agent מתכנן אוטונומית בתוכם | Accepted | orchestration.md |
+| Model/Provider אינם hard-coded ב-Business Agent | Accepted | ADR-007 |
+| Provider/model routing הוא policy-driven לפי cost, quality, privacy, latency, availability ו-client/task | Accepted | ADR-007 / provider-and-cost-policy.md |
+| Business budget הוא warn-and-approve לפי policy | Accepted | ADR-008 |
+| Runtime overage מאושר ע"י authorized client approver כאשר policy דורשת | Accepted | ADR-008 |
+| Emergency safety cap נפרד ואינו מתבטל ע"י business overage approval | Accepted | ADR-008 |
+| Memory מופרדת למחלקות ו-Tenant boundaries | Accepted | memory-contract.md |
+| Agent רשאי לזהות מידע שכדאי לזכור ולבצע/request write; Policy מחליטה אם/איך לשמור | Accepted | memory-contract.md |
+| PII persistent memory דורש policy/consent/legal basis מתאים | Accepted | security-model.md / memory-contract.md |
+| Template הוא starting point + modular composition, לא מסגרת קשיחה | Accepted | template-engine.md |
+| Progressive complexity: מתחילים בהרכב הכי פשוט שמספק outcome | Accepted | platform-vision.md / template-engine.md |
+| Eval families: functional/business, security/policy, cost/runtime, contract/portability | Accepted | evidence-and-evals.md |
+| Eval thresholds ו-release blocking הם policy-driven; security invariant failure תמיד blocking | Accepted | evidence-and-evals.md |
+| Client UX הוא technical black box אך business-transparent לגבי scope/assumptions/services/cost/approvals | Accepted | platform-vision.md |
+| Intake: יעד מתחת ל-10 דקות ובדרך כלל 5-6 שאלות קריטיות, לא hard limit | Accepted | platform-vision.md |
+| בקשה עמומה: `infer -> show assumptions -> confirm/correct` | Accepted | platform-vision.md |
+| Research/Brain Agent יהיה Agent נפרד שמספק `research.lookup` | Accepted direction / planned | roadmap.md |
+| Research Agent יבחר בין internal knowledge, web, API, MCP, model knowledge ו-approved capabilities לפי policy | Accepted direction / planned | roadmap.md |
+| Travel Agent יהיה consumer ראשון לבדיקת reusability | Planned | roadmap.md |
 
-## החלטות פתוחות
+## Open implementation decisions - resolve just-in-time
 
-1. איפה יישמרו בפועל Template packages מעבר ל-base templates: בתוך Core, package registry או repos נפרדים.
-2. Schema format סופי ל-Agent Manifest: JSON Schema, Pydantic, OpenAPI-derived או שילוב.
-3. ה-implementation הראשון של Capability Registry: in-process registry, DB-backed registry או service נפרד.
-4. Provider adapters הראשונים שישמשו portability test.
-5. Cost currency normalization ו-source of pricing.
-6. מהו emergency safety cap default לכל סוג workload.
-7. Memory backend contract המדויק והאם יהיה service עצמאי בשלב ראשון.
-8. אילו Security checks יהיו blocking ב-local development לעומת CI/release.
-9. כיצד לייצג client approval identities בכל channel.
-10. היכן יישב Factory client-facing UI ביחס ל-Core repo.
+These do not block starting the thin Core Skeleton:
+
+1. Final schema implementation technology: JSON Schema, Pydantic or combined.
+2. Physical Capability Registry backend after the initial in-process implementation.
+3. First two real provider adapters for portability validation.
+4. Pricing source and currency normalization.
+5. Concrete default emergency safety-cap values by workload.
+6. Final production list of non-overridable invariants.
+7. Persistent-memory backend and whether/when it becomes a separate service.
+8. Exact client approval identity representation for each channel.
+9. Factory client-facing UI repository/deployment location.
+10. Long-term template package registry/storage beyond base templates.
+
+## Working rule
+
+Decisions that affect architecture, authority, security, cost, data handling or external side effects come back to Owner review. Routine synchronization, wording, cross-document consistency and implementation details inside accepted contracts can be handled automatically and recorded in PR history.

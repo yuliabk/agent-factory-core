@@ -1,45 +1,79 @@
 # Tool Gateway Contract
 
-**Status:** Proposed
+**Status:** Accepted direction after Owner Review
 
 ## Purpose
 
-Agents never receive unrestricted direct access to files, networks, databases, SaaS systems or side-effecting actions. Tool access is mediated by the Core Tool Gateway.
+Agents never receive unrestricted direct access to files, networks, databases, SaaS systems or side-effecting actions. Tool/API/MCP access is mediated by the Runtime Governance Plane.
 
 ## Tool contract
 
-Each tool declares:
+Each governed tool declares:
 
 - `tool_id` and version;
 - typed input/output schema;
-- required permissions;
-- supported data classifications;
+- required permissions/capabilities;
+- supported data classifications/trust levels;
 - tenant-binding behavior;
-- side-effect class;
+- risk/side-effect class;
 - idempotency support;
 - expected cost/latency class;
-- timeout and retry policy;
-- approval requirement;
+- timeout/retry policy;
+- approval policy class;
 - audit fields.
 
-## Side-effect classes
+## Risk / side-effect classes
 
-- `read_only`
-- `reversible_write`
-- `external_message`
-- `financial`
-- `permission_change`
-- `irreversible_write`
-- `sensitive_domain_action`
+At minimum:
 
-Policies may further refine them.
+- `read_only`;
+- `reversible_write`;
+- `external_message`;
+- `financial`;
+- `permission_change`;
+- `irreversible_write`;
+- `sensitive_domain_action`.
+
+PlatformPolicy may refine or map these to low/medium/high/non-overridable categories.
 
 ## Invocation pipeline
 
-`Schema -> Permission -> Tenant -> Data Policy -> Budget -> Approval -> Execute -> Validate -> Audit`
+```text
+Schema
+ -> Effective permission / tenant / trust
+ -> Data policy
+ -> Risk/side-effect classification
+ -> Budget/preflight
+ -> Policy-defined approval or auto-decision
+ -> Execute
+ -> Validate
+ -> Audit
+```
 
-Tool output is untrusted data. It cannot modify system policy or grant permissions.
+Human approval is not universal. Low-risk tools may execute automatically when effective policy allows; high-risk/consequential operations use the required approval path.
 
-## Network and MCP
+## Trust boundary
 
-Web, API and MCP calls are treated as tool/capability invocations under the same policy model. MCP availability does not create automatic authorization to use every exposed action.
+Tool output is untrusted data. It cannot modify PlatformPolicy, EffectiveReleaseConfig, ExecutionContext or grant permissions.
+
+## Network, Web and MCP
+
+Web, API and MCP calls are treated as governed Tool/Capability invocations under the same policy model. Discovery/availability of an endpoint or MCP action does not authorize its use.
+
+## Agent autonomy
+
+A business Agent may autonomously decide that an approved tool/capability is useful for its plan. Tool Gateway remains the authority for whether that request may execute.
+
+## Development vs production
+
+Sandbox/dev policy may allow explicit mocks, warnings or narrower development credentials. Production consequential tools require registered contract/version, effective grants, risk classification and audit behavior.
+
+## Failure behavior
+
+- invalid schema -> reject before execution;
+- missing permission -> deny/audit;
+- expired/invalid exception -> deny;
+- over-budget -> approved alternative/overage flow according to policy;
+- approval required but absent -> pause/typed denial;
+- duplicate consequential retry -> idempotency handling where supported;
+- timeout/provider failure -> bounded policy-defined retry/fallback.

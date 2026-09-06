@@ -1,39 +1,61 @@
 # Agent Factory Core
 
-A spec-driven control plane for building, testing, releasing and governing reusable AI agents.
+A spec-driven platform Core for building, testing, releasing and governing reusable AI agents.
 
-The repository is currently in architecture/contract hardening. It does not contain a production agent runtime or real customer data.
+The repository now has an accepted architectural foundation and is preparing the first thin executable Core Skeleton. It does not contain a production customer runtime or real customer data.
 
 ## Platform goal
 
-A non-technical client should be able to describe a business need in plain language, answer a small number of critical questions, confirm assumptions/budget and receive an agent built from approved templates and policies.
+A non-technical client describes a business need in plain language, answers only critical questions, confirms material assumptions/budget and receives an Agent built from approved specifications, templates and policies.
 
-Behind that simple experience, Core standardizes:
+Behind that experience, Core standardizes:
 
-- Agent Manifest and lifecycle.
-- Security, tenant isolation and approvals.
-- Orchestration and `ExecutionContext`.
-- Capability-based agent-to-agent routing.
-- Provider-neutral model routing.
+- Spec compilation and reproducible releases.
+- Reusable `AgentManifest` separated from `ClientInstanceConfig`.
+- Immutable `EffectiveReleaseConfig` as runtime authority.
+- Risk/trust-based security and controlled exceptions.
+- Hybrid orchestration and trusted `ExecutionContext`.
+- Capability-based Agent-to-Agent routing.
+- Provider-neutral, policy-driven model routing.
 - Tool/API/MCP access through policy.
-- Memory/retrieval contracts.
-- Budget and cost guardrails.
-- Evals, evidence, audit and release controls.
-- Template-first agent composition.
+- Governed autonomous memory contracts.
+- Budget and emergency safety guardrails.
+- Policy-driven eval/release decisions, evidence and audit.
+- Hybrid template-first modular composition.
+
+## Core architecture
+
+```text
+Business Intent -> Versioned Spec
+
+AgentManifest
+ + ClientInstanceConfig
+ + PlatformPolicy / ExceptionPolicy
+ -> EffectiveReleaseConfig
+ -> Runtime Governance
+ -> Evidence / Evals / Release Decision / Audit
+```
+
+Core is logically divided into:
+
+- **Build / Control Plane** - intent/spec, templates, manifests/configs, policy compilation, eval/release build artifacts.
+- **Runtime Governance Plane** - orchestration, policy, routing, tools, memory, cost/runtime limits and audit.
+
+These can initially live in one repository/project while preserving a contract boundary for future physical separation.
 
 ## Repository boundaries
 
-`Agent Factory Core` is not a business agent. Travel, Research, Sales, CRM and future agents should live in separate repositories and consume Core contracts.
+`Agent Factory Core` is not a business Agent. Travel, Research, Sales, CRM and future Agents live in separate repositories and consume Core contracts.
 
-Specific providers such as OpenAI, Dify, n8n, Gemini, DeepSeek or others are adapters/options rather than architectural dependencies unless an approved requirement explicitly fixes one.
+Specific providers such as OpenAI, Dify, n8n, Gemini, DeepSeek or others are adapters/options rather than architectural dependencies unless an approved bounded requirement fixes one.
 
 ## Repository structure
 
 ```text
 AGENTS.md                         repository governance for coding agents
 docs/                             architecture, security, contracts, ADRs, roadmap
-openspec/                         accepted specs and proposed changes
-templates/                        reusable manifest/intake/spec/test templates
+openspec/                         accepted specs and active change contracts
+templates/                        reusable machine-readable starting contracts
 .agents/skills/                   repo-scoped authoring/build skills
 tools/                            bounded validation/portability tooling
 tests/                            deterministic repository tests
@@ -44,13 +66,18 @@ Start with [`docs/README.md`](docs/README.md).
 ## Current state
 
 - `main` is the canonical branch.
-- Travel Agent Instance Contract v1 is included as architecture/spec work.
-- The historical Knowledge Agent synthetic smoke closure evidence is consolidated into `main`.
-- Current architectural focus: `Core Contracts v1` before new runtime implementation.
-- Next intended specialized repository after Core contracts are stable: a Research/Brain Agent exposing a reusable `research.lookup` capability.
+- Platform Vision and Core architecture have completed Owner review.
+- Core Contracts v1 has been synchronized to the accepted decisions from 2026-09-06.
+- Travel Agent Instance Contract v1 remains part of the architecture/spec history.
+- Knowledge Agent synthetic smoke evidence remains historical reference material.
+- Next executable milestone: the thin Core Skeleton vertical slice in `docs/roadmap.md`.
+- First real reusable Agent after that gate: Research/Brain Agent exposing `research.lookup`.
+- Travel Agent will be the first external consumer to prove reuse/provider independence.
 
 ## Working rule
 
-`Intent -> OpenSpec -> Architecture/ADR -> Tasks -> Owner approval -> Implementation -> Evals -> Release evidence -> Merge`
+The specification/history is the primary artifact.
 
-No production implementation is implied by documentation being present in `main`.
+`Intent -> Spec -> Architecture/ADR -> Tasks -> approved task group -> Implementation -> Evals -> Release decision/evidence -> Merge`
+
+Routine low-risk decisions may be policy-automated. Material changes to authority, security, data handling, cost or external side effects return to the appropriate approval path.

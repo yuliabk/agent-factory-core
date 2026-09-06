@@ -1,42 +1,67 @@
 # Tasks: Core Contracts v1
 
-All implementation tasks remain blocked until Owner approval of the contracts.
+Architecture decisions were reviewed with the Owner on 2026-09-06. Implementation still proceeds in bounded task groups; material architecture/authority changes return to Owner review.
 
-## C1 - Documentation and contract review
+## C1 - Documentation and contract synchronization
 
-- [ ] C1.1 Review platform vision, architecture and Core boundaries. Maps: CORE-201, CORE-210, CORE-211.
-- [ ] C1.2 Review Agent Manifest and ExecutionContext contract. Maps: CORE-202, CORE-203.
-- [ ] C1.3 Review security, governance, tool and memory contracts. Maps: CORE-206, CORE-207, CORE-212.
-- [ ] C1.4 Review capability/orchestration contract. Maps: CORE-204.
-- [ ] C1.5 Review provider/cost policy. Maps: CORE-205, CORE-208.
-- [ ] C1.6 Review lifecycle, evidence, eval and approval contract. Maps: CORE-209, CORE-212.
-- [ ] C1.7 Accept/modify ADR-005 through ADR-008.
+- [x] C1.1 Accept platform vision and Core boundaries. Maps: CORE-201, CORE-215, CORE-216, CORE-218.
+- [x] C1.2 Accept reusable AgentManifest + ClientInstanceConfig + EffectiveReleaseConfig model. Maps: CORE-202, CORE-203.
+- [x] C1.3 Accept trusted ExecutionContext and bounded-autonomy orchestration. Maps: CORE-204, CORE-214.
+- [x] C1.4 Accept risk/trust security, governance and controlled ExceptionPolicy direction. Maps: CORE-208, CORE-210.
+- [x] C1.5 Accept governed autonomous memory contract. Maps: CORE-209.
+- [x] C1.6 Accept soft-strict Capability Registry. Maps: CORE-205, CORE-206.
+- [x] C1.7 Accept provider-neutral policy-driven routing and budget/safety model. Maps: CORE-207, CORE-211.
+- [x] C1.8 Accept policy-driven eval/release strategy. Maps: CORE-212, CORE-213.
+- [x] C1.9 Accept ADR-005 through ADR-011.
+- [x] C1.10 Synchronize roadmap and decision log.
 
-## C2 - Schema skeleton after approval
+## C2 - Core Skeleton schemas/compiler
 
-- [ ] C2.1 Define JSON/YAML schema for Agent Manifest. Maps: CORE-202.
-- [ ] C2.2 Define ExecutionContext schema. Maps: CORE-203.
-- [ ] C2.3 Define minimal audit event schema. Maps: CORE-212.
-- [ ] C2.4 Define capability registration/delegation schema. Maps: CORE-204.
-- [ ] C2.5 Define tool and memory adapter interfaces. Maps: CORE-206, CORE-207.
-- [ ] C2.6 Define budget policy schema with business limit and emergency cap. Maps: CORE-208.
+- [ ] C2.1 Choose minimal schema implementation approach (recommend JSON Schema as external contract + Pydantic/runtime types if Python is selected). Maps: CORE-202, CORE-203.
+- [ ] C2.2 Implement `AgentManifest` schema/validator. Maps: CORE-202.
+- [ ] C2.3 Implement `ClientInstanceConfig` schema/validator. Maps: CORE-202.
+- [ ] C2.4 Implement minimal `PlatformPolicy` + `ExceptionPolicy` schemas. Maps: CORE-210.
+- [ ] C2.5 Compile inputs into immutable `EffectiveReleaseConfig`. Maps: CORE-203.
+- [ ] C2.6 Define trusted `ExecutionContext` schema. Maps: CORE-204.
+- [ ] C2.7 Define clear validation errors with path/rule/remediation hint.
 
-## C3 - Deterministic validation after C2 approval
+## C3 - Runtime Governance kernel
 
-- [ ] C3.1 Manifest validator with default-deny tests. Maps: CORE-202.
-- [ ] C3.2 ExecutionContext and permission enforcement tests. Maps: CORE-203, CORE-206.
-- [ ] C3.3 Agent-hop/cycle limit tests. Maps: CORE-204.
-- [ ] C3.4 Budget preflight and safety-cap tests. Maps: CORE-208.
-- [ ] C3.5 Cross-tenant memory negative tests. Maps: CORE-207.
+- [ ] C3.1 Policy evaluator: default deny, trust ceilings, exception validation. Maps: CORE-208, CORE-210.
+- [ ] C3.2 Permission/tenant/data-class enforcement tests. Maps: CORE-204, CORE-208.
+- [ ] C3.3 Runtime limits/hop/cycle enforcement. Maps: CORE-205, CORE-214.
+- [ ] C3.4 Business-budget precheck + emergency safety-cap interface/tests. Maps: CORE-211.
+- [ ] C3.5 Minimal audit/trace event schema including policy/exception/cost decisions. Maps: CORE-217.
 
-## C4 - Portability skeleton after C3 approval
+## C4 - Thin adapter vertical slice
 
-- [ ] C4.1 Model profile/provider adapter interface with at least two test adapters. Maps: CORE-205.
-- [ ] C4.2 Capability registry with two contract-compatible test providers. Maps: CORE-204.
-- [ ] C4.3 Template registry/build-plan prototype. Maps: CORE-210.
-- [ ] C4.4 Regression eval harness for provider/template swaps. Maps: CORE-209.
+- [ ] C4.1 Provider-neutral model interface with one working adapter and one second test/stub adapter. Maps: CORE-207.
+- [ ] C4.2 In-process Capability Registry with dev/production enforcement modes. Maps: CORE-205, CORE-206.
+- [ ] C4.3 Tool Gateway interface + one read-only test tool. Maps: CORE-208.
+- [ ] C4.4 Memory Gateway interface + session/task memory implementation. Maps: CORE-209.
+- [ ] C4.5 Hybrid Orchestrator can execute one bounded capability/model/tool/memory plan. Maps: CORE-214.
 
-## C5 - Next-agent gate
+## C5 - Eval/release kernel
 
-- [ ] C5.1 Approve `research.lookup` capability contract.
-- [ ] C5.2 Create Research/Brain Agent in a separate repository only after the required Core skeleton/evals are approved.
+- [ ] C5.1 EvalResult schema for functional/security/cost/contract families. Maps: CORE-212.
+- [ ] C5.2 Policy mapping for blocking/warning/advisory. Maps: CORE-212.
+- [ ] C5.3 Implement release strategies `human-required`, `policy-auto`, `policy`. Maps: CORE-213.
+- [ ] C5.4 Build minimal Evidence Pack and release decision record. Maps: CORE-217.
+- [ ] C5.5 Drift check: runtime release maps to approved Spec + EffectiveReleaseConfig. Maps: CORE-218.
+
+## C6 - Synthetic end-to-end gate
+
+- [ ] C6.1 Create a tiny synthetic reference Agent Definition.
+- [ ] C6.2 Compile AgentManifest + ClientInstanceConfig + Policy to EffectiveReleaseConfig.
+- [ ] C6.3 Execute through Runtime Governance kernel.
+- [ ] C6.4 Run required evals and release decision.
+- [ ] C6.5 Verify audit/evidence reconstruction.
+
+**Exit gate:** one complete thin path works without provider/business lock-in.
+
+## C7 - Research/Brain Agent gate
+
+- [ ] C7.1 Define/approve `research.lookup` capability contract.
+- [ ] C7.2 Create Research/Brain Agent in a separate repository.
+- [ ] C7.3 Start with the smallest useful source set and expand only after contract validation.
+- [ ] C7.4 Use Travel Agent as the first external consumer after Research v1 is stable.

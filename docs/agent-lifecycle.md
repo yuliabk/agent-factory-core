@@ -1,194 +1,176 @@
 # Agent Lifecycle
 
-**Status:** Proposed
+**Status:** Accepted direction after Owner Review
 
-## 1. מטרה
+## 1. Purpose
 
-להגדיר מסלול אחיד מכל בקשת לקוח ועד Agent פעיל, כך שכל Agent שנוצר דרך הפלטפורמה יעבור אותם Gates בסיסיים גם אם הוא נבנה על ידי מפתח, Agent builder או Template אחר.
+Define a common path from client intent to a governed deployed Agent while keeping the path flexible enough for low-risk automation and stricter high-risk flows.
 
-## 2. Lifecycle ראשי
+The specification is the primary artifact. The deployed Agent is a reproducible result of the approved specification, AgentManifest, ClientInstanceConfig and PlatformPolicy.
+
+## 2. Lifecycle
 
 ```text
 Intent
-  -> Clarified
-  -> Specified
-  -> Planned
-  -> Built
-  -> Evaluated
-  -> Owner Approved
-  -> Client Accepted
-  -> Released
-  -> Monitored
-  -> Changed / Suspended / Decommissioned
+ -> Clarified
+ -> Specified
+ -> Planned
+ -> Built
+ -> Evaluated
+ -> Release Eligible
+ -> Released
+ -> Monitored
+ -> Changed / Suspended / Deprecated / Decommissioned
 ```
 
-## 3. Stage 1 - Intent
+`Release Eligible` does not always mean a human must click approve. The release strategy is declared in specification/configuration and validated by Platform Policy.
 
-קלט: תיאור חופשי של הלקוח בשפה עסקית.
+## 3. Intent and Clarification
 
-דוגמה:
+The client describes the business goal in plain language. The platform asks only critical missing questions and may infer non-critical configuration.
 
-> "אני רוצה Agent שימכור בשבילי וידבר עם לקוחות."
+Normal UX target: under 10 minutes and typically 5-6 critical follow-up questions. This is a target, not a hard technical limit.
 
-המערכת אינה מבקשת מהלקוח לבחור API, MCP, Model או Runtime.
+For an underspecified request the default pattern is:
 
-תוצר: `ClientIntent` ראשוני.
+`infer -> show assumptions -> client confirms/corrects`
 
-## 4. Stage 2 - Clarified
+## 4. Specified
 
-המערכת שואלת מספר קטן של שאלות קריטיות בלבד, בדרך כלל עד 5-6 אחרי התיאור החופשי.
+The Spec Compiler produces at least:
 
-נושאים שחייבים להתברר מוקדם:
+- business scope and success criteria;
+- forbidden outcomes;
+- recommended Agent/template composition;
+- required/provided capabilities;
+- requested tool/memory/data requirements;
+- risk/trust recommendation;
+- budget profile and alternatives;
+- evaluation requirements;
+- release strategy requirement;
+- approval/escalation requirements.
 
-- מה התוצאה העסקית.
-- מי המשתמש או הלקוח הסופי.
-- איפה מתרחשת האינטראקציה.
-- איזה מידע ה-Agent צריך.
-- מה אסור לו לעשות בלי אדם.
-- מה מסגרת התקציב.
+Output: approved/proposed OpenSpec change + reusable AgentManifest draft + ClientInstanceConfig draft.
 
-פרטים לא קריטיים יכולים להפוך להנחות מפורשות במקום לעכב את הלקוח.
+## 5. Planned
 
-תוצר: `ClarifiedIntent + Assumptions`.
+The Factory proposes implementation profiles such as economy, balanced or premium according to policy, not a hard-coded provider.
 
-## 5. Stage 3 - Specified
+The Build / Control Plane compiles requested requirements against PlatformPolicy. Material permission, cost, data and trust decisions are surfaced for the appropriate approver.
 
-ה-Spec Compiler ממיר את ה-Intent ל:
+Low-risk decisions MAY be auto-resolved by policy. The platform does not require a human approval for every routine configuration choice.
 
-- Business scope.
-- Agent type/template recommendation.
-- Capabilities required.
-- Data classification.
-- Tools/channels required ברמת Capability.
-- Human approval points.
-- Budget profile.
-- Success metrics.
-- Forbidden outcomes.
+## 6. Built
 
-תוצר: OpenSpec change + Draft Agent Manifest.
+The build composes:
 
-## 6. Stage 4 - Planned
+```text
+Approved Spec
++ Versioned Templates
++ AgentManifest
++ ClientInstanceConfig
++ PlatformPolicy / ExceptionPolicy
++ Adapters / Agent-specific assets
+= Release Candidate
+```
 
-ה-Core או Builder מציע כמה Implementation Profiles, לדוגמה:
+No secret value or raw client production data is committed to Git or embedded in the reusable Agent Definition.
 
-- Economy.
-- Balanced.
-- Premium.
+## 7. Evaluated
 
-כל Profile יכול להשתמש ב-Providers שונים, אך חייב לשמור אותו contract עסקי.
+Evaluation families are policy-driven and include at least:
 
-בשלב זה ה-Owner מאשר:
+1. Functional/business quality.
+2. Security/policy compliance.
+3. Cost/runtime behavior.
+4. Contract/portability where relevant.
+5. Agent-hop/delegation where relevant.
 
-- Permissions.
-- Budget envelope.
-- Security/data profile.
-- Tools בעלי Side Effect.
-- Template.
-- Runtime profile.
+Evaluation thresholds are not universally hard-coded. PlatformPolicy maps risk/trust/domain/release strategy to blocking, warning or advisory thresholds.
 
-ללא אישור אין Build ל-Production path.
+## 8. Release eligibility and strategy
 
-## 7. Stage 5 - Built
+A release candidate becomes `Release Eligible` only after all blocking policy gates pass.
 
-המערכת מרכיבה Agent מ:
+Release strategy is explicit and versioned. Initial supported strategies:
 
-`Template + Manifest + Policy Profiles + Adapters + Agent-specific code/config`
+- `human-required` - named approver must approve the exact release.
+- `policy-auto` - release may proceed automatically after all policy-defined blocking gates pass.
+- `policy` - PlatformPolicy selects the effective strategy from risk, trust level, environment and change class.
 
-Build אינו רשאי להכניס Secrets ל-Git או ל-Release package.
+A specification or ClientInstanceConfig may request a strategy, but PlatformPolicy sets the maximum allowed automation.
 
-## 8. Stage 6 - Evaluated
+Example:
 
-לפחות שלושה סוגי Evaluation:
+- low-risk sandbox/read-only update -> may use `policy-auto`;
+- permission expansion or elevated data class -> human approval required;
+- non-overridable security failure -> never releasable until remediated.
 
-1. Functional - עושה את מה שהוגדר.
-2. Security - Prompt injection, permission bypass, data leakage, unsafe tool usage.
-3. Cost - עומד בפרופיל העלות ואינו נכנס ללופים חריגים.
+Every release decision, including automatic release, produces a release decision record.
 
-ל-Agent עם Agent-to-Agent calls מתווסף גם hop/contract evaluation.
+## 9. Client acceptance
 
-## 9. Stage 7 - Owner Approved
+Client-facing acceptance is business-oriented. The client sees:
 
-ה-Owner מקבל Evidence Pack קצר:
+- scope and expected outcome;
+- material assumptions;
+- what the Agent may do;
+- actions requiring client approval;
+- budget expectations/options;
+- data-use summary;
+- known limitations and escalation path.
 
-- Spec diff.
-- Manifest diff.
-- Permissions diff.
-- Cost estimate.
-- Eval results.
-- Security findings.
-- Known limitations.
-- Rollback target.
+Technical implementation details remain hidden unless requested or materially relevant.
 
-האישור מתועד וקשור ל-version המדויק.
+## 10. Effective release
 
-## 10. Stage 8 - Client Accepted
+The Build / Control Plane emits immutable `EffectiveReleaseConfig` and `agent_release_id` linked to:
 
-הלקוח רואה תוצאה עסקית ולא פרטי Backend.
+- approved spec;
+- AgentManifest version;
+- ClientInstanceConfig version;
+- PlatformPolicy and ExceptionPolicy versions;
+- template versions;
+- effective permissions/capabilities;
+- provider/model profile;
+- tool/memory contracts;
+- eval evidence;
+- release decision/approval reference;
+- rollback target.
 
-הוא מאשר:
+Runtime executes this effective release, not uncompiled drafts.
 
-- Scope.
-- What the Agent may do.
-- What requires his approval.
-- Budget expectations.
-- Data usage summary.
-- Escalation path.
+## 11. Monitoring
 
-## 11. Stage 9 - Released
+Runtime monitoring includes:
 
-נוצר `agent_release_id` עם references ל:
+- spend and budget projection;
+- errors/retries/tool failures;
+- permission denials and exception use;
+- security events;
+- quality regressions;
+- provider availability;
+- agent hop depth/cycles;
+- drift from EffectiveReleaseConfig.
 
-- Commit.
-- OpenSpec.
-- Manifest.
-- Template.
-- Policy versions.
-- Model profile.
-- Tool contracts.
-- Eval evidence.
-- Approvals.
-- Rollback target.
+Cost anomalies and failure loops receive high-priority alerting.
 
-## 12. Stage 10 - Monitored
+## 12. Change lifecycle
 
-Runtime monitoring מתמקד ב:
+Changes are classified by policy.
 
-- Spend.
-- Errors.
-- Tool failures.
-- Permission denials.
-- Security events.
-- Quality regressions.
-- Provider availability.
-- Agent hop depth.
+- documentation-only -> normal review;
+- compatible low-risk change -> regression fast path may be automatic;
+- permission/data/trust/cost expansion -> stronger gates and usually fresh approval;
+- breaking contract -> major version + migration/rollback plan;
+- emergency security response -> capability may be suspended immediately with retrospective documentation.
 
-ב-MVP העדיפות הראשונה ל-alerting היא חריגות עלות ותקלות שמייצרות עלות חוזרת.
+## 13. Suspend
 
-## 13. Change Lifecycle
+Runtime Governance Plane can suspend risky capabilities or an Agent instance when safety cap, security incident, credential compromise, client request or dangerous provider drift occurs.
 
-שינוי קטן שאינו משנה Contract יכול לעבור fast path עם Regression eval.
+Suspension may be scoped to a capability rather than the entire Agent where safe. Read-only degraded behavior is allowed only when policy permits.
 
-שינוי שמרחיב Permission, Data class, Side Effect, Budget, Provider privacy profile או Capability major version מחייב OpenSpec change ואישור חדש.
+## 14. Deprecation and decommission
 
-## 14. Suspend
-
-ה-Core יכול להעביר Agent ל-`Suspended` כאשר:
-
-- Safety cap הופעל.
-- Credential נחשד כ compromised.
-- Security incident פעיל.
-- Client requested pause.
-- Provider behavior השתנה באופן מסוכן.
-
-ב-Suspended mode פעולות חיצוניות נחסמות. פעולות read-only יכולות להישאר רק אם Policy מאפשר.
-
-## 15. Decommission
-
-סיום Agent כולל:
-
-- Revoke credentials.
-- Disable channels.
-- Export data לפי חוזה.
-- Delete state לפי retention policy.
-- Close audit package.
-- Record final release and deletion evidence.
+Deprecation provides a migration period. Decommission includes credential revocation, channel disablement, state export/deletion according to retention policy, audit closure and final deletion/release evidence.

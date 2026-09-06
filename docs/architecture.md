@@ -1,418 +1,281 @@
 # ארכיטקטורת Agent Factory Core
 
-**Status:** Accepted after Owner Review  
+**Status:** Accepted and synchronized after Owner Review  
 **Date:** 2026-09-06
 
 ## 1. מטרת המערכת
 
-`Agent Factory Core` הוא שכבת הפלטפורמה והחוזה המשותף לכל Agent שנבנה על המערכת. הוא אינו Agent עסקי בפני עצמו ואינו מכיל לוגיקה ספציפית של Travel, Sales, CRM, Research או לקוח מסוים.
+`Agent Factory Core` הוא שכבת הפלטפורמה המשותפת לכל Agent שנבנה במערכת. הוא אינו Agent עסקי ואינו מכיל לוגיקה ספציפית של Travel, Sales, CRM, Research או לקוח מסוים.
 
-המטרה היא לאפשר לבנות, להחליף, לתקן ולתחזק Agents במהירות, בלי לשנות את כל המערכת כאשר Provider, Model, Tool, Runtime או דרישת לקוח משתנים.
-
-העיקרון המנחה הוא:
+מטרת העל: לאפשר לבנות, להחליף, לתקן ולתחזק Agents במהירות כאשר Provider, Model, Tool, Runtime או דרישת לקוח משתנים.
 
 > שינוי באחריות אחת צריך להיות מקומי ככל האפשר. לשאלה "איפה משנים את זה?" צריכה להיות בדרך כלל תשובה אחת ברורה.
 
-## 2. חלוקת אחריות
+## 2. העיקרון הקנוני: Spec first
+
+ה-Specification וההיסטוריה שלה הם הארטיפקט הראשי של הפלטפורמה. Agent code, templates, configuration ו-deployment הם outputs שניתנים לשחזור מתוך contracts מאושרים.
+
+```text
+Business Intent
+ -> Versioned Spec
+ -> Agent Definition / Templates
+ -> Client Instance Configuration
+ -> PlatformPolicy / ExceptionPolicy
+ -> EffectiveReleaseConfig
+ -> Deployed Agent Instance
+```
+
+אין Feature מהותי ללא Spec. אין Runtime authority ללא Policy. אין Release שאינו ניתן לשחזור מה-artifacts הגרסאיים שלו.
+
+## 3. חלוקת אחריות
 
 ### Core אחראי על
 
-- Spec compilation ו-Agent Manifest validation.
-- Template selection והרכבת Agent.
-- Orchestration ו-Execution Context.
-- Capability Registry וניתוב בין Agents.
+- Intent/Spec compilation.
+- Template selection ו-composition.
+- AgentManifest / ClientInstanceConfig validation.
+- PlatformPolicy, ExceptionPolicy ו-effective configuration compilation.
+- Orchestration ו-ExecutionContext.
+- Capability Registry/routing.
 - Model/Provider routing.
-- Tool Gateway והרשאות לכלי.
-- Memory contracts ו-Memory access policy.
-- Security policy, tenant isolation ו-data controls.
-- Budget, quota ו-cost guardrails.
-- Audit, observability, traces ו-release evidence.
-- Evaluations, release gates, rollback ו-drift detection.
-- Runtime adapters וחוזים משותפים.
+- Tool Gateway.
+- Memory Gateway.
+- Security, trust/risk profiles ו-tenant isolation.
+- Budget, quotas, runtime limits ו-safety caps.
+- Audit, traces, evidence ו-observability.
+- Evals, release decisions/gates, rollback ו-drift detection.
+- Runtime adapter contracts.
 
 ### Core אינו אחראי על
 
-- Prompts עסקיים של Agent ספציפי.
-- Workflow עסקי ייחודי ללקוח.
-- Knowledge base של לקוח.
-- Credentials של לקוח.
-- Business rules שאינם כלל פלטפורמה.
-- UI עסקי ייחודי ל-Agent מסוים.
+- Agent-specific business prompts/workflows.
+- Client-specific business rules שאינם כלל פלטפורמה.
+- Client knowledge/data/secrets.
+- Business UI ייחודי ל-Agent.
 
-### כל Agent repo אחראי על
+### Agent repository אחראי על
 
-- Business intent ו-Scope.
-- Agent-specific behavior.
-- Capabilities שהוא מספק ודורש.
-- Agent-specific tools או adapters שאינם כלליים.
-- Acceptance tests ו-evaluation set שלו.
-- Reusable Agent Definition, ללא Secrets, PII או Client-specific business state.
+- reusable Agent Definition;
+- business intent/scope/behavior;
+- provided/required capabilities;
+- Agent-specific prompts/workflows/adapters;
+- Agent-specific evals/acceptance tests;
+- AgentManifest requirements.
 
-## 3. מבנה לוגי של המערכת
+Agent repository אינו מחזיק Secrets, raw PII או Client-specific business state.
 
-`Agent Factory Core` נשאר בשלב הראשון Project/Repository אחד, אך מתחלק ארכיטקטונית לשני Planes נפרדים עם אחריות ברורה. ההפרדה היא Contract boundary ולכן בעתיד אפשר יהיה לפצל אותם פיזית בלי לשנות Business Agents.
+## 4. שני Planes בתוך Core
+
+בשלב הראשון Core נשאר Repository/Project אחד, אך נשמר contract boundary בין שני Planes כדי לאפשר פיצול עתידי.
 
 ### Build / Control Plane
 
-אחראי על מה שקורה לפני Release:
+אחראי על:
 
-- Client Intent ו-Spec compilation.
-- Template Engine.
-- Manifest validation.
-- Policy/contract compilation.
-- Evaluation planning ותוצאות Release.
-- Release manifests ו-versioning.
-- Registry metadata ו-contract versions.
+- conversational Client Intent;
+- Spec Compiler;
+- Template Engine;
+- AgentManifest ו-ClientInstanceConfig validation;
+- Policy/Exception compilation;
+- eval/release planning;
+- EffectiveReleaseConfig generation;
+- release/version metadata;
+- Registry metadata/contracts.
 
 ### Runtime Governance Plane
 
-אחראי על אכיפת כללים בזמן invocation:
+אחראי על:
 
-- Orchestrator.
-- Execution Context.
-- Policy Engine.
-- Capability routing.
-- Model routing.
-- Tool Gateway.
-- Memory Gateway/Broker.
-- Budget Guard.
-- Runtime limits.
-- Audit, traces ו-runtime evidence.
-
-### Agent Repositories
-
-מחזיקים את ה-Agent Definitions העסקיים והגרסאות שלהם, ולא את מנגנוני ה-Core.
+- Orchestrator + trusted ExecutionContext;
+- PlatformPolicy enforcement;
+- trust/risk decisions;
+- Capability routing;
+- Model/Provider routing;
+- Tool Gateway;
+- Memory Gateway;
+- Budget/safety/runtime guards;
+- approvals/escalations according to policy;
+- audit/traces/runtime evidence;
+- drift detection.
 
 ### Client Data Plane
 
-מחזיק את נתוני הלקוח בפועל, Secrets, business state, knowledge, channels ו-tenant-scoped audit/storage.
+מחזיק בפועל tenant-scoped data, knowledge, state, secrets, channels ו-audit/storage partitions.
 
-```mermaid
-flowchart TB
-    subgraph BCP["Build / Control Plane - Agent Factory Core"]
-        INTAKE["Intent + Spec Compiler"]
-        TMP["Template Engine"]
-        MAN["Manifest Validator"]
-        REL["Evals + Release Builder"]
-        META["Registry + Contract Metadata"]
-    end
-
-    subgraph RGP["Runtime Governance Plane - Agent Factory Core"]
-        ORCH["Orchestrator"]
-        POL["Security + Policy Engine"]
-        REG["Capability Router"]
-        MR["Model Router"]
-        TG["Tool Gateway"]
-        MEM["Memory Gateway"]
-        BUD["Budget + Runtime Guard"]
-        OBS["Audit + Observability"]
-    end
-
-    subgraph AR["Agent Repositories"]
-        A1["Research Agent Definition"]
-        A2["Travel Agent Definition"]
-        A3["Sales Agent Definition"]
-        A4["Future Agent Definitions"]
-    end
-
-    subgraph DP["Client Data Plane"]
-        DATA["Client Data + Knowledge + State"]
-        SEC["Client Secrets"]
-        CHANNELS["Channels + Systems"]
-        LOGS["Tenant Audit Partition"]
-    end
-
-    INTAKE --> TMP --> MAN --> REL
-    MAN --> META
-    REL --> ORCH
-    POL --> ORCH
-    BUD --> ORCH
-    ORCH --> REG
-    ORCH --> MR
-    ORCH --> TG
-    ORCH --> MEM
-    ORCH --> OBS
-    META --> REG
-    REG --> A1
-    REG --> A2
-    REG --> A3
-    REG --> A4
-    TG --> CHANNELS
-    MEM --> DATA
-    POL --> SEC
-    OBS --> LOGS
-```
-
-## 4. Agent Definition, Client Instance ו-Deployed Agent Instance
-
-יש להפריד בין Agent reusable לבין מופע לקוח:
+## 5. ארבעת ה-artifacts של Release
 
 ```text
-Agent Definition
+AgentManifest
         +
-Client Instance Configuration
+ClientInstanceConfig
         +
-Core Policy/Contract Versions
+PlatformPolicy / ExceptionPolicy
         =
-Deployed Agent Instance
+EffectiveReleaseConfig
 ```
 
-### Agent Definition
+### AgentManifest
 
-נמצא ב-Agent repository וכולל:
+Reusable declaration of what the Agent is and requires. It requests capabilities/permissions; it does not grant them.
 
-- Agent identity ו-version.
-- Business scope ו-behavior.
-- Capabilities provided/required.
-- Agent-specific prompt/workflow logic.
-- Agent-specific evals ו-acceptance tests.
-- Manifest defaults שאינם Client-specific.
+### ClientInstanceConfig
 
-### Client Instance Configuration
+Tenant/environment-specific grants, budget, trust level, data/memory/retention, channels, provider restrictions, credential references and release preferences.
 
-מכיל רק את ההתאמה ללקוח:
+### PlatformPolicy / ExceptionPolicy
 
-- Tenant identity ו-environment.
-- Permissions ו-approval routes.
-- Budget profile.
-- Enabled tools/capabilities.
-- Provider/model profile.
-- Data-source references.
-- Memory/retention policy.
-- Channels ו-client-specific constraints.
+PlatformPolicy defines ceilings, defaults, risk/trust behavior and non-overridable invariants. ExceptionPolicy is a scoped, versioned, expiring overlay only for rules classified as overridable.
 
-Secrets עצמם אינם נשמרים ב-Agent repo או ב-Manifest. נשמרים רק references מאושרים.
+### EffectiveReleaseConfig
 
-### Deployed Agent Instance
+Immutable compiled authority for one `agent_release_id`. Runtime executes this object, not raw Manifest/client drafts.
 
-הוא Release קונקרטי שמחבר Agent Definition versioned, Client Instance Configuration, Core policy versions ו-adapter selections. כך ניתן להפעיל אותו Agent עבור כמה לקוחות בלי Fork של ה-Agent עצמו ובלי לערבב את נתוניהם.
+## 6. ExecutionContext
 
-## 5. Execution Context חובה
-
-כל Agent invocation מקבל Context אחיד מה-Runtime Governance Plane. Agent אינו רשאי להמציא, להרחיב או לעקוף אותו.
+Every invocation receives trusted context such as:
 
 ```text
-ExecutionContext
-- request_id
-- tenant_id
-- actor_id
-- actor_type
-- environment
-- agent_id
-- agent_release_id
-- permissions
-- data_classification
-- budget_context
-- model_policy
-- tool_policy
-- memory_policy
-- trace_id
-- deadline
+request_id
+trace_id
+tenant_id
+actor_id / actor_type
+environment
+agent_id
+agent_release_id
+trust_level
+effective_permissions
+data_classification
+budget_context
+model_policy
+tool_policy
+memory_policy
+deadline
 ```
 
-ה-Context הוא המקור להרשאה, תקציב, Traceability ו-Isolation. Prompt אינו מקור סמכות.
+Prompt/model output cannot modify authority.
 
-## 6. Agent Manifest
+## 7. Template-first, modular composition
 
-כל Agent חייב לספק Manifest תקין לפני Build או Runtime. ה-Manifest מתאר מה ה-Agent הוא, מה הוא יודע לעשות, מה הוא דורש ומה אסור לו לעשות.
+A new Agent is not built from zero and is not forced into one rigid template.
 
-ה-Core משתמש בו כדי:
+```text
+Spec
+ + smallest suitable Base Template
+ + required Capability Modules
+ + Agent-specific assets
+ = reusable Agent Definition
+```
 
-- לבחור Template.
-- לבדוק Capabilities.
-- להחיל Security profile.
-- לבחור Model/Provider policy.
-- לחבר Tools ו-Memory.
-- להגדיר Budget ו-approval routes.
-- להריץ Evals ו-Release gates.
+The Factory follows progressive complexity: choose the simplest composition that satisfies the business outcome and add autonomy/integrations/premium capabilities only when justified.
 
-הסכמה המלאה מוגדרת ב-`docs/agent-manifest.md` וב-`templates/agent-manifest.yaml`.
+## 8. Hybrid orchestration and Agent autonomy
 
-## 7. Template-first
+The Runtime Governance Plane sets boundaries. The business Agent can autonomously plan inside them.
 
-Agent חדש אינו נבנה מאפס.
+The Agent may decide how to decompose a task, which approved capability to request, when more evidence is needed and how to replan after failure.
 
-תהליך ברירת המחדל:
+The Agent may not grant itself permission, widen tenant/data scope, disable safety/audit/budget controls or bypass a blocking policy decision.
 
-`Client Intent -> Spec -> Template -> Manifest -> Adapters/Tools -> Evals -> Release`
+## 9. Capability-based Agent-to-Agent routing
 
-ה-Core מחזיק את Template Engine ואת חוזי התבניות. תבניות מערכת בסיסיות יכולות להישמר ב-Core. תבניות Agent עסקיות גדולות יכולות להישמר כריפו או Package נפרד ולהירשם ב-Template Registry.
-
-המטרה היא להימנע מ-Monorepo שבו כל Agent וכל Business Logic מתערבבים.
-
-## 8. תקשורת בין Agents
-
-Agents אינם קוראים זה לזה לפי URL, repo name או implementation detail. Agent מבקש Capability.
-
-דוגמה:
+Agents request versioned capabilities, not peer URLs/repositories.
 
 ```text
 Travel Agent requires: research.lookup
-Core resolves: Research Agent v1.3
+Core resolves: compatible Research Agent release
 ```
 
-ה-Runtime Governance Plane בודק לפני הניתוב:
+Registry behavior is soft-strict:
 
-- Tenant.
-- Permissions.
-- Data classification.
-- Cost policy.
-- Capability contract version.
-- Availability ו-health.
+- sandbox/dev may warn or use mocks for optional/non-critical unresolved capabilities;
+- production requires critical/consequential capabilities to be registered, compatible and policy-approved;
+- security invariants remain blocking in all environments.
 
-כך ניתן להחליף Research Agent, להפעיל כמה implementations או לבצע fallback בלי לשנות את Travel Agent.
+## 10. Provider/model independence
 
-## 9. Provider ו-Model independence
+Agents request Model/Capability Profiles. Routing is policy-driven, not universally cheapest-first or quality-first.
 
-Business logic אינו תלוי ישירות ב-OpenAI, Anthropic, Google, DeepSeek או Provider אחר.
+Inputs include capability, privacy/data classification, trust level, budget, quality evals, latency, availability and client restrictions.
 
-Agent מבקש `Model Profile`, לדוגמה:
+Provider/model change with compatible contract is a configuration + regression-eval change, not business-Agent rewrite.
 
-- `fast-cheap`
-- `balanced`
-- `high-reasoning`
-- `private-data-compatible`
-- `long-context`
+## 11. Tool Gateway
 
-ה-Model Router ממפה Profile ל-Provider ול-Model בפועל לפי Policy, תקציב, זמינות, latency, data requirements ו-quality target.
+Every governed Tool/API/MCP request passes typed schema, authorization, tenant binding, risk/side-effect classification, budget/preflight, approval when policy requires, timeout/retry/idempotency and audit.
 
-החלפת Provider אמורה להיות שינוי Policy/Configuration עם Regression Eval, לא Rewrite של Agent.
+External content is untrusted data, not authority.
 
-## 10. Tool Gateway
+## 12. Memory Gateway
 
-Agent אינו מקבל גישה חופשית ל-Network, Files, Database או SaaS.
+Memory classes remain logically separated: session, task working state, user/client persistent memory, client knowledge, operational state and platform knowledge.
 
-כל Tool invocation עובר דרך Tool Gateway שמבצע:
+Agents may autonomously request/write useful memory when EffectiveReleaseConfig permits it. Policy decides whether the write is allowed, minimized/transformed, denied or requires consent/approval.
 
-1. Schema validation.
-2. Permission check.
-3. Tenant check.
-4. Side-effect classification.
-5. Budget/preflight check כאשר רלוונטי.
-6. Human approval כאשר נדרש.
-7. Timeout ו-retry policy.
-8. Audit event.
+Client information is never silently promoted into platform knowledge.
 
-Web, MCP, API ו-Agent-to-Agent הם כולם מקורות חיצוניים מבחינת Trust Model. תוכן שמוחזר מהם נחשב Untrusted Data עד Policy evaluation.
+## 13. Security and trust
 
-## 11. Memory Gateway
+Security is a platform invariant but approvals are risk-based, not universal.
 
-Memory אינה API ישיר של Agent ל-Storage. ה-Core מספק חוזה Memory אחיד:
+PlatformPolicy defines Trust Profiles such as `sandbox`, `internal`, `business`, `privileged` and maps them to ceilings/defaults/evals/approvals.
 
-- Session memory.
-- User-approved persistent memory.
-- Client knowledge retrieval.
-- Operational state.
+Factory recommends a trust level from the Spec. Client may configure within the permitted ceiling. ExceptionPolicy can override only explicitly overridable rules. A future production gate will finalize the small set of non-overridable invariants.
 
-כל read/write נבדק לפי Tenant, Classification, Purpose, Retention ו-Permissions.
+## 14. Budget
 
-Agent-specific memory strategy יכולה להשתנות, אבל אינה יכולה לעקוף Isolation או Retention.
+Business budget and emergency safety cap are separate.
 
-## 12. Security as a platform invariant
+- business budget: warn/project/offer alternatives/approve overage according to policy;
+- emergency safety cap: stops runaway loops/anomalies regardless of business overage approval.
 
-Security אינו Feature אופציונלי של Agent.
+Routing can optimize for economy, balance, quality, latency or privacy according to client/task policy.
 
-ה-Core אוכף לפחות:
+## 15. Evals and Release
 
-- Least privilege.
-- Default deny.
-- Tenant isolation.
-- Secrets boundary.
-- Prompt injection containment.
-- Tool allowlists.
-- Egress controls לפי סיכון.
-- Human approval לפעולות מוגנות.
-- Audit trail.
-- Budget guardrails.
-- Runtime limits.
+Evaluation families include functional/business, security/policy, cost/runtime and contract/portability.
 
-Agent repo רשאי להחמיר Policy. הוא אינו רשאי להחליש Minimum Baseline.
+Thresholds are policy-driven. Business score below a target may be blocking/warning/advisory depending on risk. Failure of a non-overridable security invariant blocks release.
 
-## 13. Budget as a first-class control
+Release strategy is versioned:
 
-יש להפריד בין שני סוגי גבול:
+- `human-required`;
+- `policy-auto`;
+- `policy` (derive effective strategy from risk/trust/environment/change class).
 
-1. **Business budget** - גבול שנקבע עם הלקוח. המערכת מתריעה ומתבקשת הרשאה מפורשת לפני חריגה.
-2. **Emergency safety cap** - תקרת בטיחות תפעולית שמונעת runaway spend או loop חריג. היא מוגדרת על ידי הפלטפורמה ואינה תחליף לתקציב העסקי.
+Automatic release still generates the same evidence and release decision record.
 
-ב-Build time ה-Owner מאשר את פרופיל העלות והחלופות. ב-Runtime הלקוח או גורם מאושר אצלו מאשר חריגה מתקציב שהוגדר לו.
+## 16. Client experience
 
-## 14. Client-facing Black Box
+The client sees a technical black box but a transparent business contract. They see scope, assumptions, material services/data use, expected cost, limitations and required approvals.
 
-הלקוח אינו אמור לבחור MCP, API, Model, Vector DB או Runtime.
+Normal intake target: under 10 minutes, typically 5-6 critical questions. For ambiguous requests use `infer -> show assumptions -> confirm/correct`.
 
-הוא מתאר מטרה עסקית בשפה רגילה. הפלטפורמה:
+## 17. Release and drift
 
-1. מזהה Intent.
-2. שואלת רק שאלות קריטיות.
-3. משלימה הנחות לא קריטיות ומציגה אותן לאישור.
-4. מציעה חלופות לפי תקציב.
-5. יוצרת Spec ו-Manifest.
-6. בונה ומעריכה Agent.
-7. מציגה ללקוח את התוצאה, מגבלות, מחיר משוער ואישורים נדרשים.
+Every `agent_release_id` links to exact Spec, Manifest, ClientInstanceConfig, PlatformPolicy/ExceptionPolicy, EffectiveReleaseConfig, templates, contracts, eval evidence, release decision and rollback target.
 
-יעד UX ראשוני: רוב ה-Intake הראשוני מסתיים בפחות מ-10 דקות. זהו יעד UX ולא hard runtime rule.
+Runtime drift from EffectiveReleaseConfig is detected and can block promotion or trigger remediation/suspension.
 
-## 15. Client Data Plane
+## 18. Core MVP boundary
 
-לכל לקוח נשמרים גבולות נפרדים עבור:
+First implementation proves only critical contracts:
 
-- Identity ו-Roles.
-- Runtime context.
-- Knowledge ו-State.
-- Credentials.
-- Audit.
-- Evaluation data.
-- Retention ו-deletion.
+- AgentManifest + ClientInstanceConfig schemas;
+- compiler to EffectiveReleaseConfig;
+- trusted ExecutionContext;
+- PlatformPolicy/ExceptionPolicy evaluation;
+- risk/trust + permission gate;
+- budget precheck/safety cap;
+- provider-neutral model adapter interface;
+- soft-strict capability registration/resolution;
+- Memory/Tool gateway interfaces;
+- minimal audit/evidence/release decision schema;
+- policy-driven eval/release gate.
 
-מידע לקוח ו-Secrets אינם חוזרים ל-Build/Control Plane כ-raw data. ה-Core מחזיק Metadata ו-Evidence נדרשים בלבד. Runtime Governance יכול לפעול על references והרשאות לפי הצורך, אך אינו הופך למאגר משותף של Client Data.
+No Kubernetes, service mesh, multi-region or distributed bus is required for MVP.
 
-## 16. Release contract
+## 19. First reference Agent
 
-כל Release מזוהה באמצעות `agent_release_id` ומקושר ל:
+After Core Skeleton, build Research/Brain Agent in a separate repository providing `research.lookup`. It selects among internal knowledge, Web, API, MCP, model knowledge and approved capabilities under policy, budget and provenance requirements.
 
-- Agent Definition version.
-- Client Instance Configuration version.
-- Agent Manifest version.
-- OpenSpec change.
-- Commit SHA.
-- Template version.
-- Policy versions.
-- Model routing profile.
-- Tool contract versions.
-- Eval results.
-- Security evidence.
-- Human approvals.
-- Rollback target.
-
-Runtime drift שאינו מיוצג ב-Release contract חוסם Promotion.
-
-## 17. גבולות MVP של ה-Core
-
-בשלב הראשון ה-Core צריך להוכיח רק את החוזים הקריטיים:
-
-- Manifest validation.
-- Execution Context.
-- Security/permission gate.
-- Budget precheck.
-- Provider-neutral model call.
-- Capability registration/resolution.
-- Audit event.
-- Eval gate בסיסי.
-
-אין צורך ב-MVP ב-Kubernetes, Service Mesh, multi-region או distributed agent bus מורכב.
-
-## 18. Agent הבא לאחר ייצוב ה-Core
-
-ה-Agent הראשון שנבנה לפי החוזים החדשים יהיה Research/Brain Agent בריפו נפרד.
-
-הוא יספק Capability כללית כגון `research.lookup` ויחליט, תחת Policy, האם להשתמש ב:
-
-- Knowledge פנימי.
-- Web search.
-- API.
-- MCP.
-- Agent אחר.
-- Model knowledge כאשר מותר ומתאים.
-
-Travel Agent ישמש בהמשך Consumer ראשון של Capability זו כדי לבדוק שה-Core אכן מאפשר שימוש חוזר ולא תלות ב-Provider יחיד.
+Travel Agent is the first consumer to prove reusability and provider independence.

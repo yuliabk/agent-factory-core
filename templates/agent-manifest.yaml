@@ -21,66 +21,31 @@ capabilities:
   provides: []
   requires: []
 
-permissions:
-  default: deny
-  allow: []
-
-modelPolicy:
-  profile: balanced
-  allowFallback: true
-  disallowedProviders: []
-  dataResidencyProfile: default
-
-toolPolicy:
-  default: deny
-  tools: []
-
-memoryPolicy:
-  session: enabled
-  persistentUserMemory: disabled
-  clientKnowledge: disabled
-  operationalState: enabled
-  retentionProfile: short
-
-security:
-  baseline: platform-default
+requirements:
+  requestedPermissions: []
+  memoryClasses:
+    - session
   dataClasses:
     - public
-  promptInjectionProfile: strict
-  egressProfile: restricted
+  runtimeProfile: bounded-standard
+  toolCapabilities: []
 
-budget:
-  currency: USD
-  businessLimit:
-    period: monthly
-    amount: 25
-    mode: warn-and-approve
-  warnings:
-    - 0.50
-    - 0.80
-    - 0.95
-  buildApprover: platform-owner
-  runtimeApprover: client-owner
-  preflightForExpensiveOperations: true
-  emergencySafetyCapProfile: platform-default
+modelRequirements:
+  profile: balanced
+  allowFallback: true
+  requiredFeatures: []
 
-runtime:
-  timeoutSeconds: 120
-  maxToolCallsPerRequest: 12
-  maxAgentHopsPerRequest: 4
-  maxRetries: 2
-  maxParallelTasks: 4
-
-observability:
-  audit: required
-  traces: required
-  costEvents: required
-  contentLogging: minimized
-
-release:
-  requiredEvals:
+evaluationRequirements:
+  requiredFamilies:
     - functional
     - security
     - cost
-  humanApprovalRequired: true
+
+releaseRequirements:
+  strategy: policy
   rollbackRequired: true
+
+# Client-specific values such as tenant permissions, budget, retention,
+# provider restrictions, channels and credential references belong in
+# ClientInstanceConfig and are compiled with PlatformPolicy into an
+# immutable EffectiveReleaseConfig.

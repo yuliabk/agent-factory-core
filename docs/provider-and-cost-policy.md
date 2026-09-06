@@ -1,133 +1,138 @@
 # Provider, Model and Cost Policy
 
-**Status:** Proposed
+**Status:** Accepted direction after Owner Review
 
-## 1. מטרות
+## 1. Goals
 
-- למנוע תלות ב-Provider יחיד.
-- לאפשר התאמה לתקציב לקוח.
-- לאפשר מעבר מהיר כאשר מחיר, זמינות או איכות משתנים.
-- לשלוט בעלות לפני ואחרי כל פעולה משמעותית.
+- avoid dependency on one provider/model;
+- adapt to client budget without rebuilding the Agent;
+- allow fast switching when price, quality or availability changes;
+- select the best allowed option for the task rather than always prioritizing price or always prioritizing quality;
+- make cost a first-class runtime control.
 
-## 2. אין Provider hard-code בלוגיקה עסקית
+## 2. Policy-driven optimization
 
-Agent מבקש Model Profile, לא Model name.
+The platform does **not** use a universal `cheapest-first` or `quality-first` strategy.
 
-דוגמאות Profiles:
+Routing is selected by policy according to the client, task and risk context.
 
-| Profile | Intent |
-|---|---|
-| `fast-cheap` | classification, extraction, simple drafting |
-| `balanced` | general agent work |
-| `high-reasoning` | complex planning or validation |
-| `long-context` | large-context tasks |
-| `private-data-compatible` | provider/runtime that satisfies data policy |
+Example optimization profiles:
 
-מיפוי Profile -> Provider/Model נשמר ב-Core configuration.
+- `economy` - lowest acceptable cost for the required quality/risk floor;
+- `balanced` - default trade-off among quality, cost and latency;
+- `quality-first` - maximize validated quality within budget/policy;
+- `latency-first` - prioritize response time within quality/privacy floor;
+- `private-data-compatible` - provider/runtime constrained by data policy;
+- `high-reasoning` - stronger reasoning capability when justified.
 
-## 3. Router inputs
+The client chooses outcomes/budget preferences in plain language. The Core maps them to technical routing policy.
 
-Model Router שוקל:
+## 3. No provider hard-code in business logic
 
-- Required capability.
-- Data classification.
-- Client restrictions.
-- Region/privacy requirements.
-- Cost budget.
-- Latency.
-- Context length.
-- Eval quality score.
-- Current provider health.
+An Agent requests a model/capability profile, not a concrete provider/model, unless an explicit approved exception or domain requirement fixes one.
 
-## 4. Fallback
+Provider/model mapping belongs to Runtime Governance configuration and is versioned separately from Agent business logic.
 
-Fallback מותר רק בין Models שעברו Compatibility Eval לאותו Profile.
+## 4. Router inputs
 
-Provider outage אינו סיבה לשלוח מידע ל-Provider שאינו מאושר ללקוח.
+The Model/Provider Router considers at least:
 
-## 5. Budget levels
+- required capability/features;
+- data classification and trust level;
+- ClientInstanceConfig restrictions;
+- region/privacy/residency requirements;
+- approved budget and projected cost;
+- latency/SLA target;
+- context length;
+- eval quality/compatibility score;
+- current provider health/rate limits;
+- portability/fallback eligibility.
 
-### Platform build budget
+## 5. Fallback
 
-בזמן Build ה-Owner מקבל estimate וחלופות. ה-Owner מאשר את profile לפני הפעלת תהליך יקר.
+Fallback is allowed only to implementations that satisfy the effective policy and passed required compatibility/regression evals.
+
+Provider outage never authorizes sending data to an unapproved provider.
+
+Fallback decisions are recorded in trace/audit.
+
+## 6. Budget model
+
+### Build budget
+
+The Factory estimates build/evaluation cost and can offer business-readable alternatives. Human approval is required only when PlatformPolicy classifies the build spend/change as requiring approval.
 
 ### Client runtime budget
 
-בזמן Runtime Budget שייך ללקוח או ל-Agent instance שלו. המערכת עוקבת אחרי שימוש מצטבר ומתריעה לפני חריגה.
+Business budget belongs to the client/Agent instance and is stored in ClientInstanceConfig / EffectiveReleaseConfig.
+
+Default behavior is `warn-and-approve` rather than silent overrun or a rigid business kill switch.
 
 ### Emergency safety cap
 
-קיימת תקרה נפרדת שמטרתה למנוע loop, runaway recursion או תקלה שמייצרת חיובים. הפעלתה עוצרת פעולות חדשות ודורשת Operator review.
+Emergency safety cap is separate from business budget and exists to stop abnormal loops, recursion or anomalous spend. Business overage approval does not override it.
 
-## 6. Warning and approval flow
+## 7. Budget checks
 
-ברירת מחדל:
+Every request receives a lightweight budget check. Expensive/composite operations receive preflight estimation where feasible.
 
-- 50% - informational event.
-- 80% - warning ללקוח/Owner לפי שלב.
-- 95% - high warning + cost projection.
-- פעולה שתעבור את 100% - preflight pause + explicit approval.
+Typical expensive operations include large web research, batch document processing, long-context work, multi-agent plans and high-cost media generation.
 
-אישור חריגה חייב לכלול:
+Thresholds are policy profiles, not universal constants. A default profile may use informational/warning/high-warning/preflight bands, but clients/workloads can use approved alternatives.
 
-- Amount or new limit.
-- Period.
-- Approver.
-- Timestamp.
-- Expiration או review date.
-- Reason.
+## 8. Overage flow
 
-## 7. Per-request checks
+When an operation would cross an approved business limit:
 
-כל request עובר בדיקת Budget בסיסית.
+1. estimate/project cost;
+2. offer a cheaper approved alternative when available;
+3. pause the new spend if policy requires;
+4. request authorization from the effective runtime approver;
+5. record amount/new limit, period, approver, timestamp, reason and expiry/review date.
 
-לפני פעולה מורכבת/יקרה מבוצע preflight estimate ככל שניתן, לדוגמה:
+## 9. Cost events
 
-- Large web research.
-- Batch document processing.
-- Multi-agent plan.
-- Long-context model.
-- High-cost image/video processing.
-
-## 8. Cost event
-
-Audit cost event כולל לפחות:
+Cost/accounting event contains as available:
 
 ```text
 request_id
+trace_id
 agent_id
 agent_release_id
 provider
-model
+model_or_implementation
 operation_type
 input_units
 output_units
 estimated_cost
-actual_cost_if_available
+actual_cost
+currency
 budget_bucket
+policy_decision
 approval_reference
 ```
 
-אין לשמור prompt content רק כדי לחשב עלות.
+Raw prompt content is not stored merely for cost accounting.
 
-## 9. Client options
+## 10. Client options
 
-בשלב Planning הפלטפורמה יכולה להציג 2-3 חלופות עסקיות, בלי להציף את הלקוח בפרטים טכניים:
+The Factory can present 2-3 understandable business options such as:
 
-- חסכוני - עלות נמוכה יותר, ביצועים מתאימים למשימות רגילות.
-- מאוזן - ברירת מחדל מומלצת.
-- מתקדם - איכות/Reasoning גבוהים יותר כאשר יש הצדקה.
+- economical;
+- balanced/recommended;
+- advanced/premium.
 
-הלקוח בוחר לפי תוצאה ועלות, לא לפי מותג Model.
+These are dynamic solution profiles, not permanent bindings to provider brands.
 
-## 10. Provider change
+## 11. Provider/model change
 
-שינוי Provider דורש:
+A provider/model change requires the policy-defined combination of:
 
-- Regression eval.
-- Cost comparison.
-- Privacy/data policy check.
-- Tool/function compatibility check.
-- Rollback target.
+- compatibility/regression eval;
+- quality comparison;
+- cost comparison;
+- privacy/data-policy check;
+- tool/function compatibility;
+- rollback target.
 
-אם כל החוזים נשמרים, אין צורך לשנות Business Logic של Agent.
+If the approved contract/profile is preserved, provider replacement should not require rewriting Agent business logic.

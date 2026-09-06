@@ -1,0 +1,59 @@
+apiVersion: agentfactory.io/v1alpha1
+kind: ClientInstanceConfig
+
+metadata:
+  tenantId: example-tenant
+  environment: sandbox
+  agentId: example-agent
+  agentVersion: 0.1.0
+
+trust:
+  requestedLevel: sandbox
+
+permissions:
+  grants: []
+
+capabilities:
+  enabled: []
+
+tools:
+  bindings: []
+
+modelPolicy:
+  profile: balanced
+  disallowedProviders: []
+  privacyProfile: default
+
+memoryPolicy:
+  session: enabled
+  persistentUserMemory: disabled
+  clientKnowledge: disabled
+  operationalState: enabled
+  retentionProfile: short
+
+budget:
+  currency: USD
+  businessLimit:
+    period: monthly
+    amount: 25
+    mode: warn-and-approve
+  runtimeApproverRole: client-owner
+  preflightForExpensiveOperations: true
+  emergencySafetyCapProfile: platform-default
+
+runtime:
+  timeoutSeconds: 120
+  maxToolCallsPerRequest: 12
+  maxAgentHopsPerRequest: 4
+  maxRetries: 2
+  maxParallelTasks: 4
+
+release:
+  strategy: policy
+  approverRole: client-owner
+
+credentials:
+  refs: []
+
+exceptions:
+  refs: []

@@ -1,72 +1,61 @@
-# Agent Manifest Contract
+# Agent Manifest, Client Instance and Effective Release Contracts
 
-**Status:** Proposed  
-**Owner approval:** Required before implementation
+**Status:** Accepted direction after Owner Review  
+**Owner approval:** Required for implementation of the contract schemas
 
-## 1. מטרה
+## 1. Purpose
 
-Agent Manifest הוא החוזה הדקלרטיבי בין Agent repo לבין `Agent Factory Core`.
+The platform separates reusable agent definition from client-specific authorization and runtime configuration.
 
-ה-Manifest אינו Prompt ואינו מכיל Secrets. הוא מתאר את ההרשאות, ה-Capabilities, מדיניות העלות, Memory, Tools, Security ו-Release requirements של ה-Agent.
+```text
+AgentManifest
+        +
+ClientInstanceConfig
+        +
+PlatformPolicy / ExceptionPolicy
+        =
+EffectiveReleaseConfig
+        -> Deployed Agent Instance
+```
 
-ה-Core חייב לדחות Agent עם Manifest לא תקין או עם בקשה שחורגת ממדיניות הפלטפורמה.
+This separation prevents client budgets, credentials, retention rules and permissions from being embedded in a reusable Agent repository.
 
-## 2. עקרונות
+## 2. AgentManifest
 
-- Manifest הוא Machine-readable ו-Versioned.
-- מינימום שדות חובה, עם Profiles ו-Defaults כדי לא ליצור קונפיגורציה כבדה.
-- Agent יכול לבקש Capability או Permission. הוא לא מעניק אותם לעצמו.
-- Secrets מוזכרים רק כ-reference ל-Credential binding.
-- Client-specific values מופרדים מה-Template ככל האפשר.
-- כל שינוי מהותי ב-Manifest מחייב Regression evaluation לפני Production.
+`AgentManifest` lives with the Agent Definition and describes what the Agent is and what it requires. It is machine-readable, versioned and reusable across clients.
 
-## 3. שדות חובה ל-MVP
+It MUST NOT contain secrets, raw PII, client credentials, client-specific business state or concrete authorization grants.
 
-| Section | Required | Purpose |
-|---|---:|---|
-| `apiVersion` | כן | Version של schema |
-| `kind` | כן | תמיד `AgentManifest` בשלב הראשון |
-| `metadata` | כן | identity, version, owner |
-| `intent` | כן | למה ה-Agent קיים ומה התוצאה העסקית |
-| `template` | כן | מאיזו תבנית הוא נבנה |
-| `capabilities` | כן | מה הוא מספק ומה הוא דורש |
-| `permissions` | כן | Default-deny allowlist |
-| `modelPolicy` | כן | Profile ו-fallback policy |
-| `toolPolicy` | כן | כלי מותר, side effects ו-approval |
-| `memoryPolicy` | כן | סוגי memory ו-retention profile |
-| `security` | כן | baseline profile ו-data classes |
-| `budget` | כן | currency, warning, approval ו-safety cap reference |
-| `runtime` | כן | timeout, concurrency, loop limits |
-| `observability` | כן | audit/trace requirements |
-| `release` | כן | evals, approvals ו-rollback |
+### Required MVP sections
 
-## 4. Identity
+| Section | Purpose |
+|---|---|
+| `apiVersion` | Contract schema version |
+| `kind` | `AgentManifest` |
+| `metadata` | Stable identity, version and owner |
+| `intent` | Business purpose and success outcome |
+| `template` | Base/template lineage |
+| `capabilities` | Capabilities provided and required |
+| `requirements` | Requested tools, memory, data classes and runtime needs |
+| `modelRequirements` | Model profile requirements, not hard-coded provider |
+| `evaluationRequirements` | Functional/security/cost/domain eval families |
+| `releaseRequirements` | Default release strategy and rollback expectations |
+
+### Example
 
 ```yaml
+apiVersion: agentfactory.io/v1alpha1
+kind: AgentManifest
 metadata:
   id: research-agent
   version: 0.1.0
   owner: platform-owner
-  status: draft
-```
-
-`id` נשאר יציב. `version` משתנה עם contract או behavior. גרסת Deployment מזוהה בנפרד באמצעות `agent_release_id`.
-
-## 5. Intent
-
-```yaml
 intent:
-  businessGoal: "Provide verified information to other agents"
-  primaryUsers:
-    - internal-agent
-  successOutcome: "Return useful evidence with provenance within policy and budget"
-```
-
-Intent נשמר כדי שהמערכת וה-Operator יבינו למה Agent קיים גם לאחר חודשים של שינויים טכניים.
-
-## 6. Capabilities
-
-```yaml
+  businessGoal: "Provide policy-bounded research to other agents"
+  successOutcome: "Return structured evidence with provenance"
+template:
+  id: general-agent
+  version: 1
 capabilities:
   provides:
     - name: research.lookup
@@ -74,156 +63,111 @@ capabilities:
   requires:
     - name: web.search
       optional: true
-```
-
-Agent-to-Agent dependency מוגדרת כ-Capability, לא ככתובת Agent קונקרטי.
-
-## 7. Permissions
-
-```yaml
-permissions:
-  default: deny
-  allow:
+requirements:
+  requestedPermissions:
     - capability: web.search
-    - capability: knowledge.read
-```
-
-Permissions מקבלות אישור Platform/Owner בזמן Build. Client-specific bindings נבדקים שוב ב-Runtime.
-
-## 8. Model Policy
-
-```yaml
-modelPolicy:
-  profile: balanced
-  allowFallback: true
-  disallowedProviders: []
-  dataResidencyProfile: default
-```
-
-Agent אינו בוחר Model hard-coded. ה-Core בוחר Provider/Model שעומד ב-Profile וב-Policy.
-
-## 9. Tool Policy
-
-```yaml
-toolPolicy:
-  default: deny
-  tools:
-    - capability: web.search
-      sideEffect: none
-      approval: never
-    - capability: crm.write
-      sideEffect: external-write
-      approval: policy
-```
-
-כל Tool input/output חייב Schema. Tool עם Side Effect דורש Idempotency, failure behavior ו-approval policy.
-
-## 10. Memory Policy
-
-```yaml
-memoryPolicy:
-  session: enabled
-  persistentUserMemory: disabled
-  clientKnowledge: read-only
-  operationalState: enabled
-  retentionProfile: short
-```
-
-Agent אינו מקבל Storage credentials ישירים. ה-Core מספק גישה דרך Memory Broker.
-
-## 11. Security
-
-```yaml
-security:
-  baseline: platform-default
+  memoryClasses:
+    - session
+    - client_knowledge
   dataClasses:
     - public
     - internal
-  promptInjectionProfile: strict
-  egressProfile: restricted
-```
-
-`platform-default` הוא Minimum Baseline ואינו ניתן להחלשה דרך Manifest.
-
-## 12. Budget
-
-```yaml
-budget:
-  currency: USD
-  businessLimit:
-    period: monthly
-    amount: 50
-    mode: warn-and-approve
-  warnings:
-    - 0.50
-    - 0.80
-    - 0.95
-  buildApprover: platform-owner
-  runtimeApprover: client-owner
-  preflightForExpensiveOperations: true
-  emergencySafetyCapProfile: platform-default
-```
-
-ה-Business Limit אינו Kill Switch אוטומטי. לפני חריגה המערכת עוצרת את הפעולה החדשה שתחצה את הגבול ומבקשת אישור. תקרת הבטיחות התפעולית נשארת נפרדת ומגינה על המערכת מ-loop או runaway spend.
-
-## 13. Runtime Limits
-
-```yaml
-runtime:
-  timeoutSeconds: 120
-  maxToolCallsPerRequest: 12
-  maxAgentHopsPerRequest: 4
-  maxRetries: 2
-  maxParallelTasks: 4
-```
-
-ערכים אלו מגינים גם על יציבות וגם על עלות. Agent יכול לבקש Override, אך אינו מאשר אותו בעצמו.
-
-## 14. Observability
-
-```yaml
-observability:
-  audit: required
-  traces: required
-  costEvents: required
-  contentLogging: minimized
-```
-
-אין לשמור Secrets או raw sensitive content כברירת מחדל.
-
-## 15. Release
-
-```yaml
-release:
-  requiredEvals:
+  runtimeProfile: bounded-standard
+modelRequirements:
+  profile: balanced
+  allowFallback: true
+evaluationRequirements:
+  requiredFamilies:
     - functional
     - security
     - cost
-  humanApprovalRequired: true
+releaseRequirements:
+  strategy: policy
   rollbackRequired: true
 ```
 
-## 16. Validation invariants
+The Agent asks for permissions and capabilities. It never grants them to itself.
 
-Manifest יידחה אם מתקיים אחד מהבאים:
+## 3. ClientInstanceConfig
 
-- `permissions.default` אינו `deny`.
-- Agent מבקש Secret value בתוך הקובץ.
-- Tool בעל Side Effect אינו כולל Approval policy.
-- Agent מבקש לבטל Audit.
-- Agent מבקש Security baseline חלש מהמינימום.
-- אין Budget policy.
-- אין Runtime limits.
-- `requires` מצביע ל-Agent קונקרטי במקום Capability.
-- Model קונקרטי hard-coded במקום Profile, אלא אם אושר exception מפורש.
+`ClientInstanceConfig` is tenant/environment specific. It binds the reusable Agent Definition to one client deployment.
 
-## 17. שינויים שדורשים Re-approval
+It includes, as applicable:
 
-- הרחבת Permissions.
-- Tool חדש בעל Side Effect.
-- Data classification גבוהה יותר.
-- שינוי Model/Provider policy שמשפיע על Privacy או Cost.
-- העלאת Budget limit מהותית.
-- שינוי Capability contract major version.
-- שינוי Retention.
-- שינוי Runtime limits מעבר לטווח המאושר.
+- `tenant_id` and environment;
+- enabled capabilities and tools;
+- concrete permission grants within Platform Policy;
+- client data classification and source references;
+- budget envelope and runtime approver;
+- model/provider restrictions;
+- memory and retention configuration;
+- channels and integration bindings;
+- trust level;
+- release strategy override if permitted;
+- approved policy exceptions by reference;
+- credential references, never credential values.
+
+A client may make configuration stricter. It may not exceed the maximum authority permitted by Platform Policy or a valid ExceptionPolicy.
+
+## 4. PlatformPolicy and ExceptionPolicy
+
+PlatformPolicy defines mandatory limits, risk rules, trust-level ceilings, security invariants, cost guardrails and release governance.
+
+ExceptionPolicy is a controlled, explicit override mechanism for rules that are declared overridable. An exception includes scope, reason, approver, expiration/review date and audit reference.
+
+Non-overridable platform invariants cannot be bypassed by Manifest, client configuration, prompt, model output or exception.
+
+## 5. EffectiveReleaseConfig
+
+The Build / Control Plane compiles the three inputs into an immutable `EffectiveReleaseConfig` for a specific `agent_release_id`.
+
+```text
+EffectiveReleaseConfig
+- agent_release_id
+- agent_manifest_version
+- client_instance_config_version
+- platform_policy_version
+- exception_policy_refs[]
+- effective_permissions[]
+- enabled_capabilities[]
+- tool_bindings[]
+- model_routing_profile
+- memory_policy
+- data_classification
+- trust_level
+- business_budget
+- emergency_safety_cap
+- runtime_limits
+- release_strategy
+- required_evals[]
+- approval_routes[]
+- credential_refs[]
+- rollback_target
+```
+
+Runtime executes the Effective Release, not raw drafts or conversational assumptions.
+
+## 6. Validation invariants
+
+The compiler/validator rejects a release when:
+
+- a requested permission is not granted by ClientInstanceConfig + PlatformPolicy;
+- a grant exceeds the trust-level ceiling;
+- a non-overridable invariant would be weakened;
+- a required capability has no acceptable resolution for the target environment;
+- a secret value appears in a versioned config;
+- required budget/runtime controls are absent;
+- a protected side effect lacks a valid approval route;
+- release strategy conflicts with Platform Policy;
+- an ExceptionPolicy is expired, out of scope or invalid;
+- required evals or rollback requirements are missing.
+
+## 7. Change and re-approval rules
+
+A new Effective Release is required when any material input changes. Fresh approval is required when policy classifies the change as material, including permission expansion, higher data class, new consequential tool, increased trust level, material budget expansion, retention change, major capability contract change or release-policy change.
+
+Provider/model substitutions that preserve the approved profile may use a regression fast path when Platform Policy permits.
+
+## 8. Source of truth
+
+The specification and its version history are the primary design artifact. Agent code and deployed instances are reproducible outputs of approved specs, manifests, client configuration and policy versions.

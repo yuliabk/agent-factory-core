@@ -1,0 +1,33 @@
+apiVersion: agentfactory.io/v1alpha1
+kind: EffectiveReleaseConfig
+
+metadata:
+  agentReleaseId: example-agent@0.1.0+example-tenant.1
+  generatedFrom:
+    agentManifestVersion: 0.1.0
+    clientInstanceConfigVersion: 1
+    platformPolicyVersion: 1
+    exceptionPolicyRefs: []
+
+effective:
+  tenantId: example-tenant
+  environment: sandbox
+  trustLevel: sandbox
+  permissions: []
+  capabilities: []
+  toolBindings: []
+  modelRoutingProfile: balanced
+  memoryPolicy: {}
+  dataClassification:
+    - public
+  businessBudget: {}
+  emergencySafetyCap: platform-default
+  runtimeLimits: {}
+  releaseStrategy: policy
+  requiredEvals:
+    - functional
+    - security
+    - cost
+  approvalRoutes: []
+  credentialRefs: []
+  rollbackTarget: null

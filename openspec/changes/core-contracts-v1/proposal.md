@@ -1,47 +1,69 @@
 # Proposal: Core Contracts v1
 
+## Status
+
+Architecture direction reviewed and accepted by Owner on 2026-09-06. This change now serves as the implementation contract for a thin Core Skeleton. Material deviations from the accepted authority/security/data/cost architecture require renewed Owner review.
+
 ## Problem
 
-The repository already contains useful prototype architecture, security controls, runtime portability work and agent-specific experiments, but several platform-wide decisions are still implicit or tied too closely to specific providers/runtimes. The next generation of agents needs a stable Core contract so each agent does not reimplement security, cost controls, tools, memory, orchestration or provider logic.
+The repository contains valuable prototype architecture, security controls, portability work and Agent experiments, but a scalable Factory needs one provider-neutral contract so every Agent does not reimplement security, cost, tools, memory, orchestration, release governance or provider logic.
 
 ## Goal
 
-Define a provider-neutral Core contract that every future agent can inherit while keeping business agents in separate repositories.
+Define a maintainable Core that turns versioned specifications into reusable Agent Definitions and governed client deployments, while keeping Business Agents in separate repositories.
+
+Canonical model:
+
+```text
+Business Intent -> Versioned Spec
+AgentManifest + ClientInstanceConfig + PlatformPolicy/ExceptionPolicy
+ -> EffectiveReleaseConfig
+ -> bounded Runtime Governance
+ -> Evidence/Evals/Release Decision
+```
+
+## Accepted platform decisions
 
 The change formalizes:
 
-- Agent Manifest and ExecutionContext;
-- template-first composition;
-- mandatory security and tenant isolation;
-- capability-based agent-to-agent routing;
-- provider-neutral model selection;
-- Tool Gateway and Memory Broker contracts;
-- budget warnings, approval and emergency safety caps;
-- evidence, eval, approval and release lifecycle;
-- conversational non-technical client intake.
+- Build / Control Plane separated logically from Runtime Governance Plane;
+- specification/history as primary artifact;
+- reusable AgentManifest separated from ClientInstanceConfig;
+- immutable EffectiveReleaseConfig as runtime authority;
+- risk-based Trust Profiles and controlled ExceptionPolicy;
+- configurable release strategy (`human-required`, `policy-auto`, `policy`);
+- hybrid bounded-autonomy orchestration;
+- soft-strict Capability Registry;
+- provider-neutral policy-driven model routing;
+- Tool Gateway and governed autonomous Memory Gateway;
+- business budget + independent emergency safety cap;
+- policy-driven evaluation thresholds and release gates;
+- hybrid template-first modular composition;
+- non-technical, assumption-aware client intake.
 
 ## Why now
 
-The Travel Agent contract and Knowledge Agent prototype demonstrate that agent-specific work already needs shared governance, evidence and portability. A reusable Research/Brain Agent is planned next. Without Core contracts, that work would create direct coupling and duplicate platform concerns.
+Travel Agent and Knowledge Agent work already need shared governance/evidence/portability. Research/Brain Agent is the next reusable business Agent. Implementing it before the Core contract would duplicate platform concerns and create provider/capability coupling.
 
 ## Scope
 
-### In scope
+### In scope for the next implementation slice
 
-- Architecture/specification/documentation only.
-- Contract definitions and proposed schemas/templates.
-- Provider/runtime neutrality rules.
-- Security, cost, orchestration, memory, tooling and evaluation requirements.
-- Transition guidance from earlier provider-specific prototype assumptions.
+- schemas/validators for AgentManifest, ClientInstanceConfig, PlatformPolicy/ExceptionPolicy and EffectiveReleaseConfig;
+- trusted ExecutionContext;
+- minimal policy/trust/permission/budget runtime kernel;
+- provider/capability/tool/memory adapter interfaces;
+- minimal eval/release decision/evidence/audit contracts;
+- one synthetic end-to-end vertical slice.
 
-### Out of scope
+### Out of scope for this slice
 
-- Production runtime implementation.
-- New provider accounts or billing changes.
-- Production secrets or customer data.
-- Deployment of Research/Brain Agent.
-- Production migration of Travel Agent.
+- production customer data/secrets;
+- full distributed registry/service mesh/Kubernetes;
+- final long-term memory backend;
+- full client-facing Factory UI;
+- production Research/Brain or Travel migration before the Core slice passes its gate.
 
 ## Expected outcome
 
-After approval, the repository has one clear architectural direction and a bounded implementation sequence for a small Core skeleton before the Research/Brain Agent repository is built.
+The repository provides one coherent source of truth and a fast implementation path: prove the thin Core vertical slice first, then build Research/Brain Agent as the first real reusable Agent and Travel Agent as its first consumer.
