@@ -26,7 +26,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C2.2 Add canonical JSON Schema for `AgentManifest` from the accepted minimal shape. Maps: CORE-202.
 - [x] C2.3 Add matching Pydantic AgentManifest models. Maps: CORE-202.
 - [x] C2.4 Add schema/Pydantic semantic-alignment tests. Maps: CORE-202, CORE-203.
-- [x] C2.5 Contract CI is now active in GitHub Actions; run #2 passed all 15 contract tests on 2026-09-06.
+- [x] C2.5 Contract CI is active in GitHub Actions; PR #16 run #4 passed all 16 contract tests on 2026-09-06.
 - [x] C2.6 Implement `ClientInstanceConfig` JSON Schema + Pydantic model/validator and aligned template. Maps: CORE-202.
 - [x] C2.7 Implement minimal typed `PlatformPolicy` + `ExceptionPolicy` JSON Schemas + Pydantic models. Maps: CORE-210.
 - [x] C2.8 Add immutable `EffectiveReleaseConfig` JSON Schema/Pydantic contract and compiler using typed policy objects. Maps: CORE-203.
