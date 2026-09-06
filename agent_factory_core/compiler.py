@@ -14,6 +14,7 @@ from .contracts.effective_release_config import (
 )
 from .contracts.exception_policy import ExceptionPolicy
 from .contracts.platform_policy import PlatformPolicy
+from .contracts.trust import trust_profile_rank
 from .registry import CapabilityRegistry, CapabilityResolutionError
 
 
@@ -166,6 +167,16 @@ def compile_effective_release(
             remediation="Use an allowed configuration or a valid scoped ExceptionPolicy",
         )
 
+    if trust_profile_rank(client.spec.trust_profile) > trust_profile_rank(platform_policy.spec.max_trust_profile):
+        raise CompilationError(
+            path="spec.trustProfile",
+            rule=(
+                f"trust profile {client.spec.trust_profile!r} exceeds PlatformPolicy ceiling "
+                f"{platform_policy.spec.max_trust_profile!r}"
+            ),
+            remediation="Choose a trust profile at or below the PlatformPolicy ceiling",
+        )
+
     if client.spec.provider_profile not in allowed_provider_profiles:
         raise CompilationError(
             path="spec.providerProfile",
@@ -243,6 +254,7 @@ def compile_effective_release(
             variables=dict(client.spec.variables),
             capabilities=manifest.spec.capabilities,
             capabilityBindings=capability_bindings,
+            trustProfile=client.spec.trust_profile,
             providerProfile=client.spec.provider_profile,
             secretsRef=dict(client.spec.secrets_ref),
             memoryConfig=dict(client.spec.memory_config),
