@@ -1,8 +1,12 @@
+import json
 import unittest
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
+from pathlib import Path
 
-from agent_factory_core.contracts import ExecutionContext
+from jsonschema import Draft202012Validator
+
+from agent_factory_core.contracts import ExecutionContext, RuntimeAuditEvent
 from agent_factory_core.runtime import (
     RuntimeLimits,
     build_audit_event,
@@ -10,6 +14,9 @@ from agent_factory_core.runtime import (
     evaluate_limits,
     evaluate_request_authority,
 )
+
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def context() -> ExecutionContext:
@@ -36,6 +43,10 @@ def context() -> ExecutionContext:
 
 
 class RuntimeGovernanceKernelTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.audit_schema = json.loads((ROOT / "schemas/runtime-audit-event.schema.json").read_text())
+
     def test_request_authority_allows_only_trusted_scope(self) -> None:
         ctx = context()
         allowed = evaluate_request_authority(
@@ -53,6 +64,15 @@ class RuntimeGovernanceKernelTests(unittest.TestCase):
         denied = evaluate_request_authority(ctx, tenant_id="tenant-a", permission="crm.write")
         self.assertFalse(denied.allowed)
         self.assertEqual(denied.rule, "permission")
+
+        denied = evaluate_request_authority(
+            ctx,
+            tenant_id="tenant-a",
+            permission="web.search",
+            data_classification="confidential",
+        )
+        self.assertFalse(denied.allowed)
+        self.assertEqual(denied.rule, "data_classification")
 
     def test_request_authority_rejects_expired_deadline(self) -> None:
         ctx = context()
@@ -110,20 +130,30 @@ class RuntimeGovernanceKernelTests(unittest.TestCase):
         )
         self.assertEqual(allowed.action, "allow")
 
-    def test_audit_event_contains_minimized_runtime_evidence(self) -> None:
+    def test_audit_event_validates_against_canonical_schema(self) -> None:
         event = build_audit_event(
             context(),
             platform_policy_ref="platform-default@1",
             exception_policy_refs=("tenant-a-exception@1",),
-            operation="tool:web.search",
+            approval_ref="approval-123",
+            operation="tool.execute",
+            target_ref="tool:web.search",
             decision="allow",
             result="success",
             cost_amount=Decimal("0.02"),
             cost_currency="USD",
         )
+        dumped = event.model_dump(by_alias=True, mode="json")
+        Draft202012Validator(self.audit_schema).validate(dumped)
+
+        generated = RuntimeAuditEvent.model_json_schema(by_alias=True)
+        self.assertEqual(set(self.audit_schema["required"]), set(generated["required"]))
+        self.assertEqual(set(self.audit_schema["properties"]), set(generated["properties"]))
+
         self.assertEqual(event.tenant_id, "tenant-a")
         self.assertEqual(event.agent_release_id, "release-1")
         self.assertEqual(event.platform_policy_ref, "platform-default@1")
+        self.assertEqual(event.target_ref, "tool:web.search")
         self.assertFalse(hasattr(event, "prompt"))
         self.assertFalse(hasattr(event, "payload"))
 
