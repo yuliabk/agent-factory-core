@@ -73,6 +73,11 @@ POLICY = {
         "maxTrustProfile": "business",
         "registryMode": "strict",
         "defaultDataClassification": "internal",
+        "evalRules": [
+            {"checkId": "security.cross-tenant-isolation", "classification": "blocking"},
+            {"checkId": "business.answer-quality", "classification": "warning"},
+        ],
+        "securityInvariantChecks": ["security.cross-tenant-isolation"],
         "exceptionAllowances": {
             "permissions": ["crm.read"],
             "providerProfiles": ["premium"],
@@ -107,6 +112,7 @@ class PolicyRegistryExecutionContextTests(unittest.TestCase):
         parsed = PlatformPolicy.model_validate(POLICY)
         self.assertEqual(parsed.spec.registry_mode, "strict")
         self.assertEqual(parsed.spec.max_trust_profile, "business")
+        self.assertEqual(parsed.spec.eval_rules[0].classification, "blocking")
 
     def test_external_and_internal_top_level_shapes_stay_aligned(self) -> None:
         for schema, model in (
