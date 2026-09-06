@@ -20,6 +20,7 @@ VALID_CONFIG = {
         "tenant": {"id": "tenant-acme"},
         "variables": {"locale": "en"},
         "trustProfile": "internal",
+        "releaseStrategy": "policy",
         "providerProfile": "balanced",
         "secretsRef": {"search": "secret://tenant-acme/search"},
         "memoryConfig": {"profile": "session-only"},
@@ -41,6 +42,7 @@ class ClientInstanceConfigContractTests(unittest.TestCase):
         parsed = ClientInstanceConfig.model_validate(VALID_CONFIG)
         self.assertEqual(parsed.spec.agent_ref.name, "research-agent")
         self.assertEqual(parsed.spec.trust_profile, "internal")
+        self.assertEqual(parsed.spec.release_strategy, "policy")
         self.assertEqual(parsed.model_dump(by_alias=True)["kind"], "ClientInstanceConfig")
 
     def test_business_logic_field_is_rejected(self) -> None:
@@ -54,6 +56,21 @@ class ClientInstanceConfigContractTests(unittest.TestCase):
     def test_missing_trust_profile_is_rejected(self) -> None:
         config = json.loads(json.dumps(VALID_CONFIG))
         del config["spec"]["trustProfile"]
+        with self.assertRaises(ValidationError):
+            self.validator.validate(config)
+        with self.assertRaises(PydanticValidationError):
+            ClientInstanceConfig.model_validate(config)
+
+    def test_missing_or_unknown_release_strategy_is_rejected(self) -> None:
+        config = json.loads(json.dumps(VALID_CONFIG))
+        del config["spec"]["releaseStrategy"]
+        with self.assertRaises(ValidationError):
+            self.validator.validate(config)
+        with self.assertRaises(PydanticValidationError):
+            ClientInstanceConfig.model_validate(config)
+
+        config = json.loads(json.dumps(VALID_CONFIG))
+        config["spec"]["releaseStrategy"] = "always-auto"
         with self.assertRaises(ValidationError):
             self.validator.validate(config)
         with self.assertRaises(PydanticValidationError):
