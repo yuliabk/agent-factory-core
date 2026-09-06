@@ -9,8 +9,7 @@
     "apiVersion": {"const": "agentfactory.io/v1alpha1"},
     "kind": {"const": "EffectiveReleaseConfig"},
     "metadata": {
-      "type": "object",
-      "additionalProperties": false,
+      "type": "object", "additionalProperties": false,
       "required": ["releaseId", "environment"],
       "properties": {
         "releaseId": {"type": "string", "minLength": 1},
@@ -18,37 +17,33 @@
       }
     },
     "policy": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["platformPolicyVersion", "exceptionPolicyRefs"],
+      "type": "object", "additionalProperties": false,
+      "required": ["platformPolicyName", "platformPolicyVersion", "exceptionPolicyRefs"],
       "properties": {
+        "platformPolicyName": {"type": "string", "minLength": 1},
         "platformPolicyVersion": {"type": "string", "minLength": 1},
         "exceptionPolicyRefs": {"type": "array", "items": {"type": "string", "minLength": 1}}
       }
     },
     "spec": {
-      "type": "object",
-      "additionalProperties": false,
+      "type": "object", "additionalProperties": false,
       "required": [
-        "agentRef", "tenant", "variables", "capabilities", "providerProfile",
-        "secretsRef", "memoryConfig", "budgetConfig", "permissions", "toolBindings", "evalProfile"
+        "agentRef", "tenant", "variables", "capabilities", "capabilityBindings",
+        "providerProfile", "secretsRef", "memoryConfig", "budgetConfig",
+        "permissions", "dataClassification", "toolBindings", "evalProfile"
       ],
       "properties": {
-        "agentRef": {
-          "type": "object", "additionalProperties": false, "required": ["name", "version"],
-          "properties": {"name": {"type": "string", "minLength": 1}, "version": {"type": "string", "minLength": 1}}
-        },
-        "tenant": {
-          "type": "object", "additionalProperties": false, "required": ["id"],
-          "properties": {"id": {"type": "string", "minLength": 1}}
-        },
+        "agentRef": {"type": "object", "additionalProperties": false, "required": ["name", "version"], "properties": {"name": {"type": "string", "minLength": 1}, "version": {"type": "string", "minLength": 1}}},
+        "tenant": {"type": "object", "additionalProperties": false, "required": ["id"], "properties": {"id": {"type": "string", "minLength": 1}}},
         "variables": {"type": "object", "additionalProperties": true},
         "capabilities": {"type": "object"},
+        "capabilityBindings": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
         "providerProfile": {"type": "string", "minLength": 1},
         "secretsRef": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
         "memoryConfig": {"type": "object", "additionalProperties": true},
         "budgetConfig": {"type": "object", "additionalProperties": true},
         "permissions": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "dataClassification": {"type": "string", "minLength": 1},
         "toolBindings": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
         "evalProfile": {"type": "string", "minLength": 1}
       }
