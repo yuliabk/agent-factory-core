@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1 Core Skeleton is complete end-to-end and C7.1 `research.lookup@1` is now the first authoritative external capability contract; the next executable step is C7.2, creating the Research/Brain Agent in a separate repository and registering its first compatible implementation.
+**Current mode:** Phase 1 Core Skeleton is complete end-to-end; C7.1 `research.lookup@1` contract and C7.2 external Research/Brain Agent v0.1 registration are complete. The next executable step is C7.3: replace the synthetic external retriever with the smallest governed real source set without widening public capability authority.
 
 ## North Star
 
@@ -109,15 +109,15 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 Separate repository exposing `research.lookup`.
 
 - [x] authoritative `research.lookup@1` Capability Registry contract is defined in Core with canonical Registry/Input/Output schemas, explicit read-only risk/cost/data scope and bounded override surface;
-- [ ] create the Research/Brain Agent in a separate repository and register its first compatible implementation/release;
-- [ ] start with the smallest useful source set: internal/model knowledge plus one governed external retrieval path, then expand only after contract validation;
+- [x] Research/Brain Agent v0.1 exists in `yuliabk/agent-factory-research-agent`, is contract-locked to Core, passes its own CI, and is registered by exact sandbox release commit `dad37d9147ed4fcb97c0ba268402e93e78e76645`;
+- [ ] start with the smallest useful real source set: internal/model knowledge plus one governed external retrieval path, replacing the synthetic retriever without changing the public `research.lookup@1` contract;
 - [ ] inspect request/context and decide whether available/internal knowledge is sufficient;
 - [ ] choose internal knowledge, Web search, API, MCP, model knowledge or approved capability according to policy;
-- [ ] return `research.lookup@1` structured answer/findings/evidence/limitations output;
+- [x] return `research.lookup@1` structured answer/findings/evidence/limitations output;
 - [ ] route model usage through Core policy rather than provider hard-code;
-- [ ] respect data, trust, budget and tool permissions;
-- [ ] degrade gracefully if optional sources are unavailable;
-- [ ] run the first external-Agent integration/eval/release path through Core.
+- [ ] respect data, trust, budget and tool permissions with a real external source path;
+- [x] degrade gracefully if optional sources are unavailable;
+- [ ] run the first real-source external-Agent integration/eval/release path through Core.
 
 ## Phase 3 - Travel Agent as first external consumer
 
@@ -161,8 +161,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Phase 1 Core Skeleton is complete and C7.1 is complete.** `research.lookup@1` is now the first real authoritative external capability contract. The Registry owns its input/output schemas, risk/cost/data scope and consumer permission; the public payload cannot select provider/model/tool/credentials, and consumer authority remains isolated from provider-internal search/API/model permissions.
+**Phase 1 Core Skeleton, C7.1 and C7.2 are complete.** The first real external Research Agent repository exists, its `research.lookup@1` provider contract is locked to Core, both repositories pass CI, and Core resolves the capability to the exact immutable sandbox Research Agent release while keeping consumer authority separate from provider-internal `web.search` authority.
 
-**Next executable step:** C7.2 / Phase 2 - create the Research/Brain Agent in a separate repository, implement the smallest contract-compatible source path, and register that release as the first `research.lookup@1` implementation. Do not add Travel-specific logic to Core and do not expand the Research source set before the first contract/eval/release path is green.
+**Next executable step:** C7.3 / Phase 2 - replace the synthetic external retriever with one governed real source path, keep the public `research.lookup@1` contract unchanged, route any model/tool use through Core policy, and run the first real-source eval/release/evidence path before adding more sources or integrating Travel Agent.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
