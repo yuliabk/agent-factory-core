@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1B Runtime Governance kernel is mostly implemented; trust/risk request-time enforcement remains the last open C3 boundary.
+**Current mode:** Phase 1B Runtime Governance kernel is complete for the thin skeleton; Phase 1C adapter contracts are next, starting with the read-only Tool Gateway vertical slice.
 
 ## North Star
 
@@ -66,7 +66,7 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 ### 1B. Runtime Governance kernel
 
 - [x] first trusted `ExecutionContext` contract and builder.
-- [ ] trust/risk + request-time permission evaluation - deadline/tenant/permission/classification checks are implemented; explicit trust-profile runtime enforcement remains.
+- [x] trust/risk + request-time permission evaluation, including compile-time trust ceiling and request-time minimum trust enforcement.
 - [x] runtime limits/hop/cycle enforcement.
 - [x] business-budget precheck + emergency safety-cap interface.
 - [x] minimal audit/trace event with canonical JSON Schema + aligned Pydantic model.
@@ -140,10 +140,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Phase 1B is mostly implemented for the thin skeleton.** Request-time tenant/permission/classification/deadline enforcement, runtime hop/cycle limits, business-budget vs independent safety-cap handling and minimized audit evidence are now covered by contract tests.
+**Phase 1B is complete for the thin skeleton.** The trusted runtime path now enforces tenant, permission, data classification, deadline, compiled trust profile, hop/cycle limits, business budget vs independent safety cap and minimized audit evidence.
 
-**Remaining C3 decision:** define how effective `trustProfile`/risk ceilings are represented in the compiled release and trusted `ExecutionContext`, then enforce them at request time without allowing prompts or Agent output to change authority.
-
-After that boundary is explicit, continue to the first Tool/Memory/Model adapter interfaces and the synthetic end-to-end Agent.
+**Next executable step:** Phase 1C C4.3 - add the minimal Tool Gateway interface plus one synthetic read-only tool, with all execution mediated by trusted ExecutionContext and the Runtime Governance evaluator. Then add Memory/Model interfaces and the bounded orchestrator.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
