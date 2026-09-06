@@ -13,7 +13,7 @@
   },
   "implementations": [
     {
-      "id": "github:yuliabk/agent-factory-research-agent@dad37d9147ed4fcb97c0ba268402e93e78e76645",
+      "id": "github:yuliabk/agent-factory-research-agent@4a8b308aeaf22228c6a03d438509b0717e6daf8b",
       "environments": ["sandbox"],
       "enabled": true
     }

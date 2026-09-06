@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1 Core Skeleton is complete end-to-end; C7.1 `research.lookup@1` contract and C7.2 external Research/Brain Agent v0.1 registration are complete. The next executable step is C7.3: replace the synthetic external retriever with the smallest governed real source set without widening public capability authority.
+**Current mode:** Phase 1 Core Skeleton is complete end-to-end; C7.1 `research.lookup@1`, C7.2 external Research/Brain Agent registration, and C7.3 first real sandbox source slice are complete. The next executable step is C7.4: use Travel Agent as the first sandbox consumer of `research.lookup@1` while keeping production disabled.
 
 ## North Star
 
@@ -109,24 +109,29 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 Separate repository exposing `research.lookup`.
 
 - [x] authoritative `research.lookup@1` Capability Registry contract is defined in Core with canonical Registry/Input/Output schemas, explicit read-only risk/cost/data scope and bounded override surface;
-- [x] Research/Brain Agent v0.1 exists in `yuliabk/agent-factory-research-agent`, is contract-locked to Core, passes its own CI, and is registered by exact sandbox release commit `dad37d9147ed4fcb97c0ba268402e93e78e76645`;
-- [ ] start with the smallest useful real source set: internal/model knowledge plus one governed external retrieval path, replacing the synthetic retriever without changing the public `research.lookup@1` contract;
-- [ ] inspect request/context and decide whether available/internal knowledge is sufficient;
-- [ ] choose internal knowledge, Web search, API, MCP, model knowledge or approved capability according to policy;
+- [x] Research/Brain Agent exists in `yuliabk/agent-factory-research-agent`, is contract-locked to Core, passes its own CI, and is registered in Core by exact sandbox release commit;
+- [x] smallest useful real source set is implemented: internal evidence plus English Wikipedia through the official MediaWiki REST API, without changing `research.lookup@1`;
+- [x] source path uses bounded result count, explicit User-Agent, timeout, deterministic normalization and graceful failure handling;
+- [x] live CI smoke test proves the Wikipedia path makes a real network call and returns contract-compatible evidence;
+- [x] freshness honesty is enforced: Wikipedia supports background (`any`) only and is not presented as `recent/current` evidence;
 - [x] return `research.lookup@1` structured answer/findings/evidence/limitations output;
-- [ ] route model usage through Core policy rather than provider hard-code;
-- [ ] respect data, trust, budget and tool permissions with a real external source path;
-- [x] degrade gracefully if optional sources are unavailable;
-- [ ] run the first real-source external-Agent integration/eval/release path through Core.
+- [x] degrade gracefully if the external source is unavailable;
+- [ ] pass provider-side external network/tool access through Core Runtime Governance before any production registration;
+- [ ] route model usage through Core policy if/when a real model adapter is added;
+- [ ] add broader recent/current sources only after the first consumer integration proves the need;
+
+**C7.3 status:** complete for the sandbox real-source slice. Research Agent release `4a8b308aeaf22228c6a03d438509b0717e6daf8b` contains the first real source and remains sandbox-only in the Core Registry.
 
 ## Phase 3 - Travel Agent as first external consumer
 
-- [ ] consume `research.lookup` through Capability Registry;
+- [ ] consume `research.lookup@1` through Capability Registry in sandbox;
 - [ ] grant Travel Agent only `research.lookup`, not Research-provider internal web/API/model permissions;
-- [ ] remove avoidable direct search/provider dependency;
-- [ ] run end-to-end quality/security/cost eval;
-- [ ] test provider/capability fallback;
-- [ ] prove no Travel-specific logic was needed in Core.
+- [ ] exercise one real background-research request through the registered Research Agent release;
+- [ ] verify structured evidence/limitations reach the Travel consumer unchanged;
+- [ ] run consumer-side quality/security/cost/contract evals;
+- [ ] test provider/capability unavailable fallback;
+- [ ] prove no Travel-specific logic was needed in Core;
+- [ ] keep production disabled until provider-side network/tool governance is routed through Core.
 
 ## Phase 4 - Spec Compiler + Template Factory UX
 
@@ -161,8 +166,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Phase 1 Core Skeleton, C7.1 and C7.2 are complete.** The first real external Research Agent repository exists, its `research.lookup@1` provider contract is locked to Core, both repositories pass CI, and Core resolves the capability to the exact immutable sandbox Research Agent release while keeping consumer authority separate from provider-internal `web.search` authority.
+**Phase 1 Core Skeleton and C7.1-C7.3 are complete for sandbox.** The first real Research Agent source path is live: Core resolves `research.lookup@1` to the exact sandbox Research release, and that release can retrieve real background evidence from Wikipedia while preserving the public contract, freshness semantics and graceful failure behavior.
 
-**Next executable step:** C7.3 / Phase 2 - replace the synthetic external retriever with one governed real source path, keep the public `research.lookup@1` contract unchanged, route any model/tool use through Core policy, and run the first real-source eval/release/evidence path before adding more sources or integrating Travel Agent.
+**Next executable step:** C7.4 / Phase 3 - make Travel Agent the first sandbox consumer of `research.lookup@1`. The goal is to prove the consumer/provider boundary with real evidence while granting Travel only `research.lookup`. Production stays disabled until Research provider-side external network/tool access is itself routed through Core Runtime Governance.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.
