@@ -26,7 +26,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C2.2 Add canonical JSON Schema for `AgentManifest` from the accepted minimal shape. Maps: CORE-202.
 - [x] C2.3 Add matching Pydantic AgentManifest models. Maps: CORE-202.
 - [x] C2.4 Add schema/Pydantic semantic-alignment tests. Maps: CORE-202, CORE-203.
-- [x] C2.5 Execute AgentManifest + ClientInstanceConfig + compiler contract tests in the implementation environment: 9 tests passed on 2026-09-06. Repository CI workflow remains a separate infrastructure task if/when added.
+- [x] C2.5 Contract CI is now active in GitHub Actions; run #2 passed all 15 contract tests on 2026-09-06.
 - [x] C2.6 Implement `ClientInstanceConfig` JSON Schema + Pydantic model/validator and aligned template. Maps: CORE-202.
 - [x] C2.7 Implement minimal typed `PlatformPolicy` + `ExceptionPolicy` JSON Schemas + Pydantic models. Maps: CORE-210.
 - [x] C2.8 Add immutable `EffectiveReleaseConfig` JSON Schema/Pydantic contract and compiler using typed policy objects. Maps: CORE-203.
@@ -36,7 +36,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 
 ## C3 - Runtime Governance kernel
 
-- [~] C3.1 Policy evaluator: compile-time permission/provider/memory/budget boundaries and scoped ExceptionPolicy validation are implemented; trust ceilings/runtime policy evaluation remain. Maps: CORE-208, CORE-210.
+- [ ] C3.1 Complete request-time policy evaluator. Compile-time permission/provider/memory/budget boundaries and scoped ExceptionPolicy validation are already implemented; trust ceilings/runtime checks remain. Maps: CORE-208, CORE-210.
 - [ ] C3.2 Permission/tenant/data-class enforcement tests. Maps: CORE-204, CORE-208.
 - [ ] C3.3 Runtime limits/hop/cycle enforcement. Maps: CORE-205, CORE-214.
 - [ ] C3.4 Business-budget precheck + emergency safety-cap interface/tests. Maps: CORE-211.
@@ -61,7 +61,7 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 ## C6 - Synthetic end-to-end gate
 
 - [ ] C6.1 Create a tiny synthetic reference Agent Definition using only the minimal AgentManifest fields.
-- [x] C6.2 Compiler path now supports AgentManifest + ClientInstanceConfig + typed Policy/Exception + Registry resolution -> EffectiveReleaseConfig.
+- [x] C6.2 Compiler path supports AgentManifest + ClientInstanceConfig + typed Policy/Exception + Registry resolution -> EffectiveReleaseConfig.
 - [ ] C6.3 Execute through Runtime Governance kernel using ExecutionContext.
 - [ ] C6.4 Run required evals and release decision.
 - [ ] C6.5 Verify audit/evidence reconstruction.
