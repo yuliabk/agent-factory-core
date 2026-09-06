@@ -10,6 +10,14 @@ class FrozenModel(BaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
 
+class HttpJsonTransportDescriptor(FrozenModel):
+    type: Literal["http-json"]
+    endpoint_ref: str = Field(alias="endpointRef", min_length=1)
+    path: str = Field(min_length=1, pattern=r"^/")
+    auth: Literal["bearer"]
+    timeout_seconds: int = Field(alias="timeoutSeconds", ge=1, le=30)
+
+
 class CapabilityInvocationEnvelope(FrozenModel):
     api_version: Literal["agentfactory.io/v1alpha1"] = Field(alias="apiVersion")
     kind: Literal["CapabilityInvocationEnvelope"]
