@@ -18,6 +18,17 @@ spec:
   maxTrustProfile: business
   registryMode: strict
   defaultDataClassification: internal
+
+  evalRules:
+    - checkId: security.cross-tenant-isolation
+      classification: blocking
+    - checkId: business.answer-quality
+      classification: warning
+    - checkId: contract.provider-portability
+      classification: advisory
+  securityInvariantChecks:
+    - security.cross-tenant-isolation
+
   exceptionAllowances:
     permissions: []
     providerProfiles: []
@@ -25,3 +36,5 @@ spec:
     memoryConfigKeys: []
 
 # maxTrustProfile is the non-overridable trust ceiling in this Core Skeleton version.
+# Every release-gated EvalResult checkId must have an explicit evalRules mapping.
+# securityInvariantChecks must remain blocking; the deterministic eval mapper fails closed otherwise.
