@@ -23,7 +23,7 @@
       "required": [
         "allowedPermissions", "deniedPermissions", "allowedProviderProfiles",
         "allowedBudgetOverrideKeys", "allowedMemoryConfigKeys", "maxTrustProfile",
-        "registryMode", "defaultDataClassification", "evalRules",
+        "minimumReleaseStrategy", "registryMode", "defaultDataClassification", "evalRules",
         "securityInvariantChecks", "exceptionAllowances"
       ],
       "properties": {
@@ -33,6 +33,7 @@
         "allowedBudgetOverrideKeys": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
         "allowedMemoryConfigKeys": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
         "maxTrustProfile": {"enum": ["sandbox", "internal", "business", "privileged"]},
+        "minimumReleaseStrategy": {"enum": ["policy-auto", "human-required"]},
         "registryMode": {"enum": ["soft", "strict"]},
         "defaultDataClassification": {"type": "string", "minLength": 1},
         "evalRules": {
