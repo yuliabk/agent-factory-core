@@ -50,6 +50,8 @@ CLIENT = {
         "agentRef": {"name": "research-agent", "version": "0.1.0"},
         "tenant": {"id": "tenant-a"},
         "variables": {},
+        "trustProfile": "internal",
+        "releaseStrategy": "policy",
         "providerProfile": "balanced",
         "secretsRef": {},
         "memoryConfig": {"retention": "short"},
@@ -69,8 +71,15 @@ POLICY = {
         "allowedProviderProfiles": ["balanced"],
         "allowedBudgetOverrideKeys": ["monthlyLimit"],
         "allowedMemoryConfigKeys": ["retention"],
+        "maxTrustProfile": "business",
+        "minimumReleaseStrategy": "policy-auto",
         "registryMode": "strict",
         "defaultDataClassification": "internal",
+        "evalRules": [
+            {"checkId": "security.cross-tenant-isolation", "classification": "blocking"},
+            {"checkId": "business.answer-quality", "classification": "warning"},
+        ],
+        "securityInvariantChecks": ["security.cross-tenant-isolation"],
         "exceptionAllowances": {
             "permissions": ["crm.read"],
             "providerProfiles": ["premium"],
@@ -104,6 +113,9 @@ class PolicyRegistryExecutionContextTests(unittest.TestCase):
         Draft202012Validator(self.policy_schema).validate(POLICY)
         parsed = PlatformPolicy.model_validate(POLICY)
         self.assertEqual(parsed.spec.registry_mode, "strict")
+        self.assertEqual(parsed.spec.max_trust_profile, "business")
+        self.assertEqual(parsed.spec.minimum_release_strategy, "policy-auto")
+        self.assertEqual(parsed.spec.eval_rules[0].classification, "blocking")
 
     def test_external_and_internal_top_level_shapes_stay_aligned(self) -> None:
         for schema, model in (
@@ -125,6 +137,8 @@ class PolicyRegistryExecutionContextTests(unittest.TestCase):
         )
         self.assertEqual(release.spec.capability_bindings["web.search"], "web-search:test")
         self.assertEqual(release.spec.data_classification, "internal")
+        self.assertEqual(release.spec.trust_profile, "internal")
+        self.assertEqual(release.spec.release_strategy, "policy-auto")
 
     def test_registry_rejects_non_overrideable_key(self) -> None:
         manifest = json.loads(json.dumps(MANIFEST))
@@ -186,6 +200,7 @@ class PolicyRegistryExecutionContextTests(unittest.TestCase):
         Draft202012Validator(self.context_schema).validate(dumped)
         self.assertEqual(dumped["agentReleaseId"], "release-4")
         self.assertEqual(dumped["tenantId"], "tenant-a")
+        self.assertEqual(dumped["trustProfile"], "internal")
 
 
 if __name__ == "__main__":

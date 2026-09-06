@@ -17,8 +17,9 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 - [x] C1.11 Accept minimal first AgentManifest shape: `apiVersion`, `kind`, `metadata(name/version/description)`, and `spec(template/capabilities/tools/permissions/memoryProfile/budgetProfile/evalProfile)`. Maps: CORE-202.
 - [x] C1.12 Accept hybrid schema boundary: JSON Schema canonical externally; Pydantic internal for Python runtime/validation. Maps: CORE-202, CORE-203. ADR-012.
 - [x] C1.13 Accept Registry-backed capability references and bounded overrides. Maps: CORE-202, CORE-205, CORE-206. ADR-013.
-- [x] C1.14 Accept minimal `ClientInstanceConfig`: metadata(name/environment) + spec(agentRef/tenant/variables/providerProfile/secretsRef/memoryConfig/budgetOverrides/permissionOverrides/toolBindings). Maps: CORE-202, CORE-203.
+- [x] C1.14 Accept minimal `ClientInstanceConfig`: metadata(name/environment) + spec(agentRef/tenant/variables/trustProfile/releaseStrategy/providerProfile/secretsRef/memoryConfig/budgetOverrides/permissionOverrides/toolBindings). Maps: CORE-202, CORE-203, CORE-210, CORE-213.
 - [x] C1.15 Confirm `EffectiveReleaseConfig` is the only runtime-executable configuration artifact. Maps: CORE-203, CORE-218.
+- [x] C1.16 Accept trust placement/enforcement: ClientInstanceConfig requests one of `sandbox/internal/business/privileged`; PlatformPolicy sets `maxTrustProfile`; compiler rejects requests above the ceiling; EffectiveReleaseConfig and ExecutionContext carry the compiled trust profile; trust does not grant permissions. Maps: CORE-204, CORE-208, CORE-210.
 
 ## C2 - Core Skeleton schemas/compiler
 
@@ -36,26 +37,26 @@ Architecture decisions were reviewed with the Owner on 2026-09-06. Implementatio
 
 ## C3 - Runtime Governance kernel
 
-- [ ] C3.1 Complete request-time policy evaluator. Compile-time permission/provider/memory/budget boundaries and scoped ExceptionPolicy validation are already implemented; trust ceilings/runtime checks remain. Maps: CORE-208, CORE-210.
-- [ ] C3.2 Permission/tenant/data-class enforcement tests. Maps: CORE-204, CORE-208.
-- [ ] C3.3 Runtime limits/hop/cycle enforcement. Maps: CORE-205, CORE-214.
-- [ ] C3.4 Business-budget precheck + emergency safety-cap interface/tests. Maps: CORE-211.
-- [ ] C3.5 Minimal audit/trace event schema including policy/exception/cost decisions. Maps: CORE-217.
+- [x] C3.1 Complete request-time policy evaluator: deadline/tenant/permission/data-classification plus compiled trust-profile enforcement. Compile-time trust ceiling is `ClientInstanceConfig.trustProfile <= PlatformPolicy.maxTrustProfile`; runtime cannot elevate above `ExecutionContext.trustProfile`. Maps: CORE-208, CORE-210.
+- [x] C3.2 Permission/tenant/data-class enforcement tests, including conservative exact classification matching until a hierarchy is approved. Maps: CORE-204, CORE-208.
+- [x] C3.3 Runtime limits/hop/cycle enforcement. Maps: CORE-205, CORE-214.
+- [x] C3.4 Business-budget precheck + emergency safety-cap interface/tests; safety-cap stop is independent from business overage handling. Maps: CORE-211.
+- [x] C3.5 Minimal audit/trace event canonical JSON Schema + aligned Pydantic model including policy/exception/approval/operation/target/cost/result evidence. Maps: CORE-217.
 
 ## C4 - Thin adapter vertical slice
 
-- [ ] C4.1 Provider-neutral model interface with one working adapter and one second test/stub adapter. Maps: CORE-207.
+- [x] C4.1 Provider-neutral Model Router with deterministic working adapter + compatible stub adapter. Routing is selected from trusted `ExecutionContext.providerProfile`; Agent requests do not carry provider/adapter IDs; permission/trust/classification/deadline checks and fallback are enforced; costed adapters remain blocked until runtime budget accounting is attached. Maps: CORE-207.
 - [x] C4.2 Add first in-process Capability Registry resolver with authoritative records, override validation and soft/strict resolution behavior. Richer health/version routing remains later depth. Maps: CORE-205, CORE-206.
-- [ ] C4.3 Tool Gateway interface + one read-only test tool. Maps: CORE-208.
-- [ ] C4.4 Memory Gateway interface + session/task memory implementation. Maps: CORE-209.
-- [ ] C4.5 Hybrid Orchestrator can execute one bounded capability/model/tool/memory plan. Maps: CORE-214.
+- [x] C4.3 Tool Gateway interface + deterministic read-only synthetic tool. Trusted ExecutionContext binding, tenant/permission/trust/classification checks, JSON Schema input/output validation and audit are enforced; costed or write-capable tools remain blocked in this first slice. Maps: CORE-208.
+- [x] C4.4 Memory Gateway interface + ephemeral `session` / `task_working` implementation. Session scope uses trusted request ID; task scope uses trusted trace ID; namespace includes tenant/release/class/scope/key; memory read/write permissions, trust, classification, purpose, retention and enable flags are enforced; malformed config is default-deny; persistent/client-knowledge classes remain blocked. Maps: CORE-209.
+- [x] C4.5 Bounded Hybrid Orchestrator executes an Agent-prepared plan across compiled capability/model/tool/memory steps. Tenant/classification come only from trusted ExecutionContext; each step retains its gateway checks; max-step/repeat limits and deadline are enforced; execution fails closed on the first denial and records per-step audit evidence. Maps: CORE-214.
 
 ## C5 - Eval/release kernel
 
-- [ ] C5.1 EvalResult schema for functional/security/cost/contract families. Maps: CORE-212.
-- [ ] C5.2 Policy mapping for blocking/warning/advisory. Maps: CORE-212.
-- [ ] C5.3 Implement release strategies `human-required`, `policy-auto`, `policy`. Maps: CORE-213.
-- [ ] C5.4 Build minimal Evidence Pack and release decision record. Maps: CORE-217.
+- [x] C5.1 Canonical decision-neutral EvalResult JSON Schema + frozen Pydantic model for functional/business, security/policy, cost/runtime and contract/portability families. Raw statuses are `PASS`, `PASS_WITH_WARNINGS`, `FAIL`; blocking/warning/advisory and release decisions are intentionally excluded from the result contract. Maps: CORE-212.
+- [x] C5.2 PlatformPolicy evalRules map every release-gated check explicitly to `blocking`, `warning` or `advisory`; unmapped/duplicate rules, mixed releases and malformed security-invariant policy fail closed; securityInvariantChecks cannot be downgraded from blocking. Maps: CORE-212.
+- [x] C5.3 ClientInstanceConfig requests `human-required`, `policy-auto` or `policy`; PlatformPolicy defines a concrete minimum strategy; compiler writes only concrete `human-required`/`policy-auto` to EffectiveReleaseConfig. Eval gate failures block every strategy; eligible policy-auto can auto-release and eligible human-required requires human approval. Maps: CORE-213.
+- [x] C5.4 Canonical HumanApprovalRecord, ReleaseDecisionRecord and EvidencePack contracts. Approval is bound to exact release/policy/exception refs and validity window; policy-auto/human-required decisions are recorded; blocking evals cannot be overridden; EvidencePack links versioned source/config/policy/component/eval/decision/rollback references without raw sensitive payloads. Maps: CORE-217.
 - [ ] C5.5 Drift check: runtime release maps to approved Spec + EffectiveReleaseConfig. Maps: CORE-218.
 
 ## C6 - Synthetic end-to-end gate

@@ -11,20 +11,21 @@ This folder is the architectural entry point for `Agent Factory Core`.
 5. [`platform-policy-contract.md`](platform-policy-contract.md) - typed PlatformPolicy and controlled ExceptionPolicy boundary.
 6. [`effective-release-config.md`](effective-release-config.md) - compiler output and sole runtime-executable configuration artifact.
 7. [`execution-context.md`](execution-context.md) - trusted per-request runtime authority projection.
-8. [`agent-lifecycle.md`](agent-lifecycle.md) - lifecycle and policy-driven release strategy.
-9. [`security-model.md`](security-model.md) - mandatory risk/trust security baseline and exception model.
-10. [`governance.md`](governance.md) - policy hierarchy, approvals, exceptions and change governance.
-11. [`orchestration.md`](orchestration.md) - hybrid bounded-autonomy execution contract.
-12. [`capability-registry.md`](capability-registry.md) - authoritative capability contracts + soft-strict routing.
-13. [`provider-and-cost-policy.md`](provider-and-cost-policy.md) - provider-neutral, policy-driven routing and budget controls.
-14. [`tool-gateway.md`](tool-gateway.md) - governed Tool/API/MCP execution.
-15. [`memory-contract.md`](memory-contract.md) - governed autonomous memory and storage-neutral rules.
-16. [`template-engine.md`](template-engine.md) - hybrid template + modular composition.
-17. [`client-experience.md`](client-experience.md) - non-technical, assumption-aware client intake.
-18. [`evidence-and-evals.md`](evidence-and-evals.md) - policy-driven eval/release decisions, evidence and audit.
-19. [`architecture-review-2026-09-06.md`](architecture-review-2026-09-06.md) - completed synchronization review, resolved inconsistencies and readiness assessment.
-20. [`roadmap.md`](roadmap.md) - optimized implementation sequence and current next step.
-21. [`decision-log.md`](decision-log.md) - concise accepted/open decision index.
+8. [`runtime-governance-kernel.md`](runtime-governance-kernel.md) - request-time authority, limits, budget/safety and audit boundary.
+9. [`agent-lifecycle.md`](agent-lifecycle.md) - lifecycle and policy-driven release strategy.
+10. [`security-model.md`](security-model.md) - mandatory risk/trust security baseline and exception model.
+11. [`governance.md`](governance.md) - policy hierarchy, approvals, exceptions and change governance.
+12. [`orchestration.md`](orchestration.md) - hybrid bounded-autonomy execution contract.
+13. [`capability-registry.md`](capability-registry.md) - authoritative capability contracts + soft-strict routing.
+14. [`provider-and-cost-policy.md`](provider-and-cost-policy.md) - provider-neutral, policy-driven routing and budget controls.
+15. [`tool-gateway.md`](tool-gateway.md) - governed Tool/API/MCP execution.
+16. [`memory-contract.md`](memory-contract.md) - governed autonomous memory and storage-neutral rules.
+17. [`template-engine.md`](template-engine.md) - hybrid template + modular composition.
+18. [`client-experience.md`](client-experience.md) - non-technical, assumption-aware client intake.
+19. [`evidence-and-evals.md`](evidence-and-evals.md) - policy-driven eval/release decisions, evidence and audit.
+20. [`architecture-review-2026-09-06.md`](architecture-review-2026-09-06.md) - completed synchronization review, resolved inconsistencies and readiness assessment.
+21. [`roadmap.md`](roadmap.md) - optimized implementation sequence and current next step.
+22. [`decision-log.md`](decision-log.md) - concise accepted/open decision index.
 
 ## ADRs
 
@@ -38,6 +39,7 @@ This folder is the architectural entry point for `Agent Factory Core`.
 - ADR-011 - specification as primary platform artifact - **Accepted**.
 - ADR-012 - JSON Schema as external contract, Pydantic as internal Python runtime model - **Accepted**.
 - ADR-013 - Capability Registry as source of truth with lightweight manifest references - **Accepted**.
+- ADR-014 - trust profile placement and runtime enforcement - **Accepted**.
 
 Historical ADRs remain evidence of previous prototype decisions and do not override newer accepted contracts.
 

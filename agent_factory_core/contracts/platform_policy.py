@@ -1,8 +1,15 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from .release_strategy import EffectiveReleaseStrategy
+from .trust import TrustProfile
+
+
+NonEmptyString = Annotated[str, Field(min_length=1)]
+GateClassification = Literal["blocking", "warning", "advisory"]
 
 
 class StrictModel(BaseModel):
@@ -21,14 +28,23 @@ class ExceptionAllowances(StrictModel):
     memory_config_keys: list[str] = Field(alias="memoryConfigKeys", default_factory=list)
 
 
+class EvalRule(StrictModel):
+    check_id: str = Field(alias="checkId", min_length=1)
+    classification: GateClassification
+
+
 class PlatformPolicySpec(StrictModel):
     allowed_permissions: list[str] = Field(alias="allowedPermissions", default_factory=list)
     denied_permissions: list[str] = Field(alias="deniedPermissions", default_factory=list)
     allowed_provider_profiles: list[str] = Field(alias="allowedProviderProfiles", default_factory=list)
     allowed_budget_override_keys: list[str] = Field(alias="allowedBudgetOverrideKeys", default_factory=list)
     allowed_memory_config_keys: list[str] = Field(alias="allowedMemoryConfigKeys", default_factory=list)
+    max_trust_profile: TrustProfile = Field(alias="maxTrustProfile")
+    minimum_release_strategy: EffectiveReleaseStrategy = Field(alias="minimumReleaseStrategy")
     registry_mode: Literal["soft", "strict"] = Field(alias="registryMode")
     default_data_classification: str = Field(alias="defaultDataClassification", min_length=1)
+    eval_rules: list[EvalRule] = Field(alias="evalRules")
+    security_invariant_checks: list[NonEmptyString] = Field(alias="securityInvariantChecks")
     exception_allowances: ExceptionAllowances = Field(alias="exceptionAllowances")
 
 

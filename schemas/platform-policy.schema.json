@@ -22,8 +22,9 @@
       "additionalProperties": false,
       "required": [
         "allowedPermissions", "deniedPermissions", "allowedProviderProfiles",
-        "allowedBudgetOverrideKeys", "allowedMemoryConfigKeys", "registryMode",
-        "defaultDataClassification", "exceptionAllowances"
+        "allowedBudgetOverrideKeys", "allowedMemoryConfigKeys", "maxTrustProfile",
+        "minimumReleaseStrategy", "registryMode", "defaultDataClassification", "evalRules",
+        "securityInvariantChecks", "exceptionAllowances"
       ],
       "properties": {
         "allowedPermissions": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
@@ -31,8 +32,28 @@
         "allowedProviderProfiles": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
         "allowedBudgetOverrideKeys": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
         "allowedMemoryConfigKeys": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "maxTrustProfile": {"enum": ["sandbox", "internal", "business", "privileged"]},
+        "minimumReleaseStrategy": {"enum": ["policy-auto", "human-required"]},
         "registryMode": {"enum": ["soft", "strict"]},
         "defaultDataClassification": {"type": "string", "minLength": 1},
+        "evalRules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["checkId", "classification"],
+            "properties": {
+              "checkId": {"type": "string", "minLength": 1},
+              "classification": {"enum": ["blocking", "warning", "advisory"]}
+            }
+          },
+          "uniqueItems": true
+        },
+        "securityInvariantChecks": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
         "exceptionAllowances": {
           "type": "object",
           "additionalProperties": false,

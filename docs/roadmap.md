@@ -1,7 +1,7 @@
 # Agent Factory Core - Roadmap
 
 **Updated:** 2026-09-06  
-**Current mode:** Phase 1A is substantially complete; the first trusted ExecutionContext is now defined and the Runtime Governance kernel is next.
+**Current mode:** Phase 1B Runtime Governance and Phase 1C adapter/orchestration vertical slice are complete; Phase 1D C5.1 EvalResult and C5.2 eval policy mapping are complete, and C5.3 release strategy is next.
 
 ## North Star
 
@@ -66,24 +66,24 @@ Existing assets include OpenSpec workflow, client isolation concepts, release ma
 ### 1B. Runtime Governance kernel
 
 - [x] first trusted `ExecutionContext` contract and builder.
-- [ ] trust/risk + request-time permission evaluation.
-- [ ] runtime limits/hop/cycle enforcement.
-- [ ] business-budget precheck + emergency safety-cap interface.
-- [ ] minimal audit/trace event.
+- [x] trust/risk + request-time permission evaluation, including compile-time trust ceiling and request-time minimum trust enforcement.
+- [x] runtime limits/hop/cycle enforcement.
+- [x] business-budget precheck + emergency safety-cap interface.
+- [x] minimal audit/trace event with canonical JSON Schema + aligned Pydantic model.
 
 ### 1C. Adapter contracts
 
-- [ ] provider-neutral model interface with one working adapter and one stub/second adapter for portability.
+- [x] provider-neutral Model Router with deterministic primary + compatible stub adapter, Core-owned profile routing, bounded fallback and Runtime Governance checks. Costed adapters remain blocked until budget accounting is connected.
 - [x] first in-process Capability Registry resolver with authoritative records, bounded overrides and soft/strict behavior.
-- [ ] Tool Gateway interface and one read-only example capability.
-- [ ] Memory Gateway interface with session/task memory first.
-- [ ] Hybrid Orchestrator can execute one bounded capability/model/tool/memory plan.
+- [x] Tool Gateway interface with trusted binding resolution, Runtime Governance checks, schema validation, audit and one deterministic read-only synthetic tool. Costed/write-capable tools remain blocked in this first slice.
+- [x] Memory Gateway interface with ephemeral `session` and `task_working` memory. Session scope is trusted request ID; task scope is trusted trace ID; tenant/release namespace isolation, permission/trust/classification/purpose/retention checks and minimized audit are enforced. Persistent memory remains later depth.
+- [x] Hybrid Orchestrator executes one Agent-prepared bounded capability/model/tool/memory plan, preserves per-step gateway checks, enforces max-step/repeat/deadline boundaries and fails closed on the first denial.
 
 ### 1D. Eval/release kernel
 
-- [ ] functional/security/cost eval result schema.
-- [ ] policy mapping: blocking/warning/advisory.
-- [ ] `human-required`, `policy-auto`, `policy` release decision logic.
+- [x] canonical decision-neutral EvalResult for functional/business, security/policy, cost/runtime and contract/portability families, with raw `PASS`, `PASS_WITH_WARNINGS`, `FAIL` statuses and schema/Pydantic alignment.
+- [x] typed PlatformPolicy mapping from release-gated `checkId` to `blocking`, `warning`, `advisory`, with fail-closed unmapped/duplicate/mixed-release handling and non-downgradeable security invariants.
+- [ ] `human-required`, `policy-auto`, `policy` release strategy compilation and release action logic.
 - [ ] Evidence Pack + release decision reference.
 
 **Exit gate:** one synthetic reference Agent can be compiled, executed and released through the complete thin path.
@@ -140,8 +140,8 @@ Separate repository exposing `research.lookup`.
 
 ## Current stop point
 
-**Phase 1A is now effectively closed for the thin skeleton.** The compilation chain has typed external/internal contracts through `ExecutionContext`.
+**Phase 1B, Phase 1C, C5.1 and C5.2 are complete for the thin skeleton.** Evaluation facts are separate from policy effects, and release-gated checks now map deterministically through PlatformPolicy with security invariants protected from downgrade.
 
-**Next executable step:** build the minimal Runtime Governance kernel around that ExecutionContext: request-time policy/permission enforcement, limits/budget guard and audit event. Then attach the first Tool/Memory/Model interfaces and run the synthetic end-to-end Agent.
+**Next executable step:** Phase 1D C5.3 - add requested release strategy to ClientInstanceConfig, a policy-required minimum strategy, compile a concrete effective strategy into EffectiveReleaseConfig, then convert an EvalGateSummary into `block`, `auto-release` or `require-human` without yet creating the final release decision/evidence record.
 
 Keep contracts stable, implementations replaceable and decisions just-in-time.

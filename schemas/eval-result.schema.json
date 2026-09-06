@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.io/schemas/eval-result/v1alpha1.json",
+  "title": "EvalResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "kind",
+    "evalId",
+    "releaseId",
+    "checkId",
+    "checkVersion",
+    "family",
+    "status",
+    "summary",
+    "metrics",
+    "evidenceRefs",
+    "observedAt"
+  ],
+  "properties": {
+    "apiVersion": {"const": "agentfactory.io/v1alpha1"},
+    "kind": {"const": "EvalResult"},
+    "evalId": {"type": "string", "minLength": 1},
+    "releaseId": {"type": "string", "minLength": 1},
+    "checkId": {"type": "string", "minLength": 1},
+    "checkVersion": {"type": "string", "minLength": 1},
+    "family": {
+      "enum": [
+        "functional_business",
+        "security_policy",
+        "cost_runtime",
+        "contract_portability"
+      ]
+    },
+    "status": {"enum": ["PASS", "PASS_WITH_WARNINGS", "FAIL"]},
+    "summary": {"type": "string", "minLength": 1},
+    "metrics": {
+      "type": "object",
+      "additionalProperties": {
+        "type": ["string", "number", "integer", "boolean", "null"]
+      }
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "observedAt": {"type": "string", "format": "date-time"}
+  }
+}

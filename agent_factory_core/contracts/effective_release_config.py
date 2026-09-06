@@ -6,6 +6,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .agent_manifest import Capabilities
 from .client_instance_config import AgentRef, TenantRef
+from .release_strategy import EffectiveReleaseStrategy
+from .trust import TrustProfile
 
 
 class FrozenModel(BaseModel):
@@ -29,6 +31,8 @@ class EffectiveReleaseSpec(FrozenModel):
     variables: dict[str, Any]
     capabilities: Capabilities
     capability_bindings: dict[str, str] = Field(alias="capabilityBindings")
+    trust_profile: TrustProfile = Field(alias="trustProfile")
+    release_strategy: EffectiveReleaseStrategy = Field(alias="releaseStrategy")
     provider_profile: str = Field(alias="providerProfile", min_length=1)
     secrets_ref: dict[str, str] = Field(alias="secretsRef")
     memory_config: dict[str, Any] = Field(alias="memoryConfig")

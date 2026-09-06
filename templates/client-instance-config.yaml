@@ -15,6 +15,9 @@ spec:
 
   variables: {}
 
+  trustProfile: internal
+  releaseStrategy: policy
+
   providerProfile: balanced
 
   secretsRef: {}
@@ -30,6 +33,10 @@ spec:
   toolBindings: {}
 
 # ClientInstanceConfig contains only client/environment-specific deployment values.
+# trustProfile is a requested runtime trust level and cannot exceed PlatformPolicy.maxTrustProfile.
+# releaseStrategy requests human-required, policy-auto or policy-derived behavior.
+# PlatformPolicy may require a stricter concrete release strategy.
+# Neither trust nor releaseStrategy grants runtime permissions.
 # It MUST NOT contain Agent business logic or reusable Agent behavior.
 # All overrides remain bounded by PlatformPolicy / valid ExceptionPolicy.
 # Runtime executes only the compiled EffectiveReleaseConfig.

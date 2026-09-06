@@ -29,7 +29,7 @@
       "type": "object", "additionalProperties": false,
       "required": [
         "agentRef", "tenant", "variables", "capabilities", "capabilityBindings",
-        "providerProfile", "secretsRef", "memoryConfig", "budgetConfig",
+        "trustProfile", "releaseStrategy", "providerProfile", "secretsRef", "memoryConfig", "budgetConfig",
         "permissions", "dataClassification", "toolBindings", "evalProfile"
       ],
       "properties": {
@@ -38,6 +38,8 @@
         "variables": {"type": "object", "additionalProperties": true},
         "capabilities": {"type": "object"},
         "capabilityBindings": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
+        "trustProfile": {"enum": ["sandbox", "internal", "business", "privileged"]},
+        "releaseStrategy": {"enum": ["policy-auto", "human-required"]},
         "providerProfile": {"type": "string", "minLength": 1},
         "secretsRef": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
         "memoryConfig": {"type": "object", "additionalProperties": true},

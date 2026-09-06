@@ -1,6 +1,6 @@
 # Provider, Model and Cost Policy
 
-**Status:** Accepted direction after Owner Review
+**Status:** Accepted direction; first provider-neutral model slice implemented
 
 ## 1. Goals
 
@@ -136,3 +136,24 @@ A provider/model change requires the policy-defined combination of:
 - rollback target.
 
 If the approved contract/profile is preserved, provider replacement should not require rewriting Agent business logic.
+
+## 12. First executable slice - C4.1
+
+The first implementation proves provider portability without making any external provider call:
+
+- Business/Agent request contains model input + classification only; there is no provider or adapter identifier in `ModelRequest`;
+- trusted `ExecutionContext.providerProfile` selects a Core-owned route;
+- route candidates are registered implementations compatible with that profile;
+- `model.invoke` permission, deadline, data classification and minimum trust are enforced through Runtime Governance;
+- a deterministic primary adapter and a second compatible stub adapter implement the same provider-neutral contract;
+- Core can switch the route or fall back after an unavailable primary without changing the Agent request;
+- the actual implementation used is recorded in minimized `RuntimeAuditEvent` evidence;
+- costed adapters are blocked in this first slice until runtime budget accounting state is connected.
+
+The first slice is synthetic and zero-cost only. Real provider credentials, network calls, pricing tables and production health routing remain later adapter depth.
+
+Implementation:
+
+- `agent_factory_core/model_router.py`
+- `agent_factory_core/synthetic_model_adapters.py`
+- `tests/contracts/test_model_router.py`

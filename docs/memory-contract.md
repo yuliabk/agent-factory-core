@@ -1,6 +1,6 @@
 # Memory Contract
 
-**Status:** Accepted direction after Owner Review
+**Status:** Accepted direction; first session/task slice implemented
 
 ## Purpose
 
@@ -68,27 +68,39 @@ Retrieval returns the minimum context required for the request and preserves sou
 
 ## Write semantics
 
-A write request includes at least:
-
-```text
-request_id
-agent_release_id
-tenant_id
-actor_id
-memory_class
-purpose
-data_classification
-content_or_reference
-retention_profile
-source_reference
-```
+A write request includes at least the memory class, purpose, data classification, content/reference, retention profile and source reference. Tenant, actor, request and release identity are taken from trusted `ExecutionContext` and MUST NOT be granted by Agent-supplied memory payload.
 
 The gateway may reject, redact, summarize or transform a write according to policy.
+
+## First executable slice - C4.4
+
+The first implementation intentionally supports only ephemeral `session` and `task_working` memory:
+
+- `session` scope is the trusted `ExecutionContext.requestId`;
+- `task_working` scope is the trusted `ExecutionContext.traceId`;
+- storage namespace includes tenant ID, agent release ID, memory class, scope ID and key;
+- `memory.read` / `memory.write` permissions are required independently;
+- effective data classification must match the trusted runtime classification;
+- `memoryConfig` must explicitly allow class, purpose and retention profile and must enable the requested read/write direction;
+- `minimumTrustProfile` in trusted `memoryConfig` is enforced by Runtime Governance;
+- malformed or incomplete memory configuration is default-deny;
+- reads/writes create minimized `RuntimeAuditEvent` evidence without storing memory content in audit;
+- the reference backend is in-process and ephemeral only.
+
+This slice does **not** implement `user_persistent`, `client_knowledge`, vector retrieval, production storage, PII persistence, secrets storage or storage credentials.
 
 ## Deletion and lifecycle
 
 Deletion policy covers primary storage, indexes/caches and derived artifacts according to the configured retention/deletion contract. Decommissioning an Agent instance does not automatically delete shared platform knowledge, but must close or delete tenant-scoped memory according to policy.
 
+For the first in-process session/task slice, lifecycle is process-ephemeral; durable retention/deletion semantics remain a later persistent-memory implementation task.
+
 ## Portability
 
 The Core contract is storage-neutral. Implementations may use relational databases, object stores, vector stores or specialized memory systems while preserving isolation, authorization, retention, deletion and retrieval semantics.
+
+## First implementation boundary
+
+- Gateway: `agent_factory_core/memory_gateway.py`
+- Contract tests: `tests/contracts/test_memory_gateway.py`
+- Trusted authority: `ExecutionContext.memoryConfig` + Runtime Governance evaluator

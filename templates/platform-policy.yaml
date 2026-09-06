@@ -15,10 +15,28 @@ spec:
     - monthlyLimit
   allowedMemoryConfigKeys:
     - retention
+  maxTrustProfile: business
+  minimumReleaseStrategy: policy-auto
   registryMode: strict
   defaultDataClassification: internal
+
+  evalRules:
+    - checkId: security.cross-tenant-isolation
+      classification: blocking
+    - checkId: business.answer-quality
+      classification: warning
+    - checkId: contract.provider-portability
+      classification: advisory
+  securityInvariantChecks:
+    - security.cross-tenant-isolation
+
   exceptionAllowances:
     permissions: []
     providerProfiles: []
     budgetOverrideKeys: []
     memoryConfigKeys: []
+
+# maxTrustProfile is the non-overridable trust ceiling in this Core Skeleton version.
+# minimumReleaseStrategy is a policy floor: human-required can strengthen policy-auto, never vice versa.
+# Every release-gated EvalResult checkId must have an explicit evalRules mapping.
+# securityInvariantChecks must remain blocking; the deterministic eval mapper fails closed otherwise.
